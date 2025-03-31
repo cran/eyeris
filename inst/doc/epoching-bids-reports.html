@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Extracting Data Epochs and Exporting Pupil Data</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Extracting Data Epochs and Exporting Pupil
+Data</h1>
+
+
+
+<p><code>eyeris</code> was intentionally designed for intuitive,
+flexible preprocessing of pupillometry data, with support for
+event-based epoching and BIDS-style organization for reproducible
+workflows.</p>
+<p>In this vignette, we’ll walk through a typical use case:</p>
+<ol style="list-style-type: decimal">
+<li>loading raw data,</li>
+<li>preprocessing it,</li>
+<li>extracting trial-based epochs,</li>
+<li>and exporting everything in a clean, analysis-ready format.</li>
+</ol>
+<p>We’ll also demonstrate a unique feature we designed to maximize both
+your productivity as well as data quality:
+<code>interactive HTML reports</code>, which include a record of the
+steps used to preprocess / epoch any given dataset – and, for epoched
+data – an interactive “gallery” view to quickly skim through trial-level
+data from each step of the preprocessing pipeline to make quality
+control and assurance intuitive and accessible for any dataset (without
+needing to write any additional code)!</p>
+<div id="load-and-preprocess-your-data" class="section level2">
+<h2>1️⃣ Load and Preprocess Your Data</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Load eyeris</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(eyeris)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Load the example memory task file and run default glassbox preproc workflow</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>eye <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;memory.asc&quot;</span>, <span class="at">package =</span> <span class="st">&quot;eyeris&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">glassbox</span>()</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::load_asc()</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::deblink()</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::detransient()</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::interpolate()</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::lpfilt()</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Skipping eyeris::detrend()</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::zscore()</span></span></code></pre></div>
+</div>
+<div id="extract-data-epochs" class="section level2">
+<h2>2️⃣ Extract Data Epochs</h2>
+<p><code>epoch()</code> enables flexible extraction of trials using:</p>
+<ul>
+<li>start/stop events,</li>
+<li>string-based patterns,</li>
+<li>and even embedded trial metadata.</li>
+</ul>
+<div id="example-a-fixed-time-epochs-around-a-matched-event" class="section level3">
+<h3>Example A: Fixed Time Epochs Around a Matched Event</h3>
+<blockquote>
+<p>Extract a 2-second window centered around each “PROBE” event.</p>
+</blockquote>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>eye_1a <span class="ot">&lt;-</span> eye <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">epoch</span>(<span class="at">events =</span> <span class="st">&quot;PROBE*&quot;</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; ℹ Epoching pupil data...</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; ℹ Block 1: found 10 matching events for PROBE</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; ✔ Done!</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; ✔ Block 1: pupil data from 10 unique event messages extracted</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; ✔ Pupil epoching completed in 0.13 seconds</span></span></code></pre></div>
+<p>Now, if you take a look at <code>eye</code>, you’ll notice there’s a
+new list element within this <code>eyeris</code> object:
+<code>epoch_probe</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>eye_1a<span class="sc">$</span>epoch_probe</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; $block_1</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 20,000 × 18</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;    block time_orig timebin eye_x eye_y eye      hz type     pupil_raw</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt;    &lt;dbl&gt;     &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt;  1     1  11335474 0        975.  545. R      1000 diameter      6138</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt;  2     1  11335475 0.00100  975.  544. R      1000 diameter      6144</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;  3     1  11335476 0.00200  975.  544  R      1000 diameter      6146</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt;  4     1  11335477 0.00300  976.  544. R      1000 diameter      6143</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;  5     1  11335478 0.00400  975.  545  R      1000 diameter      6141</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt;  6     1  11335479 0.00500  975.  545. R      1000 diameter      6140</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt;  7     1  11335480 0.00600  975.  544. R      1000 diameter      6137</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;  8     1  11335481 0.00700  975.  544. R      1000 diameter      6127</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;  9     1  11335482 0.00800  975   545. R      1000 diameter      6119</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 10     1  11335483 0.00900  975.  546. R      1000 diameter      6113</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; # ℹ 19,990 more rows</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; # ℹ 9 more variables: pupil_raw_deblink &lt;dbl&gt;,</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient &lt;dbl&gt;,</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate &lt;dbl&gt;,</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate_lpfilt &lt;dbl&gt;,</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate_lpfilt_z &lt;dbl&gt;, template &lt;chr&gt;,</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; #   matching_pattern &lt;chr&gt;, matched_event &lt;chr&gt;, event_message &lt;chr&gt;</span></span></code></pre></div>
+<p>By default, the resulting <code>eyeris</code> object will contain the
+epoched data frame within a list element called <code>epoch_xyz</code>
+where <code>xyz</code> will be a sanitized version of the original
+<code>start</code> event string you supplied for the pattern matching
+procedure.</p>
+<p>However, you have the ability to customize this label, by passing a
+value to the <code>label</code> argument within
+<code>epoch()</code>.</p>
+<div class="alert alert-warning">
+<p>⚠️ Warning: if no label is specified and there are no event message
+strings provided for sanitization, then you may obtain a strange-looking
+epoch list element in your output <code>eyeris</code> object (e.g.,
+<code>epoch_</code>, or perhaps even <code>$epoch_nana</code>, etc.).
+The extracted data epochs should still be accessible here, however, to
+avoid ambiguous list objects, <strong>we highly recommend you
+explicitly</strong> <strong>supply sensible epoch labels here within
+your <code>epoch()</code> calls to be safe.</strong></p>
+</div>
+</div>
+<div id="example-b-metadata-parsing-with-custom-labels" class="section level3">
+<h3>Example B: Metadata Parsing with Custom Labels</h3>
+<blockquote>
+<p>Extract the 1-second window after “PROBE_START” and apply a custom
+label to the resulting epoch set.</p>
+</blockquote>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>eye_1b <span class="ot">&lt;-</span> eye <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">epoch</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="at">events =</span> <span class="st">&quot;PROBE_START_{trial}&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;probeAfter&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  )</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; ℹ Epoching pupil data...</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ℹ Block 1: found 5 matching events for PROBESTARTtrial</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; ✔ Done!</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; ✔ Block 1: pupil data from 5 unique event messages extracted</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ✔ Pupil epoching completed in 0.03 seconds</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>eye_1b <span class="sc">|&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">pluck</span>(<span class="st">&quot;epoch_probeAfter&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="fu">head</span>()</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; $block_1</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; # A tibble: 5,000 × 18</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt;    block time_orig timebin eye_x eye_y eye      hz type     pupil_raw</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt;    &lt;dbl&gt;     &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt;  1     1  11336474 0        972.  550. R      1000 diameter      6513</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt;  2     1  11336475 0.00100  971.  551. R      1000 diameter      6512</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt;  3     1  11336476 0.00200  970.  551. R      1000 diameter      6512</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt;  4     1  11336477 0.00300  970.  550. R      1000 diameter      6512</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt;  5     1  11336478 0.00400  971.  548. R      1000 diameter      6514</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt;  6     1  11336479 0.00501  972.  547. R      1000 diameter      6516</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt;  7     1  11336480 0.00601  972.  548. R      1000 diameter      6518</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt;  8     1  11336481 0.00701  972.  548. R      1000 diameter      6518</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt;  9     1  11336482 0.00801  972.  550. R      1000 diameter      6518</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt; 10     1  11336483 0.00901  972.  550. R      1000 diameter      6517</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt; # ℹ 4,990 more rows</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co">#&gt; # ℹ 9 more variables: pupil_raw_deblink &lt;dbl&gt;,</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient &lt;dbl&gt;,</span></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate &lt;dbl&gt;,</span></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate_lpfilt &lt;dbl&gt;,</span></span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate_lpfilt_z &lt;dbl&gt;, template &lt;chr&gt;,</span></span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a><span class="co">#&gt; #   matching_pattern &lt;chr&gt;, matched_event &lt;chr&gt;, trial &lt;chr&gt;</span></span></code></pre></div>
+<div class="alert alert-light">
+<p>💡 <strong>Note:</strong> You can customize <code>epoch()</code> with
+trial-level metadata!</p>
+<p>For instance, here, <code>{trial}</code> will not only extract data
+but also add a <code>trial</code> column parsed from the event string,
+which originally took the form of <code>PROBE_START_22</code> (where
+<code>22</code> was the trial number embedded within the event message
+string we had originally programmed to be sent as event messages at the
+start of each probe trial on our <code>PsychoPy</code> /
+<code>EyeLink</code> experiment.</p>
+</div>
+<pre><code>#&gt; # A tibble: 5 × 4
+#&gt;   template            matching_pattern    matched_event  trial
+#&gt;   &lt;chr&gt;               &lt;chr&gt;               &lt;chr&gt;          &lt;chr&gt;
+#&gt; 1 PROBE_START_{trial} ^PROBE_START_(.*?)$ PROBE_START_22 22   
+#&gt; 2 PROBE_START_{trial} ^PROBE_START_(.*?)$ PROBE_START_22 22   
+#&gt; 3 PROBE_START_{trial} ^PROBE_START_(.*?)$ PROBE_START_22 22   
+#&gt; 4 PROBE_START_{trial} ^PROBE_START_(.*?)$ PROBE_START_22 22   
+#&gt; 5 PROBE_START_{trial} ^PROBE_START_(.*?)$ PROBE_START_22 22</code></pre>
+</div>
+<div id="example-c-epoch-with-subtractive-baselining" class="section level3">
+<h3>Example C: Epoch with Subtractive Baselining</h3>
+<blockquote>
+<p>Use the 1-second window before <code>&quot;DELAY_STOP&quot;</code> as a
+baseline and apply it to the epoch data.</p>
+</blockquote>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>eye_1c <span class="ot">&lt;-</span> eye <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="fu">epoch</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>    <span class="at">events =</span> <span class="st">&quot;PROBE_START_{trial}&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;probeEpochs&quot;</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>    <span class="at">calc_baseline =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>    <span class="at">apply_baseline =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>    <span class="at">baseline_type =</span> <span class="st">&quot;sub&quot;</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>    <span class="at">baseline_events =</span> <span class="st">&quot;DELAY_STOP_*&quot;</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>    <span class="at">baseline_period =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  )</span></code></pre></div>
+<p>In this example, we’re extracting 1-second epochs following each
+<code>&quot;PROBE_START&quot;</code> event and applying <strong>subtractive
+baseline correction</strong>. The baseline is computed from the
+<strong>1-second window before</strong> each corresponding
+<code>&quot;DELAY_STOP&quot;</code> event.</p>
+<p>In other words, this means each pupil trace is normalized by
+subtracting the average pupil size from the pre-probe delay period
+(i.e., the baseline period).</p>
+</div>
+<div id="example-d-startend-event-pair-epoching" class="section level3">
+<h3>Example D: Start/End Event Pair Epoching</h3>
+<blockquote>
+<p>Manually define start and end times for two trials:</p>
+</blockquote>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>start_events <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">time =</span> <span class="fu">c</span>(<span class="dv">11334491</span>, <span class="dv">11338691</span>),</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">msg =</span> <span class="fu">c</span>(<span class="st">&quot;TRIALID 22&quot;</span>, <span class="st">&quot;TRIALID 23&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>end_events <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="at">time =</span> <span class="fu">c</span>(<span class="dv">11337158</span>, <span class="dv">11341292</span>),</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="at">msg =</span> <span class="fu">c</span>(<span class="st">&quot;RESPONSE_22&quot;</span>, <span class="st">&quot;RESPONSE_23&quot;</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>eye_1d <span class="ot">&lt;-</span> eye <span class="sc">|&gt;</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="fu">epoch</span>(</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>    <span class="at">events =</span> <span class="fu">list</span>(start_events, end_events, <span class="dv">1</span>), <span class="co"># 1 = block number</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;manualTrials&quot;</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+</div>
+<div id="export-to-a-bids-like-format" class="section level2">
+<h2>3️⃣ Export to a BIDS-like Format</h2>
+<p>Once epoched, your data is ready to be exported with
+<code>bidsify()</code>, which saves the raw and epoched data in a
+structured, <code>BIDS</code>-inspired format.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">bidsify</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="at">eyeris =</span> eye_1c,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/Documents/eyeris&quot;</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">participant_id =</span> <span class="st">&quot;001&quot;</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">session_num =</span> <span class="st">&quot;01&quot;</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">task_name =</span> <span class="st">&quot;assocmem&quot;</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="at">run_num =</span> <span class="st">&quot;01&quot;</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  <span class="at">save_raw =</span> <span class="cn">TRUE</span>, <span class="co"># Also save raw timeseries</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  <span class="at">html_report =</span> <span class="cn">TRUE</span> <span class="co"># Generate a preprocessing summary</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>)</span></code></pre></div>
+<p>Which will create a directory structure like this:</p>
+<pre><code>eyeris
+└── derivatives
+    └── sub-001
+        └── ses-01
+            ├── eye
+            │   ├── sub-001_ses-01_task-assocret_run-01_desc-timeseries_pupil.csv
+            │   └── sub-001_ses-01_task-assocret_run-01_epoch-prePostProbe_desc-preproc_pupil.csv
+            ├── source
+            │   └── figures
+            │       └── run-01
+            │           ├── epoch_prePostProbe
+            │           │   ├── run-01_PROBE_START_22_1.png
+            │           │   ├── run-01_PROBE_START_22_2.png
+            │           │   ├── run-01_PROBE_START_22_3.png
+            │           │   ├── run-01_PROBE_START_22_4.png
+            │           │   ├── run-01_PROBE_START_22_5.png
+            │           │   ├── run-01_PROBE_START_22_6.png
+            │           │   ├── ...
+            │           │   ├── run-01_PROBE_STOP_22_1.png
+            │           │   ├── run-01_PROBE_STOP_22_2.png
+            │           │   ├── run-01_PROBE_STOP_22_3.png
+            │           │   ├── run-01_PROBE_STOP_22_4.png
+            │           │   ├── run-01_PROBE_STOP_22_5.png
+            │           │   ├── run-01_PROBE_STOP_22_6.png
+            │           │   ├── ...
+            │           ├── run-01_fig-1_desc-histogram.jpg
+            │           ├── run-01_fig-1_desc-timeseries.jpg
+            ├── sub-001_epoch-prePostProbe_run-01.html
+            └── sub-001.html
+
+9 directories, 80 files</code></pre>
+</div>
+<div id="data-previews-and-qc-with-interactive-reports" class="section level2">
+<h2>💡 Data Previews and QC with Interactive Reports</h2>
+<p>See the <a href="reports.html">🔎 QC with Interactive Reports
+vignette</a> for more details.</p>
+</div>
+<div id="summary" class="section level2">
+<h2>✨ Summary</h2>
+<p>This vignette demonstrated how to:</p>
+<ul>
+<li>Load and preprocess raw <code>.asc</code> (EyeLink) pupil data files
+using <code>eyeris</code>.</li>
+<li>Extract event-based epochs using both pattern matching and manual
+timestamps.</li>
+<li>Flexibly apply baseline correction.</li>
+<li>Save out the results in a clean, reproducible, BIDS-like folder
+structure.</li>
+</ul>
+<p>Check out the function documentation for <code>epoch()</code> and
+<code>bidsify()</code> to learn more about other customization options
+that may be useful for your specific workflow.</p>
+<hr />
+</div>
+<div id="citing-eyeris" class="section level2">
+<h2>📚 Citing <code>eyeris</code></h2>
+<div class="alert alert-light" style="margin-top: 1rem; margin-bottom: 1rem; padding-bottom: 0.5rem;">
+<p>If you use the <code>eyeris</code> package in your research, please
+cite it!</p>
+<p>Run the following in R to get the citation:</p>
+</div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;eyeris&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; To cite package &#39;eyeris&#39; in publications use:</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt;   Schwartz S (2025). _eyeris: Flexible, Extensible, &amp; Reproducible</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt;   Processing of Pupil Data_. R package version 1.0.0,</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt;   https://github.com/shawntz/eyeris/,</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt;   &lt;https://shawnschwartz.com/eyeris/&gt;.</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;   @Manual{,</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;     title = {eyeris: Flexible, Extensible, &amp; Reproducible Processing of Pupil Data},</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;     author = {Shawn Schwartz},</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt;     year = {2025},</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt;     note = {R package version 1.0.0, https://github.com/shawntz/eyeris/},</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt;     url = {https://shawnschwartz.com/eyeris/},</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt;   }</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

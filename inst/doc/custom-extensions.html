@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Building Your Own Custom Pipeline Extensions</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Building Your Own Custom Pipeline
+Extensions</h1>
+
+
+
+<p>One key strength of the preprocessing framework within
+<code>eyeris</code> is its modularity.</p>
+<p>While we encourage most users to use the <code>glassbox()</code>
+function for simplicity and reproducibility, advanced users can create
+custom preprocessing steps that seamlessly integrate into the
+pipeline.</p>
+<p>This vignette walks you through the structure required to write your
+own <code>eyeris</code>-compatible preprocessing functions.</p>
+<div id="how-the-pipeline-works" class="section level2">
+<h2>🧩 How the Pipeline Works</h2>
+<p>Under the hood, each preprocessing function in <code>eyeris</code> is
+a wrapper around a core operation that gets tracked, versioned, and
+stored using the <code>pipeline_handler()</code>.</p>
+<p>Custom pipeline steps must conform to the <code>eyeris</code>
+protocol for maximum compatibility with the downstream functions we
+provide.</p>
+<p>Following the <code>eyeris</code> protocol also ensures: - all
+operations follow a predictable structure, and - that new pupil data
+columns based on previous operations in the chain are able to be
+dynamically constructed within the core <code>timeseries</code> data
+frame.</p>
+<p>For instance:
+<code>pupil_raw -&gt; pupil_raw_deblink -&gt; pupil_raw_deblink_detransient -&gt; ...</code></p>
+<p>If you’re unfamiliar with how these columns are structured and
+tracked, first check out the companion vignette: <a href="anatomy.html">📦 Anatomy of an <code>eyeris</code> Object</a>.</p>
+</div>
+<div id="creating-a-custom-extension-for-eyeris" class="section level2">
+<h2>🛠️Creating a Custom Extension for <code>eyeris</code></h2>
+<p>Let’s say you want to write a new <code>eyeris</code> extension
+function called <code>winsorize()</code> to apply <a href="https://en.wikipedia.org/wiki/Winsorizing">winsorization</a> to
+extreme pupil values.</p>
+<div id="write-the-core-operation-function" class="section level3">
+<h3>1) Write the core operation function</h3>
+<p>This function should accept a data frame <code>x</code>, a string
+<code>prev_op</code> (i.e., the name of the previous pupil column), and
+any custom parameters.</p>
+<div id="to-illustrate" class="section level4">
+<h4>To illustrate:</h4>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>winsorize_pupil <span class="ot">&lt;-</span> <span class="cf">function</span>(x, prev_op, <span class="at">lower =</span> <span class="fl">0.01</span>, <span class="at">upper =</span> <span class="fl">0.99</span>) {</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  vec <span class="ot">&lt;-</span> x[[prev_op]]</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">quantile</span>(vec, <span class="at">probs =</span> <span class="fu">c</span>(lower, upper), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  vec[vec <span class="sc">&lt;</span> q[<span class="dv">1</span>]] <span class="ot">&lt;-</span> q[<span class="dv">1</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  vec[vec <span class="sc">&gt;</span> q[<span class="dv">2</span>]] <span class="ot">&lt;-</span> q[<span class="dv">2</span>]</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  vec</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+<div id="create-the-wrapper-using-the-eyerispipeline_handler" class="section level3">
+<h3>2) Create the wrapper using the
+<code>eyeris::pipeline_handler()</code></h3>
+<p>The <code>pipeline_handler()</code> enables your function to
+automatically:</p>
+<ul>
+<li>track your function within the <code>eyeris</code> list object’s
+<code>params</code> field,</li>
+<li>append a new column to each block within the <code>timeseries</code>
+list of data frames, and</li>
+<li>update the object’s <code>latest</code> pointer.</li>
+</ul>
+<div id="to-illustrate-1" class="section level4">
+<h4>To illustrate:</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co">#&#39; Winsorize pupil values</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&#39;</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&#39; Applies winsorization to extreme pupil values within each block.</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&#39;</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&#39; @param eyeris An `eyeris` object created by [load_asc()].</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&#39; @param lower Lower quantile threshold. Default is 0.01.</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&#39; @param upper Upper quantile threshold. Default is 0.99.</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&#39;</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&#39; @return Updated `eyeris` object with new winsorized pupil column.</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>winsorize <span class="ot">&lt;-</span> <span class="cf">function</span>(eyeris, <span class="at">lower =</span> <span class="fl">0.01</span>, <span class="at">upper =</span> <span class="fl">0.99</span>) {</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  <span class="fu">pipeline_handler</span>(</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>    eyeris,</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>    winsorize_pupil,</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    <span class="st">&quot;winsorize&quot;</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    <span class="at">lower =</span> lower,</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>    <span class="at">upper =</span> upper</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  )</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>}</span></code></pre></div>
+<ol style="list-style-type: decimal">
+<li>Here, the first argument is always the <code>eyeris</code> class
+object.</li>
+<li>Then, is the name of the function (the one you created in step 1
+above).</li>
+<li>Third, is the internal label you want <code>eyeris</code> to refer
+to (i.e., the one for the column name, plots, etc.).</li>
+<li>Fourth position++ are the parameters you created after
+<code>prev_op</code> when creating the function
+<code>winsorize_pupil</code> in step 1.</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="and-thats-it" class="section level2">
+<h2>🎉 And that’s it!</h2>
+<p>You should now be able to use your new function extension as a
+component within a new custom <code>eyeris</code> pipeline declaration.
+To illustrate:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;memory.asc&quot;</span>, <span class="at">package =</span> <span class="st">&quot;eyeris&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  eyeris<span class="sc">::</span><span class="fu">load_asc</span>(<span class="at">block =</span> <span class="st">&quot;auto&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  eyeris<span class="sc">::</span><span class="fu">deblink</span>(<span class="at">extend =</span> <span class="dv">50</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">winsorize</span>()</span></code></pre></div>
+</div>
+<div id="best-practices" class="section level2">
+<h2>💪 Best Practices</h2>
+<ul>
+<li><strong>Use consistent naming:</strong> i.e., match your suffix
+(e.g. <code>&quot;winsorize&quot;</code>) to the column and log structure:
+<ul>
+<li>If you call <code>pipeline_handler(..., &quot;winsorize&quot;)</code></li>
+<li>Then, your function names should reflect that:
+<ul>
+<li>the public facing <code>winsorize()</code> wrapper function,
+and</li>
+<li>the private <code>winsorize_pupil()</code> logic implementation
+function.</li>
+</ul></li>
+<li>You will then see <code>pupil_raw_*_winsorize</code> as the new
+output column!</li>
+</ul></li>
+<li><strong>Respect previous steps:</strong> Your custom function should
+rely only on <code>prev_op</code>, not on <strong><em>any hardcoded
+column names</em></strong>!</li>
+<li><strong>Return the expected data type:</strong> Be sure that you
+private function always returns a modified vector type, as the
+underlying <code>pipeline_handler()</code> is looking out for a vector
+it can transpose into the new column that will be added to the
+<code>timeseries</code> data frame within the resulting
+<code>eyeris</code> object.</li>
+<li><strong>Test on individual blocks:</strong> Always try your private
+function logic on a single data block (e.g.,
+<code>eyeris$timeseries[[1]]</code>) to debug before integrating it with
+the <code>eyeris</code> pipeline protocol.</li>
+</ul>
+</div>
+<div id="summary" class="section level2">
+<h2>✨ Summary</h2>
+<p>We hope you are now convinced at the power and extensibility the
+<code>eyeris</code> protocol enables! As we demonstrated here, with just
+a little bit of structure, you can create custom extension steps
+tailored to your specific analysis needs – all while preserving the
+reproducibility and organizational core principles <code>eyeris</code>
+was designed and built around.</p>
+<p>If you’d like to contribute new steps to <code>eyeris</code>, feel
+free to open a pull request or discussion on <a href="https://github.com/shawntz/eyeris">GitHub</a>!</p>
+<hr />
+</div>
+<div id="citing-eyeris" class="section level2">
+<h2>📚 Citing <code>eyeris</code></h2>
+<div class="alert alert-light" style="margin-top: 1rem; margin-bottom: 1rem; padding-bottom: 0.5rem;">
+<p>If you use the <code>eyeris</code> package in your research, please
+cite it!</p>
+<p>Run the following in R to get the citation:</p>
+</div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;eyeris&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; To cite package &#39;eyeris&#39; in publications use:</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;   Schwartz S (2025). _eyeris: Flexible, Extensible, &amp; Reproducible</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;   Processing of Pupil Data_. R package version 1.0.0,</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;   https://github.com/shawntz/eyeris/,</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;   &lt;https://shawnschwartz.com/eyeris/&gt;.</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;   @Manual{,</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;     title = {eyeris: Flexible, Extensible, &amp; Reproducible Processing of Pupil Data},</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;     author = {Shawn Schwartz},</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;     year = {2025},</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;     note = {R package version 1.0.0, https://github.com/shawntz/eyeris/},</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;     url = {https://shawnschwartz.com/eyeris/},</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt;   }</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

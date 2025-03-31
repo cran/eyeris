@@ -1,0 +1,34 @@
+Package: eyeris
+Type: Package
+Title: Flexible, Extensible, & Reproducible Processing of Pupil Data
+Version: 1.0.0
+Date: 2025-03-28
+Authors@R: 
+  person(
+    given = "Shawn",
+    family = "Schwartz",
+    role = c("aut", "cre", "cph"),
+    email = "stschwartz@stanford.edu", 
+    comment = c(ORCID = "0000-0001-6444-8451")
+  )
+Description: Pupillometry offers a non-invasive window into the mind and has been used extensively as a psychophysiological readout of arousal signals linked with cognitive processes like attention, stress, and emotional states (see Clewett et al., 2020 <doi:10.1038/s41467-020-17851-9>; Kret & Sjak-Shie, 2018 <doi:10.3758/s13428-018-1075-y>; Strauch, 2024 <doi:10.1016/j.tins.2024.06.002>). Yet, despite decades of pupillometry research, many established packages and workflows to date unfortunately lack design patterns based on Findability, Accessibility, Interoperability, and Reusability (FAIR) principles (see Wilkinson et al., 2016 <doi:10.1038/sdata.2016.18> for more information). 'eyeris', on the other hand, follows a design philosophy that provides users with an intuitive, modular, performant, and extensible pupillometry data preprocessing framework out-of-the-box. 'eyeris' introduces a Brain Imaging Data Structure (BIDS)-like organization for derivative (i.e., preprocessed) pupillometry data as well as an intuitive workflow for inspecting preprocessed pupil epochs using interactive output report files (Esteban et al., 2019 <doi:10.1038/s41592-018-0235-4>; Gorgolewski et al., 2016 <doi:10.1038/sdata.2016.44>).
+Encoding: UTF-8
+Depends: R (>= 4.1)
+Imports: eyelinker, dplyr, gsignal, purrr, zoo, cli, rlang, stringr,
+        utils, stats, graphics, grDevices, tidyr, progress, data.table,
+        withr
+RoxygenNote: 7.3.2
+Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+VignetteBuilder: knitr
+License: MIT + file LICENSE
+Config/testthat/edition: 3
+URL: https://shawnschwartz.com/eyeris/,
+        https://github.com/shawntz/eyeris/
+BugReports: https://github.com/shawntz/eyeris/issues
+NeedsCompilation: no
+Packaged: 2025-03-28 15:50:53 UTC; sts
+Author: Shawn Schwartz [aut, cre, cph]
+    (<https://orcid.org/0000-0001-6444-8451>)
+Maintainer: Shawn Schwartz <stschwartz@stanford.edu>
+Repository: CRAN
+Date/Publication: 2025-03-31 10:00:06 UTC
