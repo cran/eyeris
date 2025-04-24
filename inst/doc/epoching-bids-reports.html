@@ -366,14 +366,14 @@ needing to write any additional code)!</p>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(eyeris)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Load the example memory task file and run default glassbox preproc workflow</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>eye <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;memory.asc&quot;</span>, <span class="at">package =</span> <span class="st">&quot;eyeris&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">glassbox</span>()</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>demo_data <span class="ot">&lt;-</span> <span class="fu">eyelink_asc_demo_dataset</span>()</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>eye <span class="ot">&lt;-</span> <span class="fu">glassbox</span>(demo_data)</span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::load_asc()</span></span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::deblink()</span></span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::detransient()</span></span>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::interpolate()</span></span>
 <span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::lpfilt()</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Skipping eyeris::detrend()</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; ! [ SKIP ] - Skipping eyeris::detrend()</span></span>
 <span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::zscore()</span></span></code></pre></div>
 </div>
 <div id="extract-data-epochs" class="section level2">
@@ -395,7 +395,7 @@ needing to write any additional code)!</p>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; ℹ Block 1: found 10 matching events for PROBE</span></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; ✔ Done!</span></span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; ✔ Block 1: pupil data from 10 unique event messages extracted</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; ✔ Pupil epoching completed in 0.13 seconds</span></span></code></pre></div>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; ✔ Pupil epoching completed in 0.11 seconds</span></span></code></pre></div>
 <p>Now, if you take a look at <code>eye</code>, you’ll notice there’s a
 new list element within this <code>eyeris</code> object:
 <code>epoch_probe</code>.</p>
@@ -429,7 +429,7 @@ procedure.</p>
 <p>However, you have the ability to customize this label, by passing a
 value to the <code>label</code> argument within
 <code>epoch()</code>.</p>
-<div class="alert alert-warning">
+<div class="alert alert-warning" style="padding-bottom: 0;">
 <p>⚠️ Warning: if no label is specified and there are no event message
 strings provided for sanitization, then you may obtain a strange-looking
 epoch list element in your output <code>eyeris</code> object (e.g.,
@@ -622,7 +622,7 @@ that may be useful for your specific workflow.</p>
 </div>
 <div id="citing-eyeris" class="section level2">
 <h2>📚 Citing <code>eyeris</code></h2>
-<div class="alert alert-light" style="margin-top: 1rem; margin-bottom: 1rem; padding-bottom: 0.5rem;">
+<div class="alert alert-light" style="padding-bottom: 0;">
 <p>If you use the <code>eyeris</code> package in your research, please
 cite it!</p>
 <p>Run the following in R to get the citation:</p>
@@ -631,19 +631,18 @@ cite it!</p>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; To cite package &#39;eyeris&#39; in publications use:</span></span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt;   Schwartz S (2025). _eyeris: Flexible, Extensible, &amp; Reproducible</span></span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt;   Processing of Pupil Data_. R package version 1.0.0,</span></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt;   https://github.com/shawntz/eyeris/,</span></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt;   &lt;https://shawnschwartz.com/eyeris/&gt;.</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;   @Manual{,</span></span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;     title = {eyeris: Flexible, Extensible, &amp; Reproducible Processing of Pupil Data},</span></span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;     author = {Shawn Schwartz},</span></span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt;     year = {2025},</span></span>
-<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt;     note = {R package version 1.0.0, https://github.com/shawntz/eyeris/},</span></span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt;     url = {https://shawnschwartz.com/eyeris/},</span></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt;   }</span></span></code></pre></div>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt;   Processing of Pupil Data_. R package version 1.1.0,</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt;   &lt;https://shawnschwartz.com/eyeris/&gt;.</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt;   @Manual{,</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;     title = {eyeris: Flexible, Extensible, &amp; Reproducible Processing of Pupil Data},</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;     author = {Shawn Schwartz},</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;     year = {2025},</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt;     note = {R package version 1.1.0},</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt;     url = {https://shawnschwartz.com/eyeris/},</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt;   }</span></span></code></pre></div>
 </div>
 
 

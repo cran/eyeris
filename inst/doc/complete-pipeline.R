@@ -8,7 +8,7 @@ knitr::opts_chunk$set(
 )
 
 ## ----setup, eval=FALSE--------------------------------------------------------
-# # Install from CRAN (coming soon)
+# # Install latest stable release from CRAN
 # # install.packages("eyeris")
 # 
 # # pak
@@ -27,7 +27,7 @@ knitr::opts_chunk$set(
 library(eyeris)
 
 ## ----load-data----------------------------------------------------------------
-demo_data <- system.file("extdata", "memory.asc", package = "eyeris")
+demo_data <- eyelink_asc_demo_dataset()
 
 ## ----out.width='100%'---------------------------------------------------------
 # Run an automated pipeline with no real-time inspection of parameters
@@ -42,12 +42,12 @@ plot(
 )
 
 ## ----eval=FALSE, out.width='100%'---------------------------------------------
-# output <- eyeris::glassbox(demo_data, confirm = TRUE, seed = 0)
+# output <- eyeris::glassbox(demo_data, interactive_preview = TRUE, seed = 0)
 
 ## -----------------------------------------------------------------------------
 output <- eyeris::glassbox(
   demo_data,
-  confirm = FALSE, # TRUE if you want to visualize each step in real-time
+  interactive_preview = FALSE, # TRUE to visualize each step in real-time
   deblink = list(extend = 40),
   lpfilt = list(plot_freqz = FALSE)
 )

@@ -32,10 +32,14 @@ knitr::opts_chunk$set(
 # )
 
 ## ----echo=FALSE, out.width='75%'----------------------------------------------
-knitr::include_graphics("../man/figures/report_example_annotated-1.png")
+img_url <- paste0("https://github.com/shawntz/eyeris/raw/dev/inst/",
+                  "figures/report_example_annotated-1.png")
+knitr::include_graphics(img_url)
 
 ## ----echo=FALSE, out.width='100%'---------------------------------------------
-knitr::include_graphics("../man/figures/interactive-reports-demo.gif")
+gif_url <- paste0("https://github.com/shawntz/eyeris/raw/dev/inst/",
+                  "figures/interactive-reports-demo.gif")
+knitr::include_graphics(gif_url)
 
 ## -----------------------------------------------------------------------------
 citation("eyeris")

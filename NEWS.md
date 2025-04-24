@@ -1,11 +1,39 @@
+# eyeris 1.1.0
+
+## ✨ New Features
+* NF: Simplify `glassbox()` caller with redesigned parameters that enhance continuity across all pipeline steps (#148)
+
+## 📚 Documentation
+* DOC: Improved function documentation across the package and added more usage notes for clarity.
+* DOC: Updated styling of documentation website.
+
+## Minor improvements and fixes
+* ENH: Make histograms disabled by default when plotting an `eyeris` object (#156).
+* RF: Deprecated the `confirm` parameter in `glassbox()`.
+  * Please use `interactive_preview` instead.
+* RF: Deprecated the `num_previews` parameter in `glassbox()`.
+  * Please use `preview_n` instead.
+* BF: Random seed assignment was not behaving as expcted within the `glassbox()` pipeline.
+* RF: Modify paths to documentation assets to fix broken links at build.
+
+# eyeris 1.0.1
+
+This non-CRAN release patches a small handful of documentation-related chores that have no direct impact on the functionality of `eyeris` for the end user. The minor improvements and fixes contained within this release will soon be bundled with a more substantial feature upgrade when submitted to CRAN to reduce burden on the CRAN reviewers at this time. Stay tuned!
+
+## Minor improvements and fixes (#159)
+* CHORE: fix duplicate `LICENSE` file issue in `release/**` branches (#145)
+* CHORE: update funders list on `DESCRIPTION` (#149)
+* CHORE: add DOI badge to `README` (#150)
+* CHORE: fix citation years in `DESCRIPTION` (i.e., put them in parentheses, per request of `CRAN` reviewer) (#151)
+* DOC: update `README` to include `CRAN` install code + option for @latest `dev` branch via download with devtools/GitHub (#153)
+* DOC: fix version titles + urls on changelog webpage (#154)
+* CHORE: change pkgdown docs website deployment rules so that public webpage only updates on pushes to official release branches, and not the `dev` branch (#155)
+* DOC: add `CONTRIBUTING.md` guidelines file for GitHub (#157)
+* DOC: fix `/man/figures/...` image ref issues which is leading to broken links on the `R CRAN read-only` [GitHub mirror repo](https://github.com/cran/eyeris) (#158)
+
 # eyeris 1.0.0
 
----
-
-# eyeris v1.0.0
-<small>`Pending Review`</small>
-
-🎉 **First CRAN release!**
+## 🎉 **First CRAN release!** (#144)
 
 This version marks the official launch of the `eyeris` package on CRAN.
 
@@ -22,8 +50,7 @@ This version marks the official launch of the `eyeris` package on CRAN.
 
 Thanks for checking out `eyeris`! 🧠👁️
 
-# eyeris v0.1.0.9001
-<small>`February 26th, 2025`</small>
+# eyeris 0.1.0.9001
 
 ## Minor improvements and fixes
 * FF (#115): add more aggressive handling of edge cases in `eyeris::detransient()` (#121)
@@ -32,8 +59,7 @@ Thanks for checking out `eyeris`! 🧠👁️
   * Furthermore, a new `mad_thresh` override parameter has been added to `eyeris::detransient()` for advanced users to override the `mad_thresh` computed property. *Note:* this new `mad_thresh` parameter defaults to `NULL` (and should pretty much always stay as such).
 * FF (#122): fixed issue with incompatible unicode character in plot titles (#123)
 
-# eyeris v0.1.0.9000
-<small>`February 11th, 2025`</small>
+# eyeris 0.1.0.9000
 
 ## Breaking changes
 * NF (#10): add support for `.asc` files containing multiple recording segments within the same file (#120)
@@ -55,14 +81,13 @@ Thanks for checking out `eyeris`! 🧠👁️
   * Similarly, these added benefits coincide nicely with the new multi-block support (#10)
 * General bug fixes and enhancements to codebase and front-end UX (#120)
 
-# eyeris v0.0.0.9000
-<small>`November 23rd, 2024`</small>
+# eyeris 0.0.0.9000
 
 * Initial beta release
 
 ---
 
-## Commit message tags
+## Commit message tags reference:
 * **BF:** bug fix (in the *release* branch)
 * **FF:** feature fix (bug fixes in the *dev* branch)
 * **RF:** refactoring

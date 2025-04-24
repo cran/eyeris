@@ -9,8 +9,8 @@ knitr::opts_chunk$set(
 library(eyeris)
 
 # Load the example memory task file and run default glassbox preproc workflow
-eye <- system.file("extdata", "memory.asc", package = "eyeris") |>
-  glassbox()
+demo_data <- eyelink_asc_demo_dataset()
+eye <- glassbox(demo_data)
 
 ## -----------------------------------------------------------------------------
 eye_1a <- eye |>
