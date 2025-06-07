@@ -8,16 +8,17 @@
   x,
   ...,
   steps = NULL,
-  num_previews = NULL,
+  preview_n = NULL,
   preview_duration = NULL,
   preview_window = NULL,
   seed = NULL,
   block = 1,
-  plot_distributions = FALSE
+  plot_distributions = FALSE,
+  num_previews = deprecated()
 )
 }
 \arguments{
-\item{x}{An object of class \code{eyeris} derived from \code{\link[=load]{load()}}.}
+\item{x}{An object of class \code{eyeris} dervived from \code{\link[=load_asc]{load_asc()}}.}
 
 \item{...}{Additional arguments to be passed to \code{plot}.}
 
@@ -25,25 +26,24 @@
 Otherwise, pass in a vector containing the index of the step(s) you want to
 plot, with index \code{1} being the original raw pupil timeseries.}
 
-\item{num_previews}{Number of random example "epochs" to generate for
+\item{preview_n}{Number of random example "epochs" to generate for
 previewing the effect of each preprocessing step on the pupil timeseries.}
 
 \item{preview_duration}{Time in seconds of each randomly selected preview.}
 
 \item{preview_window}{The start and stop raw timestamps used to subset the
 preprocessed data from each step of the \code{eyeris} workflow for visualization.
-Defaults to NULL, meaning random epochs as defined by \code{num_examples} and
-\code{example_duration} will be plotted. To override the random epochs, set
-\code{example_timelim} here to a vector with relative start and stop times
-(e.g., \code{c(5000, 6000)} to indicate the raw data from 5-6 seconds on data that
-were recorded at 1000 Hz). Note, the start/stop time values indicated here
-relate to the raw index position of each pupil sample from 1 to n (which
-will need to be specified manually by the user depending on the sampling rate
-of the recording; i.e., 5000-6000 for the epoch positioned from 5-6 seconds
-after the start of the timeseries, sampled at 1000 Hz).}
+Defaults to NULL, meaning random epochs as defined by \code{preview_n} and
+\code{preview_duration} will be plotted. To override the random epochs, set
+\code{preview_window} here to a vector with relative start and stop times (in
+seconds), for example -- \code{c(5,6)} -- to indicate the raw data from 5-6 secs
+on data that were recorded at 1000 Hz). Note, the start/stop time values
+indicated here are in seconds because \code{eyeris} automatically computes the
+indices for the supplied range of seconds using the \verb{$info$sample.rate}
+metadata in the \code{eyeris} S3 class object.}
 
 \item{seed}{Random seed for current plotting session. Leave NULL to select
-\code{num_previews} number of random preview "epochs" (of \code{preview_duration}) each
+\code{preview_n} number of random preview "epochs" (of \code{preview_duration}) each
 time. Otherwise, choose any seed-integer as you would normally select for
 \code{\link[base:Random]{base::set.seed()}}, and you will be able to continue re-plotting the same
 random example pupil epochs each time -- which is helpful when adjusting
@@ -58,6 +58,8 @@ blocks in the recording.}
 \item{plot_distributions}{Logical flag to indicate whether to plot both
 diagnostic pupil timeseries \emph{and} accompanying histograms of the pupil
 samples at each processing step. Defaults to \code{FALSE}.}
+
+\item{num_previews}{\strong{(Deprecated)} Use \code{preview_n} instead.}
 }
 \value{
 No return value; iteratively plots a subset of the pupil timeseries
@@ -86,7 +88,7 @@ my_eyeris_data <- system.file("extdata", "memory.asc", package = "eyeris") |>
 plot(my_eyeris_data, seed = 0)
 
 ## example 2: using a custom time subset (i.e., 1 to 500 ms)
-plot(my_eyeris_data, preview_window = c(1, 500), seed = 0)
+plot(my_eyeris_data, preview_window = c(0.01, 0.5), seed = 0)
 
 # controlling which block of data you would like to plot:
 
@@ -97,11 +99,15 @@ plot(my_eyeris_data, seed = 0)
 plot(my_eyeris_data, block = 1, seed = 0)
 
 ## example 3: plots a specific block along with a custom preview window
+##   (i.e., 1000 to 2000 ms)
 plot(
   my_eyeris_data,
   block = 1,
-  preview_window = c(1000, 2000),
+  preview_window = c(1, 2),
   seed = 0
 )
 
+}
+\seealso{
+\code{\link[lifecycle:deprecate_soft]{lifecycle::deprecate_warn()}}
 }

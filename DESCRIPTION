@@ -1,8 +1,8 @@
 Package: eyeris
 Type: Package
-Title: Flexible, Extensible, & Reproducible Processing of Pupil Data
-Version: 1.1.0
-Date: 2025-03-28
+Title: Flexible, Extensible, & Reproducible Pupillometry Preprocessing
+Version: 1.2.0
+Date: 2025-06-05
 Authors@R: 
   c(
     person(
@@ -15,7 +15,12 @@ Authors@R:
     person("Stanford Wu Tsai Human Performance Alliance", role = "fnd"),
     person("Stanford Ric Weiland Graduate Fellowship", role = "fnd"),
     person("Stanford Center for Mind, Brain, Computation and Technology", role = "fnd"),
-    person("NIH National Institute on Aging R01 AG065255", role = "fnd"),
+    person("NIH National Institute on Aging R01-AG065255", role = "fnd"),
+    person("NIH National Institute on Aging R01-AG079345", role = "fnd"),
+    person("National Science Foundation Graduate Research Fellowship DGE-2146755", role = "fnd"),
+    person("McKnight Brain Research Foundation Clinical Translational Research Scholarship in Cognitive Aging and Age-Related Memory Loss", role = "fnd"),
+    person("American Brain Foundation", role = "fnd"),
+    person("American Academy of Neurology", role = "fnd"),
     person(
       given = "Mingjian",
       family = "He",
@@ -27,6 +32,12 @@ Authors@R:
       family = "Yang",
       role = "ctb",
       comment = c(ORCID = "0000-0002-1207-3245")
+    ),
+    person(
+      given = "Alice",
+      family = "Xue",
+      role = "ctb",
+      comment = c(ORCID = "0009-0006-3176-8786")
     ),
     person(
       given = "Gustavo",
@@ -50,16 +61,25 @@ URL: https://shawnschwartz.com/eyeris/,
         https://github.com/shawntz/eyeris/
 BugReports: https://github.com/shawntz/eyeris/issues
 NeedsCompilation: no
-Packaged: 2025-04-24 12:29:34 UTC; shawnschwartz
-Author: Shawn Schwartz [aut, cre, cph]
-    (<https://orcid.org/0000-0001-6444-8451>),
+Packaged: 2025-06-07 01:15:18 UTC; shawn
+Author: Shawn Schwartz [aut, cre, cph] (ORCID:
+    <https://orcid.org/0000-0001-6444-8451>),
   Stanford Wu Tsai Human Performance Alliance [fnd],
   Stanford Ric Weiland Graduate Fellowship [fnd],
   Stanford Center for Mind, Brain, Computation and Technology [fnd],
-  NIH National Institute on Aging R01 AG065255 [fnd],
-  Mingjian He [ctb] (<https://orcid.org/0000-0002-6688-8693>),
-  Haopei Yang [ctb] (<https://orcid.org/0000-0002-1207-3245>),
-  Gustavo Santiago-Reyes [ctb] (<https://orcid.org/0009-0005-3764-3215>)
+  NIH National Institute on Aging R01-AG065255 [fnd],
+  NIH National Institute on Aging R01-AG079345 [fnd],
+  National Science Foundation Graduate Research Fellowship DGE-2146755
+    [fnd],
+  McKnight Brain Research Foundation Clinical Translational Research
+    Scholarship in Cognitive Aging and Age-Related Memory Loss [fnd],
+  American Brain Foundation [fnd],
+  American Academy of Neurology [fnd],
+  Mingjian He [ctb] (ORCID: <https://orcid.org/0000-0002-6688-8693>),
+  Haopei Yang [ctb] (ORCID: <https://orcid.org/0000-0002-1207-3245>),
+  Alice Xue [ctb] (ORCID: <https://orcid.org/0009-0006-3176-8786>),
+  Gustavo Santiago-Reyes [ctb] (ORCID:
+    <https://orcid.org/0009-0005-3764-3215>)
 Maintainer: Shawn Schwartz <stschwartz@stanford.edu>
 Repository: CRAN
-Date/Publication: 2025-04-24 12:50:02 UTC
+Date/Publication: 2025-06-07 02:50:02 UTC

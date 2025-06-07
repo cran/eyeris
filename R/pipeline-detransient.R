@@ -54,7 +54,7 @@
 #'   using a constant multiplier \eqn{n} (default value: 16):
 #'   \deqn{mad\_thresh = median\_speed + (n \times mad\_val)}
 #'
-#' @param eyeris An object of class `eyeris` dervived from [eyeris::load()].
+#' @param eyeris An object of class `eyeris` dervived from [eyeris::load_asc()].
 #' @param n A constant used to compute the median absolute deviation (MAD)
 #' threshold.
 #' @param mad_thresh Default `NULL`. This parameter provides
@@ -104,7 +104,7 @@ detransient <- function(eyeris, n = 16, mad_thresh = NULL) {
 # https://github.com/dr-JT/pupillometry/blob/main/R/pupil_artifact.R
 detransient_pupil <- function(x, prev_op, n, mad_thresh) {
   pupil <- x[[prev_op]]
-  timeseries <- x[["time_orig"]]
+  timeseries <- x[["time_secs"]]
 
   # note: `pupil_speed` is calculated using the helper function below
   pupil_speed <- speed(pupil, timeseries)

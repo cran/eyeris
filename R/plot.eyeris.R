@@ -6,27 +6,26 @@
 #' qualitatively assessing the consequences of the preprocessing recipe and
 #' parameters on the raw pupillary signal.
 #'
-#' @param x An object of class `eyeris` derived from [eyeris::load()].
+#' @param x An object of class `eyeris` dervived from [eyeris::load_asc()].
 #' @param ... Additional arguments to be passed to `plot`.
 #' @param steps Which steps to plot; defaults to `all` (i.e., plot all steps).
 #' Otherwise, pass in a vector containing the index of the step(s) you want to
 #' plot, with index `1` being the original raw pupil timeseries.
-#' @param num_previews Number of random example "epochs" to generate for
+#' @param preview_n Number of random example "epochs" to generate for
 #' previewing the effect of each preprocessing step on the pupil timeseries.
 #' @param preview_duration Time in seconds of each randomly selected preview.
 #' @param preview_window The start and stop raw timestamps used to subset the
 #' preprocessed data from each step of the `eyeris` workflow for visualization.
-#' Defaults to NULL, meaning random epochs as defined by `num_examples` and
-#' `example_duration` will be plotted. To override the random epochs, set
-#' `example_timelim` here to a vector with relative start and stop times
-#' (e.g., `c(5000, 6000)` to indicate the raw data from 5-6 seconds on data that
-#' were recorded at 1000 Hz). Note, the start/stop time values indicated here
-#' relate to the raw index position of each pupil sample from 1 to n (which
-#' will need to be specified manually by the user depending on the sampling rate
-#' of the recording; i.e., 5000-6000 for the epoch positioned from 5-6 seconds
-#' after the start of the timeseries, sampled at 1000 Hz).
+#' Defaults to NULL, meaning random epochs as defined by `preview_n` and
+#' `preview_duration` will be plotted. To override the random epochs, set
+#' `preview_window` here to a vector with relative start and stop times (in
+#' seconds), for example -- `c(5,6)` -- to indicate the raw data from 5-6 secs
+#' on data that were recorded at 1000 Hz). Note, the start/stop time values
+#' indicated here are in seconds because `eyeris` automatically computes the
+#' indices for the supplied range of seconds using the `$info$sample.rate`
+#' metadata in the `eyeris` S3 class object.
 #' @param seed Random seed for current plotting session. Leave NULL to select
-#' `num_previews` number of random preview "epochs" (of `preview_duration`) each
+#' `preview_n` number of random preview "epochs" (of `preview_duration`) each
 #' time. Otherwise, choose any seed-integer as you would normally select for
 #' [base::set.seed()], and you will be able to continue re-plotting the same
 #' random example pupil epochs each time -- which is helpful when adjusting
@@ -39,9 +38,12 @@
 #' @param plot_distributions Logical flag to indicate whether to plot both
 #' diagnostic pupil timeseries *and* accompanying histograms of the pupil
 #' samples at each processing step. Defaults to `FALSE`.
+#' @param num_previews **(Deprecated)** Use `preview_n` instead.
 #'
 #' @return No return value; iteratively plots a subset of the pupil timeseries
 #' from each preprocessing step run.
+#'
+#' @seealso [lifecycle::deprecate_warn()]
 #'
 #' @examples
 #' # first, generate the preprocessed pupil data
@@ -59,7 +61,7 @@
 #' plot(my_eyeris_data, seed = 0)
 #'
 #' ## example 2: using a custom time subset (i.e., 1 to 500 ms)
-#' plot(my_eyeris_data, preview_window = c(1, 500), seed = 0)
+#' plot(my_eyeris_data, preview_window = c(0.01, 0.5), seed = 0)
 #'
 #' # controlling which block of data you would like to plot:
 #'
@@ -70,19 +72,29 @@
 #' plot(my_eyeris_data, block = 1, seed = 0)
 #'
 #' ## example 3: plots a specific block along with a custom preview window
+#' ##   (i.e., 1000 to 2000 ms)
 #' plot(
 #'   my_eyeris_data,
 #'   block = 1,
-#'   preview_window = c(1000, 2000),
+#'   preview_window = c(1, 2),
 #'   seed = 0
 #' )
 #'
 #' @rdname plot.eyeris
 #'
 #' @export
-plot.eyeris <- function(x, ..., steps = NULL, num_previews = NULL,
+plot.eyeris <- function(x, ..., steps = NULL, preview_n = NULL,
                         preview_duration = NULL, preview_window = NULL,
-                        seed = NULL, block = 1, plot_distributions = FALSE) {
+                        seed = NULL, block = 1, plot_distributions = FALSE,
+                        num_previews = deprecated()) {
+  # handle deprecated parameters
+  if (is_present(num_previews)) {
+    deprecate_warn("1.2.0",
+                   "plot(num_previews)",
+                   "plot(preview_n)")
+    preview_n <- num_previews
+  }
+
   # safely handle user's current options
   oldpar <- par(no.readonly = TRUE)
   on.exit(par(oldpar))
@@ -107,18 +119,25 @@ plot.eyeris <- function(x, ..., steps = NULL, num_previews = NULL,
   )
 
   params <- list(...)
+
   only_liner_trend <- if ("only_linear_trend" %in% names(params)) {
     params$only_linear_trend <- params$only_linear_trend
   } else {
     params$only_linear_trend <- FALSE
   }
 
+  non_plot_params <- c("preview_window", "seed", "steps", "num_previews",
+                       "preview_n", "preview_duration", "block",
+                       "plot_distributions", "only_linear_trend", "next_step")
+
+  plot_params <- params[!(names(params) %in% non_plot_params)]
+
   # set param defaults outside of function declaration
   if (!is.null(preview_window)) {
-    if (!is.null(num_previews) || !is.null(preview_duration)) {
+    if (!is.null(preview_n) || !is.null(preview_duration)) {
       cli::cli_alert_warning(
         paste(
-          "num_previews and/or preview_duration will be ignored,",
+          "preview_n and/or preview_duration will be ignored,",
           "since preview_window was specified here."
         )
       )
@@ -129,8 +148,8 @@ plot.eyeris <- function(x, ..., steps = NULL, num_previews = NULL,
     steps <- "all"
   }
 
-  if (is.null(num_previews)) {
-    num_previews <- 3
+  if (is.null(preview_n)) {
+    preview_n <- 3
   }
 
   if (is.null(preview_duration)) {
@@ -190,15 +209,15 @@ plot.eyeris <- function(x, ..., steps = NULL, num_previews = NULL,
 
     withr::with_seed(seed, {
       random_epochs <- draw_random_epochs(
-        pupil_data, num_previews,
+        pupil_data, preview_n,
         preview_duration, hz
       )
     })
 
-    par(mfrow = c(1, num_previews), oma = c(0, 0, 3, 0))
+    par(mfrow = c(1, preview_n), oma = c(0, 0, 3, 0))
     detrend_plotted <- FALSE
     for (i in seq_along(pupil_steps)) {
-      for (n in 1:num_previews) {
+      for (n in 1:preview_n) {
         st <- min(random_epochs[[n]]$time_orig)
         et <- max(random_epochs[[n]]$time_orig)
         title <- paste0("\n[", st, " - ", et, "]")
@@ -227,25 +246,30 @@ plot.eyeris <- function(x, ..., steps = NULL, num_previews = NULL,
         if (!only_liner_trend) {
           if (grepl("_detrend$", pupil_steps[i]) && !detrend_plotted) {
             par(mfrow = c(1, 1), oma = c(0, 0, 0, 0))
-            robust_plot(pupil_data$time_orig, pupil_data[[pupil_steps[i - 1]]],
-              type = "l", col = "black", lwd = 2,
-              main = paste0(
-                "detrend:\n",
-                gsub(
-                  "_", " > ",
-                  gsub("pupil_", "", pupil_steps[i - 1])
-                )
+
+            do.call(robust_plot, c(
+              list(
+                y = pupil_data[[pupil_steps[i - 1]]],
+                x = pupil_data$time_secs
               ),
-              xlab = "raw tracker time (ms)", ylab = "pupil size (a.u.)"
-            )
-            lines(pupil_data$time_orig, pupil_data$detrend_fitted_values,
-              type = "l", col = "blue", lwd = 2, lty = 2
+              plot_params,
+              list(
+                type = "l", col = "black", lwd = 2,
+                main = paste0(
+                  "detrend:\n",
+                  gsub("_", " > ", gsub("pupil_", "", pupil_steps[i - 1]))
+                ),
+                xlab = "tracker time (s)", ylab = "pupil size (a.u.)"
+              )
+            ))
+            lines(pupil_data$time_secs, pupil_data$detrend_fitted_values,
+              type = "l", col = "blue", lwd = 2, lty = c(9, 15)
             )
             legend("topleft",
               legend = c("pupil timeseries", "linear trend"),
               col = c("black", "blue"), lwd = 2, lty = c(1, 2)
             )
-            par(mfrow = c(1, num_previews), oma = c(0, 0, 3, 0))
+            par(mfrow = c(1, preview_n), oma = c(0, 0, 3, 0))
             detrend_plotted <- TRUE
           }
         } else {
@@ -255,20 +279,31 @@ plot.eyeris <- function(x, ..., steps = NULL, num_previews = NULL,
               "detrend:\n",
               params$next_step[length(params$next_step) - 1]
             )
-            robust_plot(pupil_data$time_orig,
-              pupil_data[[params$next_step[length(params$next_step) - 1]]],
-              type = "l", col = "black", lwd = 2, main = title,
-              xlab = "raw tracker time (ms)", ylab = "pupil size (a.u.)"
-            )
-            lines(pupil_data$time_orig,
+
+            ydat <- pupil_data[[params$next_step[length(params$next_step) - 1]]]
+            xdat <- pupil_data$time_secs
+
+            do.call(robust_plot, c(
+              list(y = ydat, x = xdat),
+              plot_params,
+              list(
+                type = "l",
+                col = "black",
+                lwd = 2,
+                main = title,
+                xlab = "tracker time (s)",
+                ylab = "pupil size (a.u.)"
+              )
+            ))
+            lines(pupil_data$time_secs,
               pupil_data$detrend_fitted_values,
-              type = "l", col = "blue", lwd = 2, lty = 2
+              type = "l", col = "blue", lwd = 2, lty = c(9, 15)
             )
             legend("topleft",
               legend = c("pupil timeseries", "linear trend"),
               col = c("black", "blue"), lwd = 2, lty = c(1, 2)
             )
-            par(mfrow = c(1, num_previews), oma = c(0, 0, 3, 0))
+            par(mfrow = c(1, preview_n), oma = c(0, 0, 3, 0))
             detrend_plotted <- TRUE
             prompt_user()
           }
@@ -281,18 +316,24 @@ plot.eyeris <- function(x, ..., steps = NULL, num_previews = NULL,
           plot_data <- random_epochs[[n]][[
             params$next_step[length(params$next_step)]
           ]]
-          robust_plot(
-            plot_data,
-            type = "l", col = colors[i], lwd = 2,
-            main = title, xlab = "time (ms)", ylab = y_label
-          )
+          do.call(robust_plot, c(
+            list(y = plot_data),
+            plot_params,
+            list(
+              type = "l", col = colors[i], lwd = 2,
+              main = title, xlab = "time (ms)", ylab = y_label
+            )
+          ))
         } else {
           plot_data <- random_epochs[[n]][[pupil_steps[i]]]
-          robust_plot(
-            plot_data,
-            type = "l", col = colors[i], lwd = 2,
-            main = title, xlab = "time (ms)", ylab = y_label
-          )
+          do.call(robust_plot, c(
+            list(y = plot_data),
+            plot_params,
+            list(
+              type = "l", col = colors[i], lwd = 2,
+              main = title, xlab = "time (ms)", ylab = y_label
+            )
+          ))
         }
       }
 
@@ -308,18 +349,28 @@ plot.eyeris <- function(x, ..., steps = NULL, num_previews = NULL,
           xlab = y_label
         )
 
-        par(mfrow = c(1, num_previews), oma = c(0, 0, 3, 0))
+        par(mfrow = c(1, preview_n), oma = c(0, 0, 3, 0))
       }
     }
-    par(mfrow = c(1, num_previews), oma = c(0, 0, 3, 0))
+    par(mfrow = c(1, preview_n), oma = c(0, 0, 3, 0))
   } else {
-    start_index <- preview_window[1]
-    end_index <- min(preview_window[2], nrow(pupil_data))
+    preview_window_indices <- round(preview_window * x$info$sample.rate) + 1
+    start_index <- preview_window_indices[1]
+    end_index <- preview_window_indices[2]
+
+    if (start_index < 1 || start_index > nrow(pupil_data) ||
+          end_index < 1 || end_index > nrow(pupil_data) ||
+          start_index >= end_index) {
+      cli::cli_abort(
+        "Invalid preview_window: start/end index out of range or invalid."
+      )
+    }
+
     sliced_pupil_data <- pupil_data[start_index:end_index, ]
 
     for (i in seq_along(pupil_steps)) {
-      st <- min(sliced_pupil_data$time_orig)
-      et <- max(sliced_pupil_data$time_orig)
+      st <- min(sliced_pupil_data$time_secs)
+      et <- max(sliced_pupil_data$time_secs)
 
       if (grepl("z", pupil_steps[i])) {
         y_units <- "(z)"
@@ -329,20 +380,28 @@ plot.eyeris <- function(x, ..., steps = NULL, num_previews = NULL,
 
       y_label <- paste("pupil size", y_units)
 
-      robust_plot(sliced_pupil_data[[pupil_steps[i]]],
-        type = "l", col = colors[i], lwd = 2,
-        main = paste(paste0(
-          gsub("_", " > ", gsub("pupil_", "", pupil_steps[i])),
-          if (is.list(x$timeseries) && !is.data.frame(x$timeseries)) {
-            sprintf(" (Run %d)", block)
-          } else {
-            ""
-          },
-          "\n[", st, " - ", et, "] | ",
-          "[", preview_window[1], " - ", preview_window[2], "]"
-        )),
-        xlab = "time (s)", ylab = y_label
-      )
+      do.call(robust_plot, c(
+        list(y = sliced_pupil_data[[pupil_steps[i]]]),
+        plot_params,
+        list(
+          type = "l",
+          col = colors[i],
+          lwd = 2,
+          main = paste0(
+            gsub("_", " > ", gsub("pupil_", "", pupil_steps[i])),
+            if (is.list(x$timeseries) && !is.data.frame(x$timeseries)) {
+              sprintf(" (Run %d)", block)
+            } else {
+              ""
+            },
+            "\n[", st, " - ", et, " seconds] | ",
+            "[index: ", preview_window_indices[1], " - ",
+            preview_window_indices[2], "]"
+          ),
+          xlab = "time (ms)",
+          ylab = y_label
+        )
+      ))
 
       if (plot_distributions) {
         plot_pupil_distribution(
@@ -389,24 +448,42 @@ draw_random_epochs <- function(x, n, d, hz) {
   drawn_epochs
 }
 
-robust_plot <- function(x, ...) {
+robust_plot <- function(y, x = NULL, ...) {
   tryCatch(
     {
-      valid <- is.finite(x) # filter out non-finite values
-
-      if (all(!valid)) {
-        cli::cli_alert_warning(
-          paste0(
-            "All values are non-finite in random segment, try running",
-            "again with a different seed to avoid empty plots!"
-          )
-        )
-        x <- rep(0, length(x)) # create empty placeholder plot
-      } else {
-        x <- x[valid]
+      if (length(y) == 0 || all(is.na(y))) {
+        cli::cli_alert_warning("No finite data to plot.")
+        return(invisible(NULL))
       }
 
-      plot(x, ...)
+      dots <- list(...)
+      col_user <- if ("col" %in% names(dots)) dots$col else "blue"
+
+      # store original y for getting NA positions
+      y_orig <- y
+
+      # if x is NULL, use 1:length(y)
+      if (is.null(x)) {
+        x_seq <- seq_along(y_orig)
+      } else {
+        x_seq <- x
+      }
+
+      # init placeholder line
+      plot(x_seq, ifelse(is.na(y_orig), NA, y_orig),
+           xlim = range(x_seq, na.rm = TRUE),
+           ...)
+
+      # add vertical lines where there are NAs
+      na_idx <- which(is.na(y_orig))
+      if (length(na_idx) > 0) {
+        abline(v = na_idx, col = "black", lty = 2)
+      }
+
+      # replace NA with -1 after drawing NA lines for continuity
+      y_clean <- y_orig
+      y_clean[is.na(y_clean)] <- -1
+      lines(x_seq, y_clean, col = col_user)
     },
     error = function(e) {
       cli::cli_alert_info(
@@ -437,4 +514,9 @@ plot_pupil_distribution <- function(data, color, main, xlab) {
     border = "white",
     breaks = "FD"
   )
+}
+
+draw_na_lines <- function(x, y, ...) {
+  na_idx <- which(is.na(y))
+  abline(v = x[na_idx], col = "black", lty = 2, ...)
 }

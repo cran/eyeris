@@ -11,7 +11,7 @@
 #' At this time, however, this function instead takes a more BIDS-inspired
 #' approach to organizing the output files for preprocessed pupil data.
 #'
-#' @param eyeris An object of class `eyeris` dervived from [eyeris::load()].
+#' @param eyeris An object of class `eyeris` dervived from [eyeris::load_asc()].
 #' @param save_all Logical flag indicating whether all epochs are to be saved
 #' or only a subset of them. Defaults to TRUE.
 #' @param epochs_list List of epochs to be saved. Defaults to NULL.
@@ -523,7 +523,7 @@ bidsify <- function(eyeris, save_all = TRUE, epochs_list = NULL,
         )
         plot(eyeris,
           steps = 1,
-          preview_window = c(0, nrow(current_data)),
+          preview_window = c(0, max(current_data$time_secs)),
           block = i_run, plot_distributions = plot_dist
         )
         dev.off()
@@ -549,7 +549,7 @@ bidsify <- function(eyeris, save_all = TRUE, epochs_list = NULL,
         )
         plot(eyeris,
           steps = length(pupil_steps),
-          preview_window = c(0, nrow(current_data)),
+          preview_window = c(0, max(current_data$time_secs)),
           block = i_run,
           plot_distributions = plot_dist
         )

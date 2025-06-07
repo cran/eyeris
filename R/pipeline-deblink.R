@@ -23,7 +23,7 @@
 #' directly unless they have a specific reason to customize the pipeline
 #' manually.
 #'
-#' @param eyeris An object of class `eyeris` dervived from [eyeris::load()].
+#' @param eyeris An object of class `eyeris` dervived from [eyeris::load_asc()].
 #' @param extend Either a single number indicating the number of milliseconds to
 #' pad forward/backward around each missing sample, or, a vector of length two
 #' indicating different numbers of milliseconds pad forward/backward around each
@@ -37,7 +37,7 @@
 #' @examples
 #' demo_data <- eyelink_asc_demo_dataset()
 #'
-#' # 50 ms in both directions
+#' # 50 ms in both directions (the default)
 #' demo_data |>
 #'   eyeris::glassbox(deblink = list(extend = 50)) |>
 #'   plot(seed = 0)
@@ -50,7 +50,7 @@
 #'   plot(seed = 0)
 #'
 #' @export
-deblink <- function(eyeris, extend = 40) {
+deblink <- function(eyeris, extend = 50) {
   eyeris |>
     pipeline_handler(deblink_pupil, "deblink", extend)
 }

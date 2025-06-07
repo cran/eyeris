@@ -4,10 +4,10 @@
 \alias{deblink}
 \title{NA-pad blink events / missing data}
 \usage{
-deblink(eyeris, extend = 40)
+deblink(eyeris, extend = 50)
 }
 \arguments{
-\item{eyeris}{An object of class \code{eyeris} dervived from \code{\link[=load]{load()}}.}
+\item{eyeris}{An object of class \code{eyeris} dervived from \code{\link[=load_asc]{load_asc()}}.}
 
 \item{extend}{Either a single number indicating the number of milliseconds to
 pad forward/backward around each missing sample, or, a vector of length two
@@ -44,7 +44,7 @@ Advanced users may call it directly if needed.
 \examples{
 demo_data <- eyelink_asc_demo_dataset()
 
-# 50 ms in both directions
+# 50 ms in both directions (the default)
 demo_data |>
   eyeris::glassbox(deblink = list(extend = 50)) |>
   plot(seed = 0)

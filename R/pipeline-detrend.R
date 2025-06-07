@@ -16,7 +16,7 @@
 #' directly unless they have a specific reason to customize the pipeline
 #' manually.
 #'
-#' @param eyeris An object of class `eyeris` dervived from [eyeris::load()].
+#' @param eyeris An object of class `eyeris` dervived from [eyeris::load_asc()].
 #'
 #' @return An `eyeris` object with two new columns in `timeseries`:
 #' `detrend_fitted_betas`, and `pupil_raw_{...}_detrend`.
@@ -39,7 +39,7 @@ detrend <- function(eyeris) {
 
 detrend_pupil <- function(x, prev_op) {
   pupil <- x[[prev_op]]
-  timeseries <- x[["time_orig"]]
+  timeseries <- x[["time_secs"]]
 
   fit <- lm(pupil ~ timeseries)
 

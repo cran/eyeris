@@ -63,8 +63,13 @@
 #'   eyeris::load_asc(block = 3)
 #'
 #' ## (3) Auto-detect multiple recording segments embedded within the same file
+#' ##  (i.e., the default behavior)
 #' demo_data |>
 #'   eyeris::load_asc(block = "auto")
+#'
+#' ## (4) Omit block column
+#' demo_data |>
+#'   eyeris::load_asc(block = NULL)
 #'
 #' @export
 load_asc <- function(file, block = "auto") {
@@ -146,17 +151,17 @@ load_asc <- function(file, block = "auto") {
         list_out$blinks <- list("block_1" = x$blinks)
       }
     } else if (is.numeric(block)) {
-      # manual setting
+      # manually set block number inside the data
       list_out$timeseries <- setNames(
-        list(raw_df),
+        list(raw_df |> dplyr::mutate(block = !!as.numeric(block))),
         paste0("block_", as.character(block))
       )
       list_out$events <- setNames(
-        list(x$msg),
+        list(x$msg |> dplyr::mutate(block = !!as.numeric(block))),
         paste0("block_", as.character(block))
       )
       list_out$blinks <- setNames(
-        list(x$blinks),
+        list(x$blinks |> dplyr::mutate(block = !!as.numeric(block))),
         paste0("block_", as.character(block))
       )
     } else {
@@ -164,9 +169,13 @@ load_asc <- function(file, block = "auto") {
     }
   } else {
     # fallback to direct assignment if all block cases fail
-    list_out$timeseries <- raw_df
-    list_out$events <- x$msg
-    list_out$blinks <- x$blinks
+    list_out$timeseries <- list("block_1" = raw_df)
+
+    # omit the block column from the timeseries, events, and blinks
+    list_out$timeseries$block_1 <- list_out$timeseries$block_1 |>
+      dplyr::select(-block)
+    list_out$events <- x$msg |> dplyr::select(-block)
+    list_out$blinks <- x$blinks |> dplyr::select(-block)
   }
 
   # fix metadata (info) for newer versions of eyelink
@@ -177,7 +186,36 @@ load_asc <- function(file, block = "auto") {
   list_out$file <- file
   list_out$info <- x$info
   list_out$latest <- "pupil_raw"
+  list_out <- normalize_time_orig(list_out)
   class(list_out) <- "eyeris"
 
   return(list_out)
+}
+
+# normalize "time_orig" to seconds and to start at 0
+any_block_entries <- function(eyeris_obj) {
+  is.list(eyeris_obj$timeseries) &&
+    any(grepl("^block_", names(eyeris_obj$timeseries)))
+}
+
+normalize_time_orig <- function(eyeris_obj) {
+  if (any_block_entries(eyeris_obj)) {
+    # case: one or more multiple "blocks"
+    eyeris_obj$timeseries <- lapply(eyeris_obj$timeseries, function(block_df) {
+      block_df |>
+        dplyr::mutate(
+          time_secs = (time_orig - dplyr::first(time_orig)) / 1000,
+          .after = "time_orig"
+        )
+    })
+  } else { # safety mechanism: shouldn't ever get to this condition b/c of 167
+    # case: no tibble "block_{}" in list timeseries; timeseries is the tibble
+    eyeris_obj$timeseries <- eyeris_obj$timeseries |>
+      dplyr::mutate(
+        time_secs = (time_orig - dplyr::first(time_orig)) / 1000,
+        .after = "time_orig"
+      )
+  }
+
+  eyeris_obj
 }

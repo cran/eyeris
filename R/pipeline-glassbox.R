@@ -40,13 +40,12 @@
 #' preprocessed data from each step of the `eyeris` workflow for visualization.
 #' Defaults to NULL, meaning random epochs as defined by `preview_n` and
 #' `preview_duration` will be plotted. To override the random epochs, set
-#' `preview_window` here to a vector with relative start and stop times
-#' (e.g., `c(5000, 6000)` to indicate the raw data from 5-6 seconds on data that
-#' were recorded at 1000 Hz). Note, the start/stop time values indicated here
-#' relate to the raw index position of each pupil sample from 1 to n (which
-#' will need to be specified manually by the user depending on the sampling rate
-#' of the recording; i.e., 5000-6000 for the epoch positioned from 5-6 seconds
-#' after the start of the timeseries, sampled at 1000 Hz).
+#' `preview_window` here to a vector with relative start and stop times (in
+#' seconds), for example -- `c(5,6)` -- to indicate the raw data from 5-6 secs
+#' on data that were recorded at 1000 Hz). Note, the start/stop time values
+#' indicated here are in seconds because `eyeris` automatically computes the
+#' indices for the supplied range of seconds using the `$info$sample.rate`
+#' metadata in the `eyeris` S3 class object.
 #' @param verbose A logical flag to indicate whether to print status messages to
 #' the console. Defaults to `TRUE`. Set to `FALSE` to suppress messages about
 #' the current processing step and run silently.
@@ -80,7 +79,7 @@
 #' plot(
 #'   output,
 #'   steps = c(1, 5),
-#'   preview_window = c(0, nrow(output$timeseries$block_1)),
+#'   preview_window = c(0, max(output$timeseries$block_1$time_secs)),
 #'   seed = 0
 #' )
 #'
@@ -364,7 +363,7 @@ glassbox <- function(file,
                 plot(
                   file,
                   steps = step_counter,
-                  num_previews = preview_n,
+                  preview_n = preview_n,
                   seed = seed,
                   preview_duration = preview_duration,
                   preview_window = preview_window,

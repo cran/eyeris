@@ -6,7 +6,7 @@
 #' feature where additional trial data embedded within event messages can easily
 #' be identified and joined into the resulting epoched data frames.
 #'
-#' @param eyeris An object of class `eyeris` derived from [eyeris::load()].
+#' @param eyeris An object of class `eyeris` dervived from [eyeris::load_asc()].
 #' @param events Either (1) a single string representing the event message to
 #' perform trial extraction around, using specified `limits` to center the epoch
 #' around or no `limits` (which then just grabs the data epochs between each
@@ -225,6 +225,7 @@ epoch_pupil <- function(x, prev_op, evs, lims, label, c_bline, a_bline,
 
   processed_data <- list()
 
+  alert_str <- "\nEpoching pupil data..."
   if (is.list(x$timeseries) && !is.data.frame(x$timeseries)) {
     if (c_bline) {
       alert_str <- "\nEpoching and baselining pupil data..."
@@ -320,6 +321,8 @@ epoch_pupil <- function(x, prev_op, evs, lims, label, c_bline, a_bline,
         )
       )
     }
+
+    msg_str <- "\nPupil epoching completed in %.2f seconds"
 
     if (a_bline && n_events > 0) {
       baseline_id <- processed_data[[bn]]$baseline$id
