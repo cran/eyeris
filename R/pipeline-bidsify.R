@@ -607,7 +607,13 @@ bidsify <- function(eyeris, save_all = TRUE, epochs_list = NULL,
                   y_units <- "(a.u.)"
                 }
 
-                colors <- c("black", rainbow(length(pupil_steps) - 1))
+                # modified from `RColorBrewer`: Set1
+                colorpal <- c(
+                  "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
+                  "#FF7F00", "#F781BF", "#A65628"
+                )
+                colors <- c("black", colorpal)
+
                 y_label <- paste("pupil size", y_units)
 
                 file_out <- file.path(epochs_out, sprintf(
@@ -621,14 +627,25 @@ bidsify <- function(eyeris, save_all = TRUE, epochs_list = NULL,
                   res = 600,
                   pointsize = 6
                 )
-                plot(group_df$timebin, group_df[[pupil_steps[pstep]]],
-                  type = "l", xlab = "time (s)", ylab = y_label,
-                  col = colors[pstep],
-                  main = paste0(
-                    group, "\n", pupil_steps[pstep],
-                    sprintf(" (Run %d)", get_block_numbers(bn))
+                y_values <- group_df[[pupil_steps[pstep]]]
+                if (any(is.finite(y_values))) {
+                  plot(group_df$timebin, y_values,
+                       type = "l", xlab = "time (s)", ylab = y_label,
+                       col = colors[pstep],
+                       main = paste0(group, "\n", pupil_steps[pstep],
+                                     sprintf(" (Run %d)",
+                                             get_block_numbers(bn))))
+                } else {
+                  plot(NA, xlim = range(group_df$timebin, na.rm = TRUE),
+                       ylim = c(0, 1), type = "n", xlab = "time (s)",
+                       ylab = y_label, main = paste0(group, "\n",
+                                                     pupil_steps[pstep],
+                                                     "\nNO DATA"))
+                  warning(
+                    paste("eyeris: no finite pupillometry data to plot for
+                          current epoch...", "plotting empty epoch plot.")
                   )
-                )
+                }
                 dev.off()
               }
             }
