@@ -6,7 +6,7 @@
 #' feature where additional trial data embedded within event messages can easily
 #' be identified and joined into the resulting epoched data frames.
 #'
-#' @param eyeris An object of class `eyeris` dervived from [eyeris::load_asc()].
+#' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
 #' @param events Either (1) a single string representing the event message to
 #' perform trial extraction around, using specified `limits` to center the epoch
 #' around or no `limits` (which then just grabs the data epochs between each
@@ -29,7 +29,7 @@
 #' and message string pairs. Additionally, manual epoching only words with
 #' 1 block at a time for event-modes `2` and `3`; thus, please be sure to
 #' explicitly indicate the block number in your input list (for examples,
-#' see above as well as example #9 below for more details).
+#' see above as well as example #9 below for more details)
 #'
 #' For event-modes `1` and `2`, the way in which you pass in the event message
 #' string must conform to a standardized protocol so that `eyeris` knows how to
@@ -42,10 +42,10 @@
 #' the messages that follow a structure like this "PROBE_START_1" and
 #' "PROBE_STOP_1", and generate two additional metadata columns: `type` and
 #' `trial`, which would contain the following values based on these two example
-#' strings: `type`: `('START', 'STOP')`, and `trial`: `(1, 1)`.
+#' strings: `type`: `('START', 'STOP')`, and `trial`: `(1, 1)`
 #' @param limits A vector of 2 values (start, end) in seconds, indicating where
 #' trial extraction should occur centered around any given `start` message
-#' string in the `events` parameter.
+#' string in the `events` parameter
 #' @param label An (optional) string you can provide to customize the name of
 #' the resulting `eyeris` class object containing the epoched data frame. If
 #' left as `NULL` (default), then list item will be called `epoch_xyz`, where
@@ -57,16 +57,13 @@
 #' your output object (e.g., `$epoch_`, or `$epoch_nana`, etc.). The data
 #' should still be accessible within this nested lists, however, to avoid
 #' ambiguous list objects, we recommend you provide an `epoch` label here
-#' to be safe.**
-#' @param calc_baseline A flag indicated whether to perform baseline correction.
-#' Note, setting `calc_baseline` to TRUE alone will only compute the baseline
-#' period, but will not apply it to the preprocessed timeseries unless
-#' `apply_baseline` is also set to TRUE.
-#' @param apply_baseline A flag indicating whether to apply the calculated
-#' baseline to the pupil timeseries. The baseline correction will be applied to
-#' the pupil from the latest preprocessing step.
+#' to be safe**
+#' @param baseline **(New)** A single parameter that controls baseline
+#' correction. Set to `TRUE` to both calculate and apply baseline correction, or
+#' `FALSE` to skip it. This replaces the deprecated `calc_baseline` and
+#' `apply_baseline` parameters
 #' @param baseline_type Whether to perform *subtractive* (`sub`) or *divisive*
-#' (`div`) baseline correction. Defaults to `sub`.
+#' (`div`) baseline correction. Defaults to `sub`
 #' @param baseline_events Similar to `events`, `baseline_events`, you can supply
 #' either (1) a single string representing the event message to center the
 #' baseline calculation around, as indicated by `baseline_period`; or (2) a
@@ -84,15 +81,26 @@
 #' correction, which will be centered around the single string "start" message
 #' string provided in `baseline_events`. Again, `baseline_period` will be
 #' ignored if both a "start" **and** "end" message string are provided to the
-#' `baseline_events` argument.
+#' `baseline_events` argument
 #' @param hz Data sampling rate. If not specified, will use the value contained
-#' within the tracker's metadata.
-#' @param verbose A flag to indicate whether to print detailed logging messages.
+#' within the tracker's metadata
+#' @param verbose A flag to indicate whether to print detailed logging messages
 #' Defaults to `TRUE`. Set to `False` to suppress messages about the current
-#' processing step and run silently.
+#' processing step and run silently
+#' @param call_info A list of call information and parameters. If not provided,
+#' it will be generated from the function call
+#' @param calc_baseline **(Deprecated)** Use `baseline` instead
+#' @param apply_baseline **(Deprecated)** Use `baseline` instead
 #'
-#' @return Updated `eyeris` object with dataframes containing the epoched data
-#' (`epoch_`).
+#' @return An `eyeris` object with a new nested list of data frames: `$epoch_*`.
+#'   The epochs are organized hierarchically by block and preprocessing step.
+#'   Each epoch contains the pupil timeseries data for the specified time window
+#'   around each event message, along with metadata about the event.
+#'
+#'   When using `bidsify()` to export the data, filenames will include both
+#'   epoch and baseline event information for clarity.
+#'
+#' @seealso [lifecycle::deprecate_warn()]
 #'
 #' @examples
 #' demo_data <- eyelink_asc_demo_dataset()
@@ -154,8 +162,7 @@
 #'     events = "PROBE_START_{trial}",
 #'     limits = c(0, 1), # grab 0 seconds prior to and 1 second post PROBE event
 #'     label = "prePostProbe", # custom epoch label name
-#'     calc_baseline = TRUE,
-#'     apply_baseline = TRUE,
+#'     baseline = TRUE, # Calculate and apply baseline correction
 #'     baseline_type = "sub", # "sub"tractive baseline calculation is default
 #'     baseline_events = "DELAY_STOP_*",
 #'     baseline_period = c(-1, 0)
@@ -170,8 +177,7 @@
 #'     events = "PROBE_START_{trial}",
 #'     limits = c(0, 1), # grab 0 seconds prior to and 1 second post PROBE event
 #'     label = "prePostProbe", # custom epoch label name
-#'     calc_baseline = TRUE,
-#'     apply_baseline = TRUE,
+#'     baseline = TRUE, # Calculate and apply baseline correction
 #'     baseline_type = "sub", # "sub"tractive baseline calculation is default
 #'     baseline_events = c(
 #'       "DELAY_START_*",
@@ -198,18 +204,81 @@
 #'
 #' @export
 epoch <- function(eyeris, events, limits = NULL, label = NULL,
-                  calc_baseline = FALSE, apply_baseline = FALSE,
-                  baseline_type = c("sub", "div"), baseline_events = NULL,
-                  baseline_period = NULL, hz = NULL, verbose = TRUE) {
+                  baseline = FALSE, baseline_type = c("sub", "div"),
+                  baseline_events = NULL, baseline_period = NULL,
+                  hz = NULL, verbose = TRUE, call_info = NULL,
+                  calc_baseline = deprecated(),
+                  apply_baseline = deprecated()) {
+  # handle deprecated parameters
+  if (is_present(calc_baseline)) {
+    lifecycle::deprecate_warn(
+      "1.3.0",
+      "epoch(calc_baseline)", "epoch(baseline)"
+    )
+    if (isTRUE(calc_baseline)) {
+      baseline <- TRUE
+    }
+  }
+
+  if (is_present(apply_baseline)) {
+    lifecycle::deprecate_warn(
+      "1.3.0",
+      "epoch(apply_baseline)", "epoch(baseline)"
+    )
+    if (isTRUE(apply_baseline)) {
+      baseline <- TRUE
+    }
+  }
+
+  calc_baseline <- baseline
+  apply_baseline <- baseline
+
+  call_info <- if (is.null(call_info)) {
+    list(
+      call_stack = match.call(),
+      parameters = list(
+        events = events, limits = limits, label = label,
+        baseline = baseline, baseline_type = baseline_type,
+        baseline_events = baseline_events, baseline_period = baseline_period,
+        hz = hz, verbose = verbose
+      )
+    )
+  } else {
+    call_info
+  }
   eyeris |>
     pipeline_handler(
       epoch_pupil, "epoch", events, limits, label, calc_baseline,
       apply_baseline, baseline_type, baseline_events, baseline_period, hz,
-      verbose
+      verbose,
+      call_info = call_info
     )
 }
 
-# Main epoching + baselining logic
+#' Main epoching and baselining logic
+#'
+#' This function handles the core epoching and baselining operations for pupil
+#' data. It processes time series data to extract epochs based on specified
+#' events and optionally computes and applies baseline corrections.
+#'
+#' This function is called by the exposed wrapper [eyeris::epoch()].
+#'
+#' @param x An object of class `eyeris` derived from [eyeris::load_asc()]
+#' @param prev_op The name of the previous operation's output column
+#' @param evs Events specification for epoching (character vector or list)
+#' @param lims Time limits for epochs (numeric vector)
+#' @param label Label for the epoch output
+#' @param c_bline Logical indicating whether to calculate baseline
+#' @param a_bline Logical indicating whether to apply baseline correction
+#' @param bline_type Type of baseline correction ("sub" or "div")
+#' @param bline_evs Events specification for baseline calculation
+#' @param bline_per Baseline period specification
+#' @param hz Sampling rate in Hz
+#' @param verbose A flag to indicate whether to print detailed logging messages
+#'
+#' @return A list containing epoch and baseline results
+#'
+#' @keywords internal
 epoch_pupil <- function(x, prev_op, evs, lims, label, c_bline, a_bline,
                         bline_type = c("sub", "div"), bline_evs, bline_per,
                         hz, verbose) {
@@ -309,7 +378,27 @@ epoch_pupil <- function(x, prev_op, evs, lims, label, c_bline, a_bline,
 
     epoch_id <- processed_data[[bn]]$epoch$id
     epoched_data <- processed_data[[bn]]$epoch$res
+
+    if (is.null(x[[epoch_id]])) {
+      x[[epoch_id]] <- list()
+    }
     x[[epoch_id]][[bn]] <- dplyr::as_tibble(epoched_data)
+
+    # store epoch metadata when no baseline correction is used
+    if (!a_bline) {
+      epoch_info <- list(
+        calc_baseline = FALSE,
+        apply_baseline = FALSE,
+        epoch_events = evs,
+        epoch_limits = lims,
+        n_epochs = length(unique(epoched_data$matched_event))
+      )
+
+      if (is.null(x[[epoch_id]]$info)) {
+        x[[epoch_id]]$info <- list()
+      }
+      x[[epoch_id]]$info[[bn]] <- epoch_info
+    }
 
     if (verbose) {
       alert(
@@ -356,10 +445,49 @@ epoch_pupil <- function(x, prev_op, evs, lims, label, c_bline, a_bline,
     }
   }
 
+  # recalculate epoched confounds if they exist, since new epochs were created
+  if (!is.null(x$confounds$unepoched_timeseries)) {
+    if (verbose) {
+      alert("info", "Recalculating epoched confounds for new epochs...")
+    }
+
+    # check for epoch data and compute confounds if present
+    epoch_names <- grep("^epoch_", names(x), value = TRUE)
+
+    if (length(epoch_names) > 0) {
+      x <- calculate_epoched_confounds(x, epoch_names, hz, verbose)
+    }
+  }
+
   return(x)
 }
 
-# Block-by-block epoch and baseline handler
+#' Block-by-block epoch and baseline handler
+#'
+#' This function processes a single block of pupil data to extract epochs and
+#' optionally compute and apply baseline corrections. It handles the core
+#' epoching and baselining logic for a single block of data.
+#'
+#' This function is called by the internal [epoch_pupil()] function.
+#'
+#' @param x An object of class `eyeris` derived from [eyeris::load_asc()]
+#' @param blk A list containing block metadata
+#' @param lab Label for the epoch output
+#' @param evs Events specification for epoching (character vector or list)
+#' @param lims Time limits for epochs (numeric vector)
+#' @param msg_s Start message string
+#' @param msg_e End message string
+#' @param c_bline Logical indicating whether to calculate baseline
+#' @param a_bline Logical indicating whether to apply baseline correction
+#' @param bline_type Type of baseline correction ("sub" or "div")
+#' @param bline_evs Events specification for baseline calculation
+#' @param bline_per Baseline period specification
+#' @param hz Sampling rate in Hz
+#' @param verbose A flag to indicate whether to print detailed logging messages
+#'
+#' @return A list containing epoch and baseline results
+#'
+#' @keywords internal
 epoch_and_baseline_block <- function(x, blk, lab, evs, lims, msg_s, msg_e,
                                      c_bline, a_bline, bline_type,
                                      bline_evs, bline_per, hz, verbose) {
@@ -430,7 +558,8 @@ epoch_and_baseline_block <- function(x, blk, lab, evs, lims, msg_s, msg_e,
     )
 
     computed_baselines <- compute_baseline(
-      x, result, baseline_epochs, bline_type
+      x, result, baseline_epochs, bline_type,
+      epoch_events = evs, baseline_events = bline_evs
     )
 
     baseline_id <- make_baseline_label(computed_baselines, epoch_id)
@@ -447,7 +576,11 @@ epoch_and_baseline_block <- function(x, blk, lab, evs, lims, msg_s, msg_e,
       apply_baseline = a_bline,
       baseline_type = bline_type,
       baseline_events = bline_evs,
-      baseline_period = bline_per
+      baseline_period = bline_per,
+      epoch_events = evs,
+      epoch_limits = lims,
+      n_epochs = length(result),
+      n_baseline_epochs = length(baseline_epochs)
     )
   }
 
@@ -468,7 +601,25 @@ epoch_and_baseline_block <- function(x, blk, lab, evs, lims, msg_s, msg_e,
   )
 }
 
-# Epoch and baseline processor
+#' Epoch and baseline processor
+#'
+#' This function processes a single block of pupil data to extract epochs and
+#' optionally compute and apply baseline corrections. It handles the core
+#' epoching and baselining logic for a single block of data.
+#'
+#' This function is called by the internal [epoch_and_baseline_block()]
+#' function.
+#'
+#' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
+#' @param timestamps A list containing start and end timestamps
+#' @param evs Events specification for epoching (character vector or list)
+#' @param lims Time limits for epochs (numeric vector)
+#' @param hz Sampling rate in Hz
+#' @param verbose A flag to indicate whether to print detailed logging messages
+#'
+#' @return A list containing epoch and baseline results
+#'
+#' @keywords internal
 process_epoch_and_baselines <- function(eyeris, timestamps, evs,
                                         lims, hz, verbose) {
   n_timestamps <- nrow(timestamps$start)
@@ -499,10 +650,9 @@ process_epoch_and_baselines <- function(eyeris, timestamps, evs,
       epoch_manually(evs, hz, verbose)
   }
 
-  # nolint start
   if (!is.null(n_timestamps) &&
-    length(epochs) > 0 &&
-    length(epochs) != n_timestamps) {
+        length(epochs) > 0 &&
+        length(epochs) != n_timestamps) {
     stop(sprintf(
       paste0(
         "Expected %d samples but got %d samples.",
@@ -511,7 +661,6 @@ process_epoch_and_baselines <- function(eyeris, timestamps, evs,
       )
     ))
   }
-  # nolint end
 
   if (verbose) {
     alert("success", "Done!")
@@ -520,7 +669,22 @@ process_epoch_and_baselines <- function(eyeris, timestamps, evs,
   epochs
 }
 
-# Manually epoch using provided start/end dataframes of timestamps
+#' Manually epoch using provided start/end dataframes of timestamps
+#'
+#' This function manually epochs data using provided start/end dataframes
+#' of timestamps.
+#'
+#' This function is called by the internal [process_epoch_and_baselines()]
+#' function.
+#'
+#' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
+#' @param ts_list A list containing start/end dataframes of timestamps
+#' @param hz Sampling rate in Hz
+#' @param verbose A flag to indicate whether to print detailed logging messages
+#'
+#' @return A list containing epoch results
+#'
+#' @keywords internal
 epoch_manually <- function(eyeris, ts_list, hz, verbose) {
   s_df <- ts_list[[1]]
   e_df <- ts_list[[2]]
@@ -577,7 +741,21 @@ epoch_manually <- function(eyeris, ts_list, hz, verbose) {
   epochs
 }
 
-# Epoch based on a single event message (without explicit limits)
+#' Epoch based on a single event message (without explicit limits)
+#'
+#' This function epochs data based on a single event message
+#' (i.e., without explicit limits).
+#'
+#' This function is called by the internal [epoch_only_start_msg()] function.
+#'
+#' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
+#' @param start A dataframe containing the start timestamps
+#' @param hz Sampling rate in Hz
+#' @param verbose A flag to indicate whether to print detailed logging messages
+#'
+#' @return A list containing epoch results
+#'
+#' @keywords internal
 epoch_only_start_msg <- function(eyeris, start, hz, verbose) {
   all_epochs <- slice_epochs_no_limits(eyeris$timeseries, start)
 
@@ -610,7 +788,22 @@ epoch_only_start_msg <- function(eyeris, start, hz, verbose) {
   epochs
 }
 
-# Epoch using a start message with fixed limits around it
+#' Epoch using a start message with fixed limits around it
+#'
+#' This function epochs data using a start message with fixed limits around it.
+#'
+#' This function is called by the internal [epoch_start_msg_and_limits()]
+#' function.
+#'
+#' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
+#' @param start A dataframe containing the start timestamps
+#' @param lims Time limits for epochs (numeric vector)
+#' @param hz Sampling rate in Hz
+#' @param verbose A flag to indicate whether to print detailed logging messages
+#'
+#' @return A list containing epoch results
+#'
+#' @keywords internal
 epoch_start_msg_and_limits <- function(eyeris, start, lims, hz, verbose) {
   duration <- sum(abs(lims[1]), abs(lims[2]))
   n_samples <- duration / (1 / hz)
@@ -645,7 +838,22 @@ epoch_start_msg_and_limits <- function(eyeris, start, lims, hz, verbose) {
   epochs
 }
 
-# Epoch using a start and an end message (explicit timestamps)
+#' Epoch using a start and an end message (explicit timestamps)
+#'
+#' This function epochs data using a start and an end message
+#' (i.e., explicit timestamps).
+#'
+#' This function is called by the internal [epoch_start_end_msg()] function.
+#'
+#' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
+#' @param start A dataframe containing the start timestamps
+#' @param end A dataframe containing the end timestamps
+#' @param hz Sampling rate in Hz
+#' @param verbose A flag to indicate whether to print detailed logging messages
+#'
+#' @return A list containing epoch results
+#'
+#' @keywords internal
 epoch_start_end_msg <- function(eyeris, start, end, hz, verbose) {
   if (nrow(start) != nrow(end)) {
     stop("Start and end timestamps must have the same number of rows")

@@ -409,29 +409,70 @@ list of data frames, and</li>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&#39; @param eyeris An `eyeris` object created by [load_asc()].</span></span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&#39; @param lower Lower quantile threshold. Default is 0.01.</span></span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&#39; @param upper Upper quantile threshold. Default is 0.99.</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&#39;</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&#39; @return Updated `eyeris` object with new winsorized pupil column.</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>winsorize <span class="ot">&lt;-</span> <span class="cf">function</span>(eyeris, <span class="at">lower =</span> <span class="fl">0.01</span>, <span class="at">upper =</span> <span class="fl">0.99</span>) {</span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  <span class="fu">pipeline_handler</span>(</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>    eyeris,</span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>    winsorize_pupil,</span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    <span class="st">&quot;winsorize&quot;</span>,</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    <span class="at">lower =</span> lower,</span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>    <span class="at">upper =</span> upper</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  )</span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>}</span></code></pre></div>
-<ol style="list-style-type: decimal">
-<li>Here, the first argument is always the <code>eyeris</code> class
-object.</li>
-<li>Then, is the name of the function (the one you created in step 1
-above).</li>
-<li>Third, is the internal label you want <code>eyeris</code> to refer
-to (i.e., the one for the column name, plots, etc.).</li>
-<li>Fourth position++ are the parameters you created after
-<code>prev_op</code> when creating the function
-<code>winsorize_pupil</code> in step 1.</li>
-</ol>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&#39; @param call_info A list of call information and parameters. If not provided,</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&#39;   it will be generated from the function call.</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&#39;</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&#39; @return Updated `eyeris` object with new winsorized pupil column.</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>winsorize <span class="ot">&lt;-</span> <span class="cf">function</span>(eyeris, <span class="at">lower =</span> <span class="fl">0.01</span>, <span class="at">upper =</span> <span class="fl">0.99</span>, <span class="at">call_info =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  <span class="co"># create call_info if not provided</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  call_info <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.null</span>(call_info)) {</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    <span class="fu">list</span>(</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>      <span class="at">call_stack =</span> <span class="fu">match.call</span>(),</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>      <span class="at">parameters =</span> <span class="fu">list</span>(<span class="at">lower =</span> lower, <span class="at">upper =</span> upper)</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>    )</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>    call_info</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>  }</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>  <span class="fu">pipeline_handler</span>(</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>    eyeris,</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>    winsorize_pupil,</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>    <span class="st">&quot;winsorize&quot;</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>    <span class="at">lower =</span> lower,</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>    <span class="at">upper =</span> upper,</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>    <span class="at">call_info =</span> call_info</span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>  )</span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>}</span></code></pre></div>
 </div>
+</div>
+<div id="understanding-call-stack-tracking" class="section level3">
+<h3>3) Understanding Call Stack Tracking</h3>
+<p>The <code>call_info</code> parameter is crucial for maintaining
+reproducibility and debugging in <code>eyeris</code>. It captures:</p>
+<ul>
+<li><strong><code>call_stack</code></strong>: The exact function call
+that was made (using <code>match.call()</code>)</li>
+<li><strong><code>parameters</code></strong>: A list of all parameters
+passed to your function</li>
+</ul>
+<p>This information is automatically stored in
+<code>eyeris$params[[new_suffix]]</code> and can be used for: -
+Generating reproducible reports - Debugging pipeline issues - Tracking
+parameter changes across different runs</p>
+<p><strong>Important Notes:</strong> - Always include
+<code>call_info = NULL</code> as the last parameter in your function
+signature - Use <code>match.call()</code> to capture the function call -
+Pass all your function parameters in the <code>parameters</code> list -
+Always pass <code>call_info = call_info</code> as the last argument to
+<code>pipeline_handler()</code></p>
+</div>
+<div id="function-structure-breakdown" class="section level3">
+<h3>4) Function Structure Breakdown</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Function signature</strong>: Always include
+<code>call_info = NULL</code> as the last parameter</li>
+<li><strong>Call info creation</strong>: Create the call_info list if
+not provided</li>
+<li><strong>Pipeline handler call</strong>: Pass all parameters
+including call_info</li>
+<li><strong>Parameter order</strong>:
+<ul>
+<li>First: <code>eyeris</code> object</li>
+<li>Second: your core operation function name</li>
+<li>Third: the suffix for column naming</li>
+<li>Fourth+: your function parameters</li>
+<li>Last: <code>call_info = call_info</code></li>
+</ul></li>
+</ol>
 </div>
 </div>
 <div id="and-thats-it" class="section level2">
@@ -474,7 +515,40 @@ it can transpose into the new column that will be added to the
 function logic on a single data block (e.g.,
 <code>eyeris$timeseries[[1]]</code>) to debug before integrating it with
 the <code>eyeris</code> pipeline protocol.</li>
+<li><strong>Include call stack tracking:</strong> Always implement
+proper <code>call_info</code> handling for reproducibility and debugging
+capabilities.</li>
 </ul>
+</div>
+<div id="advanced-custom-call-info-handling" class="section level2">
+<h2>🔍 Advanced: Custom Call Info Handling</h2>
+<p>For more complex functions, you might want to customize the
+<code>call_info</code> structure:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>custom_function <span class="ot">&lt;-</span> <span class="cf">function</span>(eyeris, param1, param2, <span class="at">call_info =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="co"># custom call_info with additional metadata</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  call_info <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.null</span>(call_info)) {</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="fu">list</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>      <span class="at">call_stack =</span> <span class="fu">match.call</span>(),</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>      <span class="at">parameters =</span> <span class="fu">list</span>(<span class="at">param1 =</span> param1, <span class="at">param2 =</span> param2),</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>      <span class="at">metadata =</span> <span class="fu">list</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>        <span class="at">timestamp =</span> <span class="fu">Sys.time</span>(),</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>        <span class="at">version =</span> <span class="st">&quot;1.0.0&quot;</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>        <span class="at">description =</span> <span class="st">&quot;Custom processing step&quot;</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>      )</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    )</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>    call_info</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  }</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="fu">pipeline_handler</span>(</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>    eyeris,</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>    custom_pupil_function,</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>    <span class="st">&quot;custom&quot;</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>    <span class="at">param1 =</span> param1,</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>    <span class="at">param2 =</span> param2,</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>    <span class="at">call_info =</span> call_info</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>  )</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="summary" class="section level2">
 <h2>✨ Summary</h2>
@@ -495,24 +569,24 @@ free to open a pull request or discussion on <a href="https://github.com/shawntz
 cite it!</p>
 <p>Run the following in R to get the citation:</p>
 </div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;eyeris&quot;</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; To cite package &#39;eyeris&#39; in publications use:</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;   Schwartz ST, Yang H, Xue AM, He M (2025). &quot;eyeris: A flexible,</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;   extensible, and reproducible pupillometry preprocessing framework in</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;   R.&quot; _bioRxiv_, 1-37. doi:10.1101/2025.06.01.657312</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;   &lt;https://doi.org/10.1101/2025.06.01.657312&gt;.</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;   @Article{,</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;     title = {eyeris: A flexible, extensible, and reproducible pupillometry preprocessing framework in R},</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;     author = {Shawn T Schwartz and Haopei Yang and Alice M Xue and Mingjian He},</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;     journal = {bioRxiv},</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;     year = {2025},</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;     pages = {1--37},</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt;     doi = {10.1101/2025.06.01.657312},</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt;   }</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;eyeris&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; To cite package &#39;eyeris&#39; in publications use:</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt;   Schwartz ST, Yang H, Xue AM, He M (2025). &quot;eyeris: A flexible,</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt;   extensible, and reproducible pupillometry preprocessing framework in</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt;   R.&quot; _bioRxiv_, 1-37. doi:10.1101/2025.06.01.657312</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;   &lt;https://doi.org/10.1101/2025.06.01.657312&gt;.</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;   @Article{,</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;     title = {eyeris: A flexible, extensible, and reproducible pupillometry preprocessing framework in R},</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;     author = {Shawn T Schwartz and Haopei Yang and Alice M Xue and Mingjian He},</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt;     journal = {bioRxiv},</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt;     year = {2025},</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;     pages = {1--37},</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;     doi = {10.1101/2025.06.01.657312},</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;   }</span></span></code></pre></div>
 </div>
 
 

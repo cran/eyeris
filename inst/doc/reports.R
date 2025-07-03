@@ -41,6 +41,15 @@ gif_url <- paste0("https://github.com/shawntz/eyeris/raw/dev/inst/",
                   "figures/interactive-reports-demo.gif")
 knitr::include_graphics(gif_url)
 
+## ----eval=FALSE---------------------------------------------------------------
+# plot_gaze_heatmap(
+#   eyeris = eyeris_data$timeseries$block_1,
+#   screen_width = eyeris_data$info$screen.x,
+#   screen_height = eyeris_data$info$screen.y,
+#   n_bins = 50,
+#   col_palette = "viridis"
+# )
+
 ## -----------------------------------------------------------------------------
 citation("eyeris")
 

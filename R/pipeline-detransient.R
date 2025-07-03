@@ -54,9 +54,9 @@
 #'   using a constant multiplier \eqn{n} (default value: 16):
 #'   \deqn{mad\_thresh = median\_speed + (n \times mad\_val)}
 #'
-#' @param eyeris An object of class `eyeris` dervived from [eyeris::load_asc()].
+#' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
 #' @param n A constant used to compute the median absolute deviation (MAD)
-#' threshold.
+#' threshold. Defaults to `16`
 #' @param mad_thresh Default `NULL`. This parameter provides
 #' alternative options for handling edge cases where the computed
 #' properties here within [eyeris::detransient()]  \eqn{mad\_val}
@@ -78,9 +78,11 @@
 #' 2. If \eqn{mad\_thresh} is very small, the user may manually
 #'    adjust the sensitivity by supplying an alternative threshold value
 #'    here directly via this `mad_thresh` parameter.
+#' @param call_info A list of call information and parameters. If not provided,
+#' it will be generated from the function call. Defaults to `NULL`
 #'
 #' @return An `eyeris` object with a new column in `timeseries`:
-#' `pupil_raw_{...}_detransient`.
+#' `pupil_raw_{...}_detransient`
 #'
 #' @seealso [eyeris::glassbox()] for the recommended way to run this step as
 #' part of the full eyeris glassbox preprocessing pipeline.
@@ -95,13 +97,54 @@
 #'   plot(seed = 0)
 #'
 #' @export
-detransient <- function(eyeris, n = 16, mad_thresh = NULL) {
+detransient <- function(eyeris, n = 16, mad_thresh = NULL, call_info = NULL) {
+  call_info <- if (is.null(call_info)) {
+    list(
+      call_stack = match.call(),
+      parameters = list(n = n, mad_thresh = mad_thresh)
+    )
+  } else {
+    call_info
+  }
+
   eyeris |>
-    pipeline_handler(detransient_pupil, "detransient", n, mad_thresh)
+    pipeline_handler(
+      detransient_pupil,
+      "detransient",
+      n,
+      mad_thresh,
+      call_info = call_info
+    )
 }
 
-# adapted from:
-# https://github.com/dr-JT/pupillometry/blob/main/R/pupil_artifact.R
+#' Internal function to remove transient artifacts from pupil data
+#'
+#' @description This function implements transient artifact removal by
+#' identifying and removing samples that exceed a speed-based threshold.
+#' The threshold is computed based on the constant `n`, which defaults to
+#' the value `16`.
+#'
+#' This function is called by the exposed wrapper [eyeris::detransient()].
+#'
+#' @details The function works by:
+#' \itemize{
+#'   \item Calculating the speed of pupil changes using finite differences
+#'   \item Identifying samples that exceed a speed-based threshold
+#'   \item Removing these samples from the pupil data
+#' }
+#'
+#' @param x A data frame containing pupil data with columns `time_secs` and
+#'   the previous operation's pupil column
+#' @param prev_op The name of the previous operation's pupil column
+#' @param n The constant used to compute the median absolute deviation (MAD)
+#'   threshold. Defaults to `16`
+#' @param mad_thresh The threshold used to identify transient artifacts.
+#'   Defaults to `NULL`
+#'
+#' @return A numeric vector of the same length as the input data with transient
+#'   artifacts removed (set to NA)
+#'
+#' @keywords internal
 detransient_pupil <- function(x, prev_op, n, mad_thresh) {
   pupil <- x[[prev_op]]
   timeseries <- x[["time_secs"]]
@@ -129,7 +172,7 @@ detransient_pupil <- function(x, prev_op, n, mad_thresh) {
   # validate `mad_val` != 0: unrealistic outcome for real data
   # likely means filtering has already been applied to the data
   # (i.e., if online filtering is enabled on the EyeLink Host PC)
-  if (!using_mad_thresh_override && mad_val == 0) {
+  if (!using_mad_thresh_override && !is.na(mad_val) && mad_val == 0) {
     warning(paste(
       "\n ***WARNING: SOMETHING OUTRAGEOUS IS HAPPENING WITH YOUR PUPIL",
       "DATA!***",
@@ -173,6 +216,12 @@ detransient_pupil <- function(x, prev_op, n, mad_thresh) {
     stop("Computed property `mad_val` == 0!")
   }
 
+  # handle case where mad_val is NA (all pupil data is NA)
+  if (!using_mad_thresh_override && is.na(mad_val)) {
+    # if all pupil data is NA, return the original pupil data unchanged
+    return(pupil)
+  }
+
   if (mad_thresh == 1) {
     comparison <- pupil_speed > mad_thresh
   } else {
@@ -182,6 +231,17 @@ detransient_pupil <- function(x, prev_op, n, mad_thresh) {
   ifelse(comparison, as.numeric(NA), pupil)
 }
 
+#' Calculate pupil speed using finite differences
+#'
+#' Computes the speed of pupil changes using finite differences between
+#' consecutive time points. This is a helper function for the detransient step.
+#'
+#' @param x A numeric vector of pupil data
+#' @param y A numeric vector of time data
+#'
+#' @return A vector of pupil speeds at each time point
+#'
+#' @keywords internal
 speed <- function(x, y) {
   delta <- diff(x) / diff(y)
   pupil <- abs(cbind(c(NA, delta), c(delta, NA))) # matrix of differences

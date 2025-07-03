@@ -9,17 +9,19 @@ epoch(
   events,
   limits = NULL,
   label = NULL,
-  calc_baseline = FALSE,
-  apply_baseline = FALSE,
+  baseline = FALSE,
   baseline_type = c("sub", "div"),
   baseline_events = NULL,
   baseline_period = NULL,
   hz = NULL,
-  verbose = TRUE
+  verbose = TRUE,
+  call_info = NULL,
+  calc_baseline = deprecated(),
+  apply_baseline = deprecated()
 )
 }
 \arguments{
-\item{eyeris}{An object of class \code{eyeris} dervived from \code{\link[=load_asc]{load_asc()}}.}
+\item{eyeris}{An object of class \code{eyeris} derived from \code{\link[=load_asc]{load_asc()}}}
 
 \item{events}{Either (1) a single string representing the event message to
 perform trial extraction around, using specified \code{limits} to center the epoch
@@ -43,7 +45,7 @@ string pairs, and the second data.frame indicates the \code{end} event timestamp
 and message string pairs. Additionally, manual epoching only words with
 1 block at a time for event-modes \code{2} and \code{3}; thus, please be sure to
 explicitly indicate the block number in your input list (for examples,
-see above as well as example #9 below for more details).
+see above as well as example #9 below for more details)
 
 For event-modes \code{1} and \code{2}, the way in which you pass in the event message
 string must conform to a standardized protocol so that \code{eyeris} knows how to
@@ -56,11 +58,11 @@ using the \code{eyeris} syntax: (e.g., \code{"PROBE_{type}_{trial}"}), which wil
 the messages that follow a structure like this "PROBE_START_1" and
 "PROBE_STOP_1", and generate two additional metadata columns: \code{type} and
 \code{trial}, which would contain the following values based on these two example
-strings: \code{type}: \verb{('START', 'STOP')}, and \code{trial}: \verb{(1, 1)}.}
+strings: \code{type}: \verb{('START', 'STOP')}, and \code{trial}: \verb{(1, 1)}}
 
 \item{limits}{A vector of 2 values (start, end) in seconds, indicating where
 trial extraction should occur centered around any given \code{start} message
-string in the \code{events} parameter.}
+string in the \code{events} parameter}
 
 \item{label}{An (optional) string you can provide to customize the name of
 the resulting \code{eyeris} class object containing the epoched data frame. If
@@ -73,19 +75,15 @@ sanitize, then you may obtain a strange-looking epoch list element in
 your output object (e.g., \verb{$epoch_}, or \verb{$epoch_nana}, etc.). The data
 should still be accessible within this nested lists, however, to avoid
 ambiguous list objects, we recommend you provide an \code{epoch} label here
-to be safe.}}
+to be safe}}
 
-\item{calc_baseline}{A flag indicated whether to perform baseline correction.
-Note, setting \code{calc_baseline} to TRUE alone will only compute the baseline
-period, but will not apply it to the preprocessed timeseries unless
-\code{apply_baseline} is also set to TRUE.}
-
-\item{apply_baseline}{A flag indicating whether to apply the calculated
-baseline to the pupil timeseries. The baseline correction will be applied to
-the pupil from the latest preprocessing step.}
+\item{baseline}{\strong{(New)} A single parameter that controls baseline
+correction. Set to \code{TRUE} to both calculate and apply baseline correction, or
+\code{FALSE} to skip it. This replaces the deprecated \code{calc_baseline} and
+\code{apply_baseline} parameters}
 
 \item{baseline_type}{Whether to perform \emph{subtractive} (\code{sub}) or \emph{divisive}
-(\code{div}) baseline correction. Defaults to \code{sub}.}
+(\code{div}) baseline correction. Defaults to \code{sub}}
 
 \item{baseline_events}{Similar to \code{events}, \code{baseline_events}, you can supply
 either (1) a single string representing the event message to center the
@@ -105,18 +103,30 @@ indicating the window of data that will be used to perform the baseline
 correction, which will be centered around the single string "start" message
 string provided in \code{baseline_events}. Again, \code{baseline_period} will be
 ignored if both a "start" \strong{and} "end" message string are provided to the
-\code{baseline_events} argument.}
+\code{baseline_events} argument}
 
 \item{hz}{Data sampling rate. If not specified, will use the value contained
-within the tracker's metadata.}
+within the tracker's metadata}
 
-\item{verbose}{A flag to indicate whether to print detailed logging messages.
+\item{verbose}{A flag to indicate whether to print detailed logging messages
 Defaults to \code{TRUE}. Set to \code{False} to suppress messages about the current
-processing step and run silently.}
+processing step and run silently}
+
+\item{call_info}{A list of call information and parameters. If not provided,
+it will be generated from the function call}
+
+\item{calc_baseline}{\strong{(Deprecated)} Use \code{baseline} instead}
+
+\item{apply_baseline}{\strong{(Deprecated)} Use \code{baseline} instead}
 }
 \value{
-Updated \code{eyeris} object with dataframes containing the epoched data
-(\code{epoch_}).
+An \code{eyeris} object with a new nested list of data frames: \verb{$epoch_*}.
+The epochs are organized hierarchically by block and preprocessing step.
+Each epoch contains the pupil timeseries data for the specified time window
+around each event message, along with metadata about the event.
+
+When using \code{bidsify()} to export the data, filenames will include both
+epoch and baseline event information for clarity.
 }
 \description{
 Intended to be used as the final preprocessing step. This function creates
@@ -185,8 +195,7 @@ eye_preproc |>
     events = "PROBE_START_{trial}",
     limits = c(0, 1), # grab 0 seconds prior to and 1 second post PROBE event
     label = "prePostProbe", # custom epoch label name
-    calc_baseline = TRUE,
-    apply_baseline = TRUE,
+    baseline = TRUE, # Calculate and apply baseline correction
     baseline_type = "sub", # "sub"tractive baseline calculation is default
     baseline_events = "DELAY_STOP_*",
     baseline_period = c(-1, 0)
@@ -201,8 +210,7 @@ eye_preproc |>
     events = "PROBE_START_{trial}",
     limits = c(0, 1), # grab 0 seconds prior to and 1 second post PROBE event
     label = "prePostProbe", # custom epoch label name
-    calc_baseline = TRUE,
-    apply_baseline = TRUE,
+    baseline = TRUE, # Calculate and apply baseline correction
     baseline_type = "sub", # "sub"tractive baseline calculation is default
     baseline_events = c(
       "DELAY_START_*",
@@ -227,4 +235,7 @@ eye_preproc |>
     label  = "example9"
   )
 
+}
+\seealso{
+\code{\link[lifecycle:deprecate_soft]{lifecycle::deprecate_warn()}}
 }

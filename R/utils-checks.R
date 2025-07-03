@@ -1,3 +1,15 @@
+#' Check and create directory if it doesn't exist
+#'
+#' Checks if a directory exists and creates it if it doesn't. Provides
+#' informative messages about the process.
+#'
+#' @param basedir The base directory path
+#' @param dir The subdirectory to create (optional)
+#' @param verbose Whether to display status messages
+#'
+#' @return No return value; creates directory if needed
+#'
+#' @keywords internal
 check_and_create_dir <- function(basedir, dir = NULL, verbose = TRUE) {
   if (!is.null(dir)) {
     dir <- file.path(basedir, dir)
@@ -28,6 +40,16 @@ check_and_create_dir <- function(basedir, dir = NULL, verbose = TRUE) {
   }
 }
 
+#' Check if input argument is provided
+#'
+#' Validates that a required argument is not NULL and throws an error
+#' if missing.
+#'
+#' @param arg The argument to check
+#'
+#' @return No return value; throws error if argument is NULL
+#'
+#' @keywords internal
 check_input <- function(arg) {
   arg_s <- deparse(substitute(arg))
   err_m <- sprintf("A value for ('%s') must be provided.\t", arg_s)
@@ -38,6 +60,15 @@ check_input <- function(arg) {
   }
 }
 
+#' Check if baseline mean is zero
+#'
+#' Validates that baseline mean is not zero for divisive baseline correction.
+#'
+#' @param x The baseline mean value to check
+#'
+#' @return No return value; throws error if baseline mean is zero
+#'
+#' @keywords internal
 check_baseline_mean <- function(x) {
   err_m <- "Baseline mean is zero, unable to divide by a baseline of 0.\t"
   err_c <- "divisive_baseline_mean_zero_error"
@@ -47,21 +78,50 @@ check_baseline_mean <- function(x) {
   }
 }
 
+#' Check baseline and epoch counts match
+#'
+#' Validates that the number of baseline epochs matches the number of epochs.
+#'
+#' @param epochs A list of epoch data
+#' @param baselines A list of baseline data
+#'
+#' @return No return value; throws error if counts don't match
+#'
+#' @keywords internal
 check_baseline_epoch_counts <- function(epochs, baselines) {
-  err_m <- paste(
-    "Number of trials matched based on baseline_events/",
-    "baseline_period {", length(baselines), "} does not match the",
-    "number of epochs matched based on events/limits {",
-    length(epochs), "}! please check whether the event message(s)",
-    "provided for baselining align with the epoched data.\t"
-  )
-  err_c <- "baseline_epochs_mismatch_error"
+  n_epochs <- length(epochs)
+  n_baselines <- length(baselines)
 
-  if (length(epochs) != length(baselines)) {
+  if (n_epochs != n_baselines) {
+    err_m <- paste(
+      "Number of trials matched based on baseline_events/",
+      "baseline_period {", n_baselines, "} does not match the",
+      "number of epochs matched based on events/limits {",
+      n_epochs, "}! please check whether the event message(s)",
+      "provided for baselining align with the epoched data.\n",
+      "This usually happens when:\n",
+      "1. There are different numbers of baseline events vs epoch events\n",
+      "2. Some baseline events don't have valid baseline windows\n",
+      "3. The baseline events and epoch events are not properly paired\n",
+      "Consider using the same event for both epoching and baselining,\n",
+      "or ensure they are properly aligned.\t"
+    )
+    err_c <- "baseline_epochs_mismatch_error"
+
     stop(structure(list(message = err_m, call = match.call()), class = err_c))
   }
 }
 
+#' Check baseline input arguments
+#'
+#' Validates that baseline inputs are properly specified.
+#'
+#' @param events Event messages for baseline extraction
+#' @param limits Time limits for baseline extraction
+#'
+#' @return No return value; throws error if inputs are invalid
+#'
+#' @keywords internal
 check_baseline_inputs <- function(events, limits) {
   err_c <- "baseline_input_args_error"
 
@@ -80,6 +140,16 @@ check_baseline_inputs <- function(events, limits) {
   }
 }
 
+#' Check if column exists in dataframe
+#'
+#' Validates that a specified column exists in a dataframe.
+#'
+#' @param df The dataframe to check
+#' @param col_name The column name to look for
+#'
+#' @return No return value; throws error if column doesn't exist
+#'
+#' @keywords internal
 check_column <- function(df, col_name) {
   if (!col_name %in% colnames(df)) {
     err_c <- "column_doesnt_exist_in_df_error"
@@ -88,6 +158,16 @@ check_column <- function(df, col_name) {
   }
 }
 
+#' Check if object is of class eyeris
+#'
+#' Validates that an object is of class eyeris.
+#'
+#' @param eyeris The `eyeris` object to check
+#' @param fun The function name for error message
+#'
+#' @return No return value; throws error if object is not eyeris class
+#'
+#' @keywords internal
 check_data <- function(eyeris, fun) {
   err_m <- sprintf(paste(
     "The provided object to `eyeris::%s()` is of type",
@@ -100,6 +180,16 @@ check_data <- function(eyeris, fun) {
   }
 }
 
+#' Check if pupil_raw column exists
+#'
+#' Validates that the pupil_raw column exists in the eyeris object.
+#'
+#' @param eyeris The `eyeris` object to check
+#' @param fun The function name for error message
+#'
+#' @return No return value; throws error if pupil_raw column is missing
+#'
+#' @keywords internal
 check_pupil_cols <- function(eyeris, fun) {
   err_m <- sprintf(paste(
     "The provided object to `eyeris::%s()` doesn't include the",
@@ -131,6 +221,15 @@ check_pupil_cols <- function(eyeris, fun) {
   }
 }
 
+#' Check epoch input for plotting
+#'
+#' Validates that exactly one epoch is specified for plotting.
+#'
+#' @param epochs A list of epoch data
+#'
+#' @return No return value; throws error if more than one epoch is specified
+#'
+#' @keywords internal
 check_epoch_input <- function(epochs) {
   err_m <- paste(
     "eyeris::plot() requires that exactly 1 set of epoched data is",
@@ -144,7 +243,15 @@ check_epoch_input <- function(epochs) {
   }
 }
 
-# first, assert that the timestamps list contains two dataframes (or tibbles)
+#' Check epoch manual input data structure
+#'
+#' Validates that the events argument is a list of two dataframes.
+#'
+#' @param ts_list A list containing both start _and_ end timestamp dataframes
+#'
+#' @return No return value; throws error if structure is invalid
+#'
+#' @keywords internal
 check_epoch_manual_input_data <- function(ts_list) {
   err_m <- "The `events` argument must be a list of two dataframes.\t"
   err_c <- "timestamps_list_config_error"
@@ -158,7 +265,15 @@ check_epoch_manual_input_data <- function(ts_list) {
   }
 }
 
-# then, assert proper formatting of each dataframe within the timestamps list
+#' Check epoch manual input dataframe format
+#'
+#' Validates that start and end timestamp dataframes have required columns.
+#'
+#' @param ts_list A list containing start and end timestamp dataframes
+#'
+#' @return No return value; throws error if format is invalid
+#'
+#' @keywords internal
 check_epoch_manual_input_dfs <- function(ts_list) {
   start_times <- ts_list[[1]]
   end_times <- ts_list[[2]]
@@ -179,6 +294,16 @@ check_epoch_manual_input_dfs <- function(ts_list) {
   check_start_end_timestamps(start_times, end_times)
 }
 
+#' Check epoch message values against available events
+#'
+#' Validates that specified event messages exist in the eyeris object.
+#'
+#' @param eyeris The `eyeris` object containing events
+#' @param events A dataframe containing event messages to validate
+#'
+#' @return No return value; throws error if invalid messages are found
+#'
+#' @keywords internal
 check_epoch_msg_values <- function(eyeris, events) {
   invalid <- setdiff(eyeris$events$text, events$msg)
   err_m <- paste(
@@ -193,6 +318,15 @@ check_epoch_msg_values <- function(eyeris, events) {
   }
 }
 
+#' Check limits in wildcard mode
+#'
+#' Validates that limits are provided when using wildcard mode.
+#'
+#' @param limits Time limits for epoch extraction
+#'
+#' @return No return value; throws error if limits are missing in wildcard mode
+#'
+#' @keywords internal
 check_limits <- function(limits) {
   err_m <- paste(
     "Limits cannot be NULL when using wildcard (*) mode",
@@ -205,6 +339,17 @@ check_limits <- function(limits) {
   }
 }
 
+#' Check start and end timestamps are balanced
+#'
+#' Validates that start and end timestamp dataframes have the same number
+#' of rows.
+#'
+#' @param start The start timestamp dataframe
+#' @param end The end timestamp dataframe
+#'
+#' @return No return value; throws error if timestamps are unbalanced
+#'
+#' @keywords internal
 check_start_end_timestamps <- function(start, end) {
   err_c <- "unbalanced_start_stop_epoch_timestamps_error"
 
@@ -228,11 +373,66 @@ check_start_end_timestamps <- function(start, end) {
   }
 }
 
+#' Count epochs and validate data is epoched
+#'
+#' Counts the number of epochs and validates that data has been epoched.
+#'
+#' @param epochs A list of epoch data
+#'
+#' @return No return value; throws error if no epochs found
+#'
+#' @keywords internal
 count_epochs <- function(epochs) {
   err_m <- "Data must be epoched.\t"
   err_c <- "epoch_count_error"
 
   if (length(epochs) == 0) {
     stop(structure(list(message = err_m, call = match.call()), class = err_c))
+  }
+}
+
+#' Check time series monotonicity
+#'
+#' Validates that a time vector is monotonically increasing.
+#'
+#' @param time_vector The time vector to check
+#' @param time_col_name The name of the time column for error messages
+#'
+#' @return No return value; throws error if time series is not monotonic
+#'
+#' @keywords internal
+check_time_monotonic <- function(time_vector, time_col_name = "time_secs") {
+  if (is.null(time_vector) || length(time_vector) == 0) {
+    cli::cli_abort(paste(
+      "Time vector is NULL or empty. Cannot validate monotonicity.",
+      "Time column:", time_col_name
+    ))
+  }
+
+  # remove NA values for the check
+  time_clean <- time_vector[!is.na(time_vector)]
+
+  if (length(time_clean) < 2) {
+    cli::cli_abort(paste(
+      "Insufficient non-NA time points to validate monotonicity.",
+      "Need at least 2 points, got", length(time_clean),
+      "Time column:", time_col_name
+    ))
+  }
+
+  # check if time series is monotonically increasing
+  if (!all(diff(time_clean) >= 0)) {
+    # find first violation
+    diffs <- diff(time_clean)
+    first_violation_idx <- which(diffs < 0)[1]
+
+    cli::cli_abort(paste(
+      "Time series is not monotonically increasing.",
+      "First violation at index", first_violation_idx + 1,
+      "where time decreases from", time_clean[first_violation_idx],
+      "to", time_clean[first_violation_idx + 1],
+      "Time column:", time_col_name,
+      "This may indicate EDF file errors or data corruption."
+    ))
   }
 }

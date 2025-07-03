@@ -11,8 +11,11 @@ knitr::opts_chunk$set(
 #   eyeris::detransient(n = 16) |>
 #   eyeris::interpolate() |>
 #   eyeris::lpfilt(wp = 4, ws = 8, rp = 1, rs = 35, plot_freqz = TRUE) |>
+#   # eyeris::downsample() |>  # optional (please read docs before enabling)
+#   # eyeris::bin() |>  # optional (please read docs before enabling)
 #   # eyeris::detrend() |>  # optional (please read docs before enabling)
-#   eyeris::zscore()
+#   eyeris::zscore() |>
+#   eyeris::summarize_confounds()
 
 ## -----------------------------------------------------------------------------
 citation("eyeris")

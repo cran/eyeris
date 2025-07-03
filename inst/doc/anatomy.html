@@ -385,6 +385,9 @@ start/stop/durations for blinks</p></li>
 frame</p></li>
 <li><p><code>latest</code>: internal tracker used for assessing which
 steps have been run so far</p></li>
+<li><p><code>confounds</code>: a list of data frames containing
+confounding variables for each preprocessing step (see: 📊
+<code>summarize_confounds()</code>)</p></li>
 <li><p><code>params</code>: detailed list of steps run and parameters
 passed to each step</p></li>
 <li><p><code>epoch_{name}</code>: list of data frames for any given
@@ -415,8 +418,11 @@ Deconstructed:</h3>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  eyeris<span class="sc">::</span><span class="fu">detransient</span>(<span class="at">n =</span> <span class="dv">16</span>) <span class="sc">|&gt;</span></span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  eyeris<span class="sc">::</span><span class="fu">interpolate</span>() <span class="sc">|&gt;</span></span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  eyeris<span class="sc">::</span><span class="fu">lpfilt</span>(<span class="at">wp =</span> <span class="dv">4</span>, <span class="at">ws =</span> <span class="dv">8</span>, <span class="at">rp =</span> <span class="dv">1</span>, <span class="at">rs =</span> <span class="dv">35</span>, <span class="at">plot_freqz =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="co"># eyeris::detrend() |&gt;  # optional (please read docs before enabling)</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  eyeris<span class="sc">::</span><span class="fu">zscore</span>()</span></code></pre></div>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="co"># eyeris::downsample() |&gt;  # optional (please read docs before enabling)</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="co"># eyeris::bin() |&gt;  # optional (please read docs before enabling)</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="co"># eyeris::detrend() |&gt;  # optional (please read docs before enabling)</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  eyeris<span class="sc">::</span><span class="fu">zscore</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  eyeris<span class="sc">::</span><span class="fu">summarize_confounds</span>()</span></code></pre></div>
 <div class="alert alert-light" style="padding-bottom: 0;">
 <p>💡 <strong>For more detailed information on the implementation of
 functions within</strong> <strong>the <code>glassbox()</code> and thus

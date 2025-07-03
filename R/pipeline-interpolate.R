@@ -22,13 +22,15 @@
 #' directly unless they have a specific reason to customize the pipeline
 #' manually.
 #'
-#' @param eyeris An object of class `eyeris` dervived from [eyeris::load_asc()].
+#' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
 #' @param verbose A flag to indicate whether to print detailed logging messages.
 #' Defaults to `TRUE`. Set to `FALSE` to suppress messages about the current
-#' processing step and run silently.
+#' processing step and run silently
+#' @param call_info A list of call information and parameters. If not provided,
+#' it will be generated from the function call
 #'
 #' @return An `eyeris` object with a new column in `timeseries`:
-#' `pupil_raw_{...}_interpolate`.
+#' `pupil_raw_{...}_interpolate`
 #'
 #' @seealso [eyeris::glassbox()] for the recommended way to run this step as
 #' part of the full eyeris glassbox preprocessing pipeline.
@@ -42,11 +44,41 @@
 #'   plot(seed = 0)
 #'
 #' @export
-interpolate <- function(eyeris, verbose = TRUE) {
+interpolate <- function(eyeris, verbose = TRUE, call_info = NULL) {
+  call_info <- if (is.null(call_info)) {
+    list(
+      call_stack = match.call(),
+      parameters = list(verbose = verbose)
+    )
+  } else {
+    call_info
+  }
+
   eyeris |>
-    pipeline_handler(interpolate_pupil, "interpolate", verbose)
+    pipeline_handler(
+      interpolate_pupil,
+      "interpolate",
+      verbose,
+      call_info = call_info
+    )
 }
 
+#' Interpolate missing pupil data using linear interpolation
+#'
+#' This function fills missing values (NAs) in pupil data using linear
+#' interpolation. It uses the `zoo::na.approx()` function with settings
+#' optimized for pupillometry data.
+#'
+#' This function is called by the exposed wrapper [eyeris::interpolate()].
+#'
+#' @param x A data frame containing the pupil time series data
+#' @param prev_op The name of the previous operation's output column
+#' @param verbose A flag to indicate whether to print detailed logging messages
+#'
+#' @return A vector of interpolated pupil values with the same length as the
+#' input
+#'
+#' @keywords internal
 interpolate_pupil <- function(x, prev_op, verbose) {
   if (!any(is.na(x[[prev_op]]))) {
     if (verbose) {

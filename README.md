@@ -38,6 +38,11 @@ Schwartz, Mingjian He, Haopei Yang, Alice Xue, and Anthony Wagner).
 derivative (preprocessed) pupillometry data, as well as an intuitive
 workflow for inspecting preprocessed pupillometry epochs within
 beautiful, interactive HTML report files (see demonstration below ⬇️)!
+The package also includes gaze heatmaps that show the distribution of
+eye coordinates across the entire screen area, helping you assess data
+quality and participant attention patterns. These heatmaps are
+automatically generated in the BIDS reports and can also be created
+manually.
 
 <img src="https://github.com/shawntz/eyeris/raw/dev/inst/figures/interactive-reports-demo.gif" width="100%" />
 
@@ -88,6 +93,9 @@ We hope you enjoy! -shawn
 set.seed(32)
 
 library(eyeris)
+#> 
+#> eyeris v2.0.0 - Lumpy Space Princess ꒰•ᴗ•｡꒱۶
+#> Welcome! Type ?`eyeris` to get started.
 
 demo_data <- eyelink_asc_demo_dataset()
 
@@ -96,18 +104,22 @@ eyeris_preproc <- glassbox(
   lpfilt = list(plot_freqz = FALSE)
 )
 #> ✔ [  OK  ] - Running eyeris::load_asc()
-#> ✔ [  OK  ] - Running eyeris::deblink()
-#> ✔ [  OK  ] - Running eyeris::detransient()
-#> ✔ [  OK  ] - Running eyeris::interpolate()
-#> ✔ [  OK  ] - Running eyeris::lpfilt()
-#> ! [ SKIP ] - Skipping eyeris::detrend()
-#> ✔ [  OK  ] - Running eyeris::zscore()
+#> ℹ [ INFO ] - Processing block: block_1
+#> ✔ [  OK  ] - Running eyeris::deblink() for block_1
+#> ✔ [  OK  ] - Running eyeris::detransient() for block_1
+#> ✔ [  OK  ] - Running eyeris::interpolate() for block_1
+#> ✔ [  OK  ] - Running eyeris::lpfilt() for block_1
+#> ! [ SKIP ] - Skipping eyeris::downsample() for block_1
+#> ! [ SKIP ] - Skipping eyeris::bin() for block_1
+#> ! [ SKIP ] - Skipping eyeris::detrend() for block_1
+#> ✔ [  OK  ] - Running eyeris::zscore() for block_1
+#> ✔ [  OK  ] - Running eyeris::summarize_confounds()
 ```
 
 ### step-wise correction of pupillary signal
 
 ``` r
-plot(eyeris_preproc)
+plot(eyeris_preproc, add_progressive_summary = TRUE)
 ```
 
 <div style="display: flex; justify-content: center; gap: 20px;">
@@ -119,14 +131,84 @@ plot(eyeris_preproc)
 ### final pre-post correction of pupillary signal (raw ➡ preprocessed)
 
 ``` r
+start_time <- min(eyeris_preproc$timeseries$block_1$time_secs)
+end_time <- max(eyeris_preproc$timeseries$block_1$time_secs)
+
 plot(eyeris_preproc,
-  steps = c(1, 5),
-  preview_window = c(0, max(eyeris_preproc$timeseries$block_1$time_secs))
+  # steps = c(1, 5), # uncomment to specify a subset of preprocessing steps to plot; by default, all steps will plot in the order in which they were executed by eyeris
+  preview_window = c(start_time, end_time),
+  add_progressive_summary = TRUE
 )
-#> ! Plotting block 1 from possible blocks: 1
+#> ! [ INFO ] - Plotting block 1 from possible blocks: 1
+#> ℹ [ INFO ] - Plotting with sampling rate: 1000 Hz
 ```
 
-<img src="man/figures/README-timeseries-plot-1.png" width="100%" /><img src="man/figures/README-timeseries-plot-2.png" width="100%" />
+<img src="man/figures/README-timeseries-plot-1.png" width="100%" /><img src="man/figures/README-timeseries-plot-2.png" width="100%" /><img src="man/figures/README-timeseries-plot-3.png" width="100%" /><img src="man/figures/README-timeseries-plot-4.png" width="100%" /><img src="man/figures/README-timeseries-plot-5.png" width="100%" /><img src="man/figures/README-timeseries-plot-6.png" width="100%" />
+
+    #> ℹ [ INFO ] - Creating progressive summary plot for block_1
+
+<img src="man/figures/README-timeseries-plot-7.png" width="100%" />
+
+    #> ✔ [  OK  ] - Progressive summary plot created successfully!
+
+    plot_gaze_heatmap(
+      eyeris = eyeris_preproc,
+      block = 1
+    )
+
+<img src="man/figures/README-timeseries-plot-8.png" width="100%" />
+
+## Logging `eyeris` commands with `eyelogger()`
+
+The `eyelogger()` utility lets you run any `eyeris` command (or block of
+R code) while automatically capturing all console output and errors to
+timestamped log files. This is especially useful for reproducibility,
+debugging, or running batch jobs.
+
+**How it works:** - All standard output (`stdout`) and standard error
+(`stderr`) are saved to log files in a directory you specify (or a
+temporary directory by default). - Each run produces two log files: -
+`<timestamp>.out`: all console output - `<timestamp>.err`: all warnings
+and errors
+
+### Usage
+
+You can wrap any `eyeris` command or block of code in
+`eyelogger({ ... })`:
+
+``` r
+library(eyeris)
+
+# log a simple code block with messages, warnings, and prints
+eyelogger({
+  message("eyeris `glassbox()` completed successfully.")
+  warning("eyeris `glassbox()` completed with warnings.")
+  print("some eyeris-related information.")
+})
+
+# log a real eyeris pipeline run, saving logs to a custom directory
+log_dir <- file.path(tempdir(), "eyeris_logs")
+eyelogger({
+  glassbox(eyelink_asc_demo_dataset(), interactive_preview = FALSE)
+}, log_dir = log_dir)
+```
+
+### Parameters
+
+- `eyeris_cmd`: The code to run (wrap in `{}` for multiple lines).
+- `log_dir`: Directory to save logs (default: a temporary directory).
+- `timestamp_format`: Format for log file names (default:
+  `"%Y%m%d_%H%M%S"`).
+
+### What you get
+
+After running, you’ll find log files in your specified directory, e.g.:
+
+    20240614_153012.out   # console output
+    20240614_153012.err   # warnings and errors
+
+This makes it easy to keep a record of your preprocessing runs and debug
+any issues that arise.
 
 ------------------------------------------------------------------------
 
