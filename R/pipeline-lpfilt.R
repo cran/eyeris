@@ -48,8 +48,7 @@
 #'   plot(seed = 0)
 #'
 #' @export
-lpfilt <- function(eyeris, wp = 4, ws = 8,
-                   rp = 1, rs = 35, plot_freqz = FALSE, call_info = NULL) {
+lpfilt <- function(eyeris, wp = 4, ws = 8, rp = 1, rs = 35, plot_freqz = FALSE, call_info = NULL) {
   # safely handle user's current options
   oldpar <- par(no.readonly = TRUE)
   on.exit(par(oldpar))
@@ -71,18 +70,61 @@ lpfilt <- function(eyeris, wp = 4, ws = 8,
     call_info
   }
 
-  eyeris |>
-    pipeline_handler(
-      lpfilt_pupil,
-      "lpfilt",
-      wp,
-      ws,
-      rp,
-      rs,
-      fs,
-      plot_freqz,
-      call_info = call_info
+  # handle binocular objects
+  if (is_binocular_object(eyeris)) {
+    # process left and right eyes independently
+    left_result <- eyeris$left |>
+      pipeline_handler(
+        lpfilt_pupil,
+        "lpfilt",
+        wp,
+        ws,
+        rp,
+        rs,
+        fs,
+        plot_freqz,
+        call_info = call_info
+      )
+
+    right_result <- eyeris$right |>
+      pipeline_handler(
+        lpfilt_pupil,
+        "lpfilt",
+        wp,
+        ws,
+        rp,
+        rs,
+        fs,
+        plot_freqz,
+        call_info = call_info
+      )
+
+    # return combined structure
+    list_out <- list(
+      left = left_result,
+      right = right_result,
+      original_file = eyeris$original_file,
+      raw_binocular_object = eyeris$raw_binocular_object
     )
+
+    class(list_out) <- "eyeris"
+
+    return(list_out)
+  } else {
+    # regular eyeris object, process normally
+    eyeris |>
+      pipeline_handler(
+        lpfilt_pupil,
+        "lpfilt",
+        wp,
+        ws,
+        rp,
+        rs,
+        fs,
+        plot_freqz,
+        call_info = call_info
+      )
+  }
 }
 
 #' Internal function to lowpass filter pupil data
@@ -107,19 +149,19 @@ lpfilt <- function(eyeris, wp = 4, ws = 8,
 #' @keywords internal
 lpfilt_pupil <- function(x, prev_op, wp, ws, rp, rs, fs, plot_freqz) {
   if (any(is.na(x[[prev_op]]))) {
-    cli::cli_abort("NAs detected in pupil data. Need to interpolate first.")
+    cli::cli_abort("[EXIT] NAs detected in pupil data. Need to interpolate first.")
   } else {
     prev_pupil <- x[[prev_op]]
   }
 
   # additional validation to prevent "non-numeric matrix extent" error
   if (!is.numeric(prev_pupil) || length(prev_pupil) == 0) {
-    cli::cli_abort("Invalid pupil data: data must be numeric and non-empty.")
+    cli::cli_abort("[EXIT] Invalid pupil data: data must be numeric and non-empty.")
   }
 
   if (any(!is.finite(prev_pupil))) {
     cli::cli_abort(
-      "Non-finite values detected in pupil data. Need to clean data first."
+      "[EXIT] Non-finite values detected in pupil data. Need to clean data first."
     )
   }
 
@@ -139,7 +181,11 @@ lpfilt_pupil <- function(x, prev_op, wp, ws, rp, rs, fs, plot_freqz) {
     )
     subtitle <- paste0(
       "*freq response for the low-pass filter* - ",
-      "cutoff (", wp, "Hz), stopping (", ws, "Hz)\n"
+      "cutoff (",
+      wp,
+      "Hz), stopping (",
+      ws,
+      "Hz)\n"
     )
 
     # calculate cex
@@ -147,8 +193,12 @@ lpfilt_pupil <- function(x, prev_op, wp, ws, rp, rs, fs, plot_freqz) {
     scaling_factor <- 7
     cex_val <- plot_width / scaling_factor
     graphics::mtext(
-      side = 2, line = 2, at = 0, adj = 0.95,
-      cex = cex_val, subtitle
+      side = 2,
+      line = 2,
+      at = 0,
+      adj = 0.95,
+      cex = cex_val,
+      subtitle
     )
   }
 

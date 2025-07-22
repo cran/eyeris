@@ -62,13 +62,46 @@ deblink <- function(eyeris, extend = 50, call_info = NULL) {
     call_info
   }
 
-  eyeris |>
-    pipeline_handler(
-      deblink_pupil,
-      "deblink",
-      extend = extend,
-      call_info = call_info
+  # handle binocular objects
+  if (is_binocular_object(eyeris)) {
+    # process left and right eyes independently
+    left_result <- eyeris$left |>
+      pipeline_handler(
+        deblink_pupil,
+        "deblink",
+        extend = extend,
+        call_info = call_info
+      )
+
+    right_result <- eyeris$right |>
+      pipeline_handler(
+        deblink_pupil,
+        "deblink",
+        extend = extend,
+        call_info = call_info
+      )
+
+    # return combined structure
+    list_out <- list(
+      left = left_result,
+      right = right_result,
+      original_file = eyeris$original_file,
+      raw_binocular_object = eyeris$raw_binocular_object
     )
+
+    class(list_out) <- "eyeris"
+
+    return(list_out)
+  } else {
+    # regular eyeris object, process normally
+    eyeris |>
+      pipeline_handler(
+        deblink_pupil,
+        "deblink",
+        extend = extend,
+        call_info = call_info
+      )
+  }
 }
 
 #' Internal function to remove blink artifacts from pupil data
@@ -107,16 +140,18 @@ deblink <- function(eyeris, extend = 50, call_info = NULL) {
 deblink_pupil <- function(x, prev_op, extend) {
   column <- dplyr::sym(prev_op)
 
-  if (length(extend) == 1) { # symmetric blink padding case
+  if (length(extend) == 1) {
+    # symmetric blink padding case
     extend_backward <- extend
     extend_forward <- extend
-  } else if (length(extend) == 2) { # asymmetric
+  } else if (length(extend) == 2) {
+    # asymmetric
     extend_backward <- extend[1]
     extend_forward <- extend[2]
   } else {
     cli::cli_abort(
       paste(
-        "extend must either be a single integer (symmetric) or a vector of",
+        "[EXIT] extend must either be a single integer (symmetric) or a vector of",
         "length 2 (asymmetric) in the format `c(backward, forward)`!"
       )
     )
@@ -131,20 +166,24 @@ deblink_pupil <- function(x, prev_op, extend) {
       blink = ifelse(is.na(pupil), 1, 0),
       blink.lag = dplyr::lag(blink),
       blink.lead = dplyr::lead(blink),
-      blink.start = ifelse(blink == 1 & !is.na(blink.lag) & blink.lag == 0,
-        time, as.numeric(NA)
-      ),
+      blink.start = ifelse(blink == 1 & !is.na(blink.lag) & blink.lag == 0, time, as.numeric(NA)),
       blink.start = zoo::na.locf(blink.start, na.rm = FALSE, fromLast = TRUE),
-      blink.end = ifelse(blink == 1 & !is.na(blink.lead) & blink.lead == 0,
-        time, as.numeric(NA)
-      ),
+      blink.end = ifelse(blink == 1 & !is.na(blink.lead) & blink.lead == 0, time, as.numeric(NA)),
       blink.end = zoo::na.locf(blink.end, na.rm = FALSE),
-      blink = ifelse(!is.na(blink.start) &
-                       time >= blink.start - extend_backward &
-                       time <= blink.start, 1, blink),
-      blink = ifelse(!is.na(blink.end) &
-                       time <= blink.end + extend_forward &
-                       time >= blink.end, 1, blink),
+      blink = ifelse(
+        !is.na(blink.start) &
+          time >= blink.start - extend_backward &
+          time <= blink.start,
+        1,
+        blink
+      ),
+      blink = ifelse(
+        !is.na(blink.end) &
+          time <= blink.end + extend_forward &
+          time >= blink.end,
+        1,
+        blink
+      ),
       pupil_deblink = ifelse(pupil == 0 | blink == 1, as.numeric(NA), pupil)
     ) |>
     dplyr::pull(pupil_deblink)

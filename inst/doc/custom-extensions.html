@@ -48,8 +48,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -60,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -423,15 +424,51 @@ list of data frames, and</li>
 <span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
 <span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>    call_info</span>
 <span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>  }</span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>  <span class="fu">pipeline_handler</span>(</span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>    eyeris,</span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>    winsorize_pupil,</span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>    <span class="st">&quot;winsorize&quot;</span>,</span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>    <span class="at">lower =</span> lower,</span>
-<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>    <span class="at">upper =</span> upper,</span>
-<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>    <span class="at">call_info =</span> call_info</span>
-<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>  )</span>
-<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>  <span class="co"># handle binocular objects</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is_binocular_object</span>(eyeris)) {</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>    <span class="co"># process left and right eyes independently</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>    left_result <span class="ot">&lt;-</span> eyeris<span class="sc">$</span>left <span class="sc">|&gt;</span></span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>      <span class="fu">pipeline_handler</span>(</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>        winsorize_pupil,</span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>        <span class="st">&quot;winsorize&quot;</span>,</span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>        <span class="at">lower =</span> lower,</span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a>        <span class="at">upper =</span> upper,</span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a>        <span class="at">call_info =</span> call_info</span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a>      )</span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a>    </span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a>    right_result <span class="ot">&lt;-</span> eyeris<span class="sc">$</span>right <span class="sc">|&gt;</span></span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a>      <span class="fu">pipeline_handler</span>(</span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a>        winsorize_pupil,</span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a>        <span class="st">&quot;winsorize&quot;</span>,</span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a>        <span class="at">lower =</span> lower,</span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a>        <span class="at">upper =</span> upper,</span>
+<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a>        <span class="at">call_info =</span> call_info</span>
+<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a>      )</span>
+<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a>    </span>
+<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a>    <span class="co"># return combined structure</span></span>
+<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a>    list_out <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a>      <span class="at">left =</span> left_result,</span>
+<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a>      <span class="at">right =</span> right_result,</span>
+<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a>      <span class="at">original_file =</span> eyeris<span class="sc">$</span>original_file,</span>
+<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a>      <span class="at">raw_binocular_object =</span> eyeris<span class="sc">$</span>raw_binocular_object</span>
+<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a>    )</span>
+<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a>    <span class="fu">class</span>(list_out) <span class="ot">&lt;-</span> <span class="st">&quot;eyeris&quot;</span></span>
+<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a>    <span class="fu">return</span>(list_out)</span>
+<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a>    <span class="co"># regular eyeris object, process normally</span></span>
+<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a>    eyeris <span class="sc">|&gt;</span></span>
+<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a>      <span class="fu">pipeline_handler</span>(</span>
+<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a>        winsorize_pupil,</span>
+<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a>        <span class="st">&quot;winsorize&quot;</span>,</span>
+<span id="cb2-61"><a href="#cb2-61" tabindex="-1"></a>        <span class="at">lower =</span> lower,</span>
+<span id="cb2-62"><a href="#cb2-62" tabindex="-1"></a>        <span class="at">upper =</span> upper,</span>
+<span id="cb2-63"><a href="#cb2-63" tabindex="-1"></a>        <span class="at">call_info =</span> call_info</span>
+<span id="cb2-64"><a href="#cb2-64" tabindex="-1"></a>      )</span>
+<span id="cb2-65"><a href="#cb2-65" tabindex="-1"></a>  }</span>
+<span id="cb2-66"><a href="#cb2-66" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 </div>
 <div id="understanding-call-stack-tracking" class="section level3">

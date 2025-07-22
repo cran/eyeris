@@ -20,13 +20,13 @@ check_and_create_dir <- function(basedir, dir = NULL, verbose = TRUE) {
   if (dir.exists(dir)) {
     if (verbose) {
       cli::cli_alert_warning(
-        sprintf("'%s' already exists. Skipping creation...", dir)
+        sprintf("[WARN] '%s' already exists. Skipping creation...", dir)
       )
     }
   } else {
     if (verbose) {
       cli::cli_alert_info(
-        sprintf("'%s' does not exist. Creating...", dir)
+        sprintf("[INFO] '%s' does not exist. Creating...", dir)
       )
     }
 
@@ -34,7 +34,7 @@ check_and_create_dir <- function(basedir, dir = NULL, verbose = TRUE) {
 
     if (verbose) {
       cli::cli_alert_success(
-        sprintf("BIDS directory successfully created at: '%s'", dir)
+        sprintf("[OKAY] BIDS directory successfully created at: '%s'", dir)
       )
     }
   }
@@ -95,9 +95,12 @@ check_baseline_epoch_counts <- function(epochs, baselines) {
   if (n_epochs != n_baselines) {
     err_m <- paste(
       "Number of trials matched based on baseline_events/",
-      "baseline_period {", n_baselines, "} does not match the",
+      "baseline_period {",
+      n_baselines,
+      "} does not match the",
       "number of epochs matched based on events/limits {",
-      n_epochs, "}! please check whether the event message(s)",
+      n_epochs,
+      "}! please check whether the event message(s)",
       "provided for baselining align with the epoched data.\n",
       "This usually happens when:\n",
       "1. There are different numbers of baseline events vs epoch events\n",
@@ -169,10 +172,14 @@ check_column <- function(df, col_name) {
 #'
 #' @keywords internal
 check_data <- function(eyeris, fun) {
-  err_m <- sprintf(paste(
-    "The provided object to `eyeris::%s()` is of type",
-    "'%s' but should be an 'eyeris' object.\t"
-  ), fun, class(eyeris))
+  err_m <- sprintf(
+    paste(
+      "The provided object to `eyeris::%s()` is of type",
+      "'%s' but should be an 'eyeris' object.\t"
+    ),
+    fun,
+    class(eyeris)
+  )
   err_c <- "input_data_type_error"
 
   if (!inherits(eyeris, "eyeris")) {
@@ -191,10 +198,13 @@ check_data <- function(eyeris, fun) {
 #'
 #' @keywords internal
 check_pupil_cols <- function(eyeris, fun) {
-  err_m <- sprintf(paste(
-    "The provided object to `eyeris::%s()` doesn't include the",
-    "expected `pupil_raw` column.\t"
-  ), fun)
+  err_m <- sprintf(
+    paste(
+      "The provided object to `eyeris::%s()` doesn't include the",
+      "expected `pupil_raw` column.\t"
+    ),
+    fun
+  )
   err_c <- "missing_pupil_raw_error"
 
   # check if timeseries is a list of blocks
@@ -202,21 +212,21 @@ check_pupil_cols <- function(eyeris, fun) {
     # now check each block for compliance
     for (block_num in seq_along(eyeris$timeseries)) {
       if (!"pupil_raw" %in% colnames(eyeris$timeseries[[block_num]])) {
-        err_m <- sprintf(paste(
-          "Block %d in the provided object to `eyeris::%s()` doesn't",
-          "include the expected `pupil_raw` column.\t"
-        ), block_num, fun)
-        stop(structure(list(message = err_m, call = match.call()),
-          class = err_c
-        ))
+        err_m <- sprintf(
+          paste(
+            "Block %d in the provided object to `eyeris::%s()` doesn't",
+            "include the expected `pupil_raw` column.\t"
+          ),
+          block_num,
+          fun
+        )
+        stop(structure(list(message = err_m, call = match.call()), class = err_c))
       }
     }
   } else {
     # original check for single df fallback method
     if (!"pupil_raw" %in% colnames(eyeris$timeseries)) {
-      stop(structure(list(message = err_m, call = match.call()),
-        class = err_c
-      ))
+      stop(structure(list(message = err_m, call = match.call()), class = err_c))
     }
   }
 }
@@ -309,7 +319,8 @@ check_epoch_msg_values <- function(eyeris, events) {
   err_m <- paste(
     "Invalid event messages specified in manual input.",
     "The following event messages do not exist within the raw data:",
-    paste(invalid, collapse = ", "), "\n"
+    paste(invalid, collapse = ", "),
+    "\n"
   )
   err_c <- "invalid_event_messages_error"
 
@@ -404,8 +415,9 @@ count_epochs <- function(epochs) {
 check_time_monotonic <- function(time_vector, time_col_name = "time_secs") {
   if (is.null(time_vector) || length(time_vector) == 0) {
     cli::cli_abort(paste(
-      "Time vector is NULL or empty. Cannot validate monotonicity.",
-      "Time column:", time_col_name
+      "[EXIT] Time vector is NULL or empty. Cannot validate monotonicity.",
+      "Time column:",
+      time_col_name
     ))
   }
 
@@ -414,9 +426,11 @@ check_time_monotonic <- function(time_vector, time_col_name = "time_secs") {
 
   if (length(time_clean) < 2) {
     cli::cli_abort(paste(
-      "Insufficient non-NA time points to validate monotonicity.",
-      "Need at least 2 points, got", length(time_clean),
-      "Time column:", time_col_name
+      "[EXIT] Insufficient non-NA time points to validate monotonicity.",
+      "Need at least 2 points, got",
+      length(time_clean),
+      "Time column:",
+      time_col_name
     ))
   }
 
@@ -427,12 +441,51 @@ check_time_monotonic <- function(time_vector, time_col_name = "time_secs") {
     first_violation_idx <- which(diffs < 0)[1]
 
     cli::cli_abort(paste(
-      "Time series is not monotonically increasing.",
-      "First violation at index", first_violation_idx + 1,
-      "where time decreases from", time_clean[first_violation_idx],
-      "to", time_clean[first_violation_idx + 1],
-      "Time column:", time_col_name,
+      "[EXIT] Time series is not monotonically increasing.",
+      "First violation at index",
+      first_violation_idx + 1,
+      "where time decreases from",
+      time_clean[first_violation_idx],
+      "to",
+      time_clean[first_violation_idx + 1],
+      "Time column:",
+      time_col_name,
       "This may indicate EDF file errors or data corruption."
     ))
   }
+}
+
+#' Check if object is a binocular eyeris object
+#'
+#' Detects whether an object is a binocular eyeris object created with
+#' `binocular_mode = "both"`.
+#'
+#' @param x The `eyeris` object to check
+#'
+#' @return Logical indicating whether the object is a binocular eyeris object
+#'
+#' @keywords internal
+is_binocular_object <- function(x) {
+  is.list(x) &&
+    "left" %in% names(x) &&
+    "right" %in% names(x) &&
+    "binocular_mode" %in% names(x$left) &&
+    "binocular_mode" %in% names(x$right) &&
+    x$left$binocular_mode == "both" &&
+    x$right$binocular_mode == "both"
+}
+
+#' Check if binocular correlations should be plotted
+#'
+#' Validates that binocular correlations should be plotted.
+#'
+#' @param x The `eyeris` object to check
+#'
+#' @return Logical indicating whether binocular correlations should be plotted
+#'
+#' @keywords internal
+should_plot_binoc_cors <- function(x) {
+  is.list(x) &&
+    ("left" %in% names(x) && "right" %in% names(x)) ||
+    (isTRUE(x$binocular))
 }

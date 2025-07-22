@@ -48,8 +48,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -60,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -368,20 +369,19 @@ needing to write any additional code)!</p>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Load the example memory task file and run default glassbox preproc workflow</span></span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>demo_data <span class="ot">&lt;-</span> <span class="fu">eyelink_asc_demo_dataset</span>()</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>eye <span class="ot">&lt;-</span> <span class="fu">glassbox</span>(demo_data)</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::load_asc()</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; ℹ [ INFO ] - Processing block: block_1</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::deblink() for block_1</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::detransient() for block_1</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::interpolate() for block_1</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::lpfilt() for block_1</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; ! [ SKIP ] - Skipping eyeris::downsample() for block_1</span></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; ! [ SKIP ] - Skipping eyeris::bin() for block_1</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; ! [ SKIP ] - Skipping eyeris::detrend() for block_1</span></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::zscore() for block_1</span></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; Block processing summary:</span></span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt;   block_1: OK (steps: 6, latest: pupil_raw_deblink_detransient_interpolate_lpfilt_z)</span></span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; ✔ [  OK  ] - Running eyeris::summarize_confounds()</span></span></code></pre></div>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::load_asc()</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Processing block: block_1</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::deblink() for block_1</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::detransient() for block_1</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::interpolate() for block_1</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::lpfilt() for block_1</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; ! [WARN] Skipping eyeris::downsample() for block_1</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; ! [WARN] Skipping eyeris::bin() for block_1</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; ! [WARN] Skipping eyeris::detrend() for block_1</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::zscore() for block_1</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Block processing summary:</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] block_1: OK (steps: 6, latest: pupil_raw_deblink_detransient_interpolate_lpfilt_z)</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::summarize_confounds()</span></span></code></pre></div>
 </div>
 <div id="extract-data-epochs" class="section level2">
 <h2>2️⃣ Extract Data Epochs</h2>
@@ -399,11 +399,11 @@ needing to write any additional code)!</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>eye_1a <span class="ot">&lt;-</span> eye <span class="sc">|&gt;</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">epoch</span>(<span class="at">events =</span> <span class="st">&quot;PROBE*&quot;</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; ℹ Epoching pupil data...</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; ℹ Block 1: found 10 matching events for PROBE</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; ✔ Done!</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; ✔ Block 1: pupil data from 10 unique event messages extracted</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; ✔ Pupil epoching completed in 0.11 seconds</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; ℹ Recalculating epoched confounds for new epochs...</span></span></code></pre></div>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Block 1: found 10 matching events for PROBE</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Done!</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Block 1: pupil data from 10 unique event messages extracted</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Pupil epoching completed in 0.11 seconds</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Recalculating epoched confounds for new epochs...</span></span></code></pre></div>
 <p>Now, if you take a look at <code>eye</code>, you’ll notice there’s a
 new list element within this <code>eyeris</code> object:
 <code>epoch_probe</code>.</p>
@@ -478,11 +478,11 @@ label to the resulting epoch set.</p>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;probeAfter&quot;</span></span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  )</span>
 <span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; ℹ Epoching pupil data...</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ℹ Block 1: found 5 matching events for PROBESTARTtrial</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; ✔ Done!</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; ✔ Block 1: pupil data from 5 unique event messages extracted</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ✔ Pupil epoching completed in 0.03 seconds</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; ℹ Recalculating epoched confounds for new epochs...</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Block 1: found 5 matching events for PROBESTARTtrial</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Done!</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Block 1: pupil data from 5 unique event messages extracted</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Pupil epoching completed in 0.02 seconds</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Recalculating epoched confounds for new epochs...</span></span>
 <span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
 <span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>eye_1b <span class="sc">|&gt;</span></span>
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">pluck</span>(<span class="st">&quot;epoch_probeAfter&quot;</span>) <span class="sc">|&gt;</span></span>

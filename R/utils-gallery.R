@@ -17,10 +17,14 @@ make_gallery <- function(eyeris, epochs, out, epoch_name, ...) {
 
   epoch_name_corrected <- sub("^epoch_", "epoch-", epoch_name)
 
-  rmd_f <- file.path(out, paste0(
-    "sub-", params$sub, "_",
-    epoch_name_corrected, ".Rmd"
-  ))
+  # include eye_suffix in filename if provided
+  report_filename <- paste0("sub-", params$sub, "_", epoch_name_corrected)
+  if (!is.null(params$eye_suffix)) {
+    report_filename <- paste0(report_filename, "_", params$eye_suffix)
+  }
+  report_filename <- paste0(report_filename, ".Rmd")
+
+  rmd_f <- file.path(out, report_filename)
 
   report_date <- format(Sys.time(), "%B %d, %Y | %H:%M:%OS3")
   package_version <- as.character(
@@ -36,25 +40,52 @@ make_gallery <- function(eyeris, epochs, out, epoch_name, ...) {
 
   epoch_lightbox_html <- print_lightbox_img_html(epochs)
 
+  title <- "`eyeris` interactive epoch previewer"
+  if (!is.null(params$eye_suffix)) {
+    title <- paste0(title, " - ", params$eye_suffix)
+  }
+
   content <- paste0(
     "---\n",
-    "title: '`eyeris` epoch previewer'\n",
-    "date: '", report_date, "'\n",
+    "title: '",
+    title,
+    "'\n",
+    "date: '",
+    report_date,
+    "'\n",
     "output:\n",
     "  html_document:\n",
     "    df_print: paged\n",
-    "    css: '", css, "'\n",
+    "    css: '",
+    css,
+    "'\n",
     "---\n\n",
-    "\n\n<img src='", sticker_path, "' class='top-right-image'>",
+    "\n\n<img src='",
+    sticker_path,
+    "' class='top-right-image'>",
     "\n\n---\n\n## Summary\n",
-    " - Subject ID: ", params$sub, "\n",
-    " - Session: ", params$ses, "\n",
-    " - Task: ", params$task, "\n",
-    " - Run: ", params$run, "\n",
-    " - BIDS Directory: ", out, "\n",
-    " - Source `.asc` file: ", eyeris$file, "\n",
+    " - Subject ID: ",
+    params$sub,
+    "\n",
+    " - Session: ",
+    params$ses,
+    "\n",
+    " - Task: ",
+    params$task,
+    "\n",
+    " - Run: ",
+    params$run,
+    "\n",
+    if (!is.null(params$eye_suffix)) paste0(" - Eye: ", params$eye_suffix, "\n") else "",
+    " - BIDS Directory: ",
+    out,
+    "\n",
+    " - Source `.asc` file: ",
+    eyeris$file,
+    "\n",
     " - [`eyeris` version](https://github.com/shawntz/eyeris): ",
-    package_version, "\n",
+    package_version,
+    "\n",
     "\n\n<style type='text/css'>\n",
     "@import url('http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/",
     "bootstrap.min.css');\n",
@@ -65,7 +96,9 @@ make_gallery <- function(eyeris, epochs, out, epoch_name, ...) {
     "'DOMContentLoaded', function() {lightbox.option({'imageFadeDuration' : 0,",
     "'resizeDuration': 25,'wrapAround': false});});</script>\n\n\n",
     "\n## Preprocessed Data Preview\n\n",
-    "\n## ", epoch_name, "\n\n",
+    "\n## ",
+    epoch_name,
+    "\n\n",
     epoch_lightbox_html,
     "\n",
     "\n\n---\n\n### Citation\n\n",
@@ -96,8 +129,11 @@ print_lightbox_img_html <- function(images) {
   for (i in images) {
     html_out <- paste0(
       html_out,
-      '<a href="', i, '" data-lightbox="gallery" data-title="Image 1">',
-      '<img src="', i,
+      '<a href="',
+      i,
+      '" data-lightbox="gallery" data-title="Image 1">',
+      '<img src="',
+      i,
       '" alt="Thumbnail 1" style="margin: 5px; width: 150px;"></a>'
     )
   }

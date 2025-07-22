@@ -48,8 +48,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -60,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -393,6 +394,24 @@ passed to each step</p></li>
 <li><p><code>epoch_{name}</code>: list of data frames for any given
 epoched timeseries</p></li>
 </ul>
+<div class="alert alert-light">
+<p>💡 <strong>Note:</strong> This vignette describes the structure of an
+<code>eyeris</code> object as returned by the main preprocessing
+pipeline.</p>
+<ol style="list-style-type: decimal">
+<li><p>Understanding these components will help you interpret results,
+debug issues, and extend the pipeline for your own research
+needs.</p></li>
+<li><p>Furthermore, binocular data will have a <code>left</code> and
+<code>right</code> component to the <code>eyeris</code> object, which
+will contain the same components as the main <code>eyeris</code>
+object.</p></li>
+<li><p>There is also a phantom <code>raw_binocular_object</code>
+component to the <code>eyeris</code> object, which contains the raw
+binocular data used internally to perform the binocular correlation
+analysis and plotting.</p></li>
+</ol>
+</div>
 <p>Now that we’ve explained what you can expect to see after running the
 <code>eyeris</code> <code>glassbox()</code> function, we’ll demonstrate
 what the <code>glassbox()</code> wrapper is generally comprised of in
