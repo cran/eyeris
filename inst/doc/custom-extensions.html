@@ -48,9 +48,8 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -61,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -369,7 +368,7 @@ frame.</p>
 tracked, first check out the companion vignette: <a href="anatomy.html">📦 Anatomy of an <code>eyeris</code> Object</a>.</p>
 </div>
 <div id="creating-a-custom-extension-for-eyeris" class="section level2">
-<h2>🛠️Creating a Custom Extension for <code>eyeris</code></h2>
+<h2>🛠 Creating a Custom Extension for <code>eyeris</code></h2>
 <p>Let’s say you want to write a new <code>eyeris</code> extension
 function called <code>winsorize()</code> to apply <a href="https://en.wikipedia.org/wiki/Winsorizing">winsorization</a> to
 extreme pupil values.</p>

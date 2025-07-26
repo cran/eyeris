@@ -1,8 +1,32 @@
-## eyeris 2.1.0 "Lumpy Space Princess" ![Lumpy Space Princess](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/lsp.png){width="50"}
+# eyeris 2.1.1 "Lumpy Space Princess" ![Lumpy Space Princess](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/lsp.png){width="50"}
+
+This release patches a few bugs that emerged as a result of the `v2.1.0` minor release.
+
+## 🔧 Minor improvements and fixes
+
+- BF (#237): Ensure full raw timeseries `.csv` file is written by `bidsify()` for single-run (monocular) data, including cases with or without epoching and with run number override. Previously, the file was only written for multi-run data by @shawntz in #240.
+
+- FF (#236): Certain `sprintf`-formatted log messages (e.g., those with '%s') for blinks/events writing in `pipeline-bidsify.R` now parse and display correctly in the logger by using the internal `alert()` wrapper by @shawntz in #241.
+
+- FF (#238): Only log `[INFO] Filtered epochs: ...` when data is epoched by @shawntz in #242.
+
+- CHORE (#239): Remove duplicate logging events for "Created gaze heatmap" in `bidsify()` pipeline. The log message now appears only once per run and uses the `[OKAY]` log level for both run-level and epoch-level heatmap creation, improving clarity and consistency in logs, by @shawntz in #243.
+
+- ENH DOC: Add GitHub Actions workflow for automated spellchecking of documentation and code using [r-spellcheck-action](https://github.com/marketplace/actions/r-spellcheck-action). The workflow runs on pushes and pull requests to `dev` and `release/**` branches by @shawntz in #244
+
+- CHORE: Adjust `pkgdown` CI deployment trigger conditions for PRs to be more specific about which branches should trigger the workflow by @shawntz in #245.
+
+- CHORE: Update the GitHub Actions workflow configuration to fix CI triggers for the R CMD build/check action. The changes modify the workflow name and expand branch pattern matching to include release branches with additional path segments, by @shawntz in #246.
+
+- CHORE: Standardize the GitHub Actions workflow configurations for air formatting operations. The changes update workflow names and branch targeting patterns to ensure consistent formatting checks and suggestions across the development workflow, by @shawntz in #247.
+
+- CHORE: Resolve spelling errors throughout the package by correcting typos in documentation, comments, and code, while also creating a WORDLIST file for the spellchecker to recognize domain-specific terms by @shawntz in #248.
+
+# eyeris 2.1.0 "Lumpy Space Princess" ![Lumpy Space Princess](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/lsp.png){width="50"}
 
 This minor release introduces significant enhancements, new features, and robust improvements focusing on binocular data support, standardized logging, and improved reporting and development workflows, substantially elevating `eyeris'` functionality, robustness, and user experience.
 
-#### ✨ New features & enhancements
+## ✨ New features & enhancements
 
 - **Comprehensive Binocular Recording Support**: `eyeris` now provides full binocular recording support, resolving a critical data loading bug previously encountered with binocular EyeLink recording data files (#216 reported by @anomalosepia). This enhancement includes nesting `eyeris` class lists with `left` and `right` parent lists to explicitly separate left eye (`L`) and right eye (`R`) data. All downstream operations are now designed to treat `L` and/or `R` as separate entities, which ensures no cross-contamination between data from the two eyes during processing. Additionally, the `bidsify()` function now appends `_eye-L` and/or `_eye-R` to all derivatives and output HTML reports for binocular data for clear naming conventions. Pipeline functions such as `deblink()`, `interpolate()`, `lpfilt()`, `detransient()`, `zscore()`, `epoch()`, `downsample()`, `detrend()`, and `bin()` have been updated to handle binocular objects. A new `plot_binocular_correlation()` function has also been added, and vignettes were updated to explain binocular data structures and usage with `glassbox()`; by @shawntz in #228.
 
@@ -12,7 +36,7 @@ This minor release introduces significant enhancements, new features, and robust
 
 - **Integration of Air R Formatter:** The project's R code formatting has transitioned to `Air`, an R formatter and language server written in Rust, replacing the lintr-based formatting system. This change involved deleting the `.github/workflows/linter.yml` file, introducing a new `.air.toml` configuration file, and adding two new GitHub workflows for format checking and suggestions. Furthermore, comprehensive code reformatting has been applied to all R source files to match Air's standards, ensuring better line breaks, consistent spacing, and improved argument alignment throughout the entire codebase; by @shawntz in #234.
 
-#### 🔧 Minor improvements and fixes
+## 🔧 Minor improvements and fixes
 
 - **Improved HTML Report Navigation:** The table of contents depth in HTML reports has been increased from 3 to 6 levels for better navigation by @shawntz in #229.
 
@@ -20,7 +44,7 @@ This minor release introduces significant enhancements, new features, and robust
 
 - **Event Placeholder Fix:** The event placeholder in example code and documentation has been updated from `{type}` to `{startstop}` to resolve a name conflict with an existing `type` column name in the derived `.csv` data files by @shawntz in #232.
 
-#### 📚 Documentation & Development Workflow Updates
+## 📚 Documentation & Development Workflow Updates
 
 - **Revamped README:** The `README` has been significantly expanded with detailed feature highlights, a comprehensive function reference table, and new sections outlining the BIDS-like file structure for both monocular and binocular data. It also includes quick links to eyeris tutorials (R CRAN package vignettes), improved example output, and updated section headings for clarity and visual appeal; by @shawntz in #231.
 
@@ -28,13 +52,13 @@ This minor release introduces significant enhancements, new features, and robust
 
 - **Makefile Maintenance:** Comments and section headers in the Makefile have been updated and clarified for better maintainability by @shawntz in #230.
 
-## eyeris 2.0.0 "Lumpy Space Princess" ![Lumpy Space Princess](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/lsp.png){width="50"}
+# eyeris 2.0.0 "Lumpy Space Princess" ![Lumpy Space Princess](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/lsp.png){width="50"}
 
 This is the largest update yet for `eyeris`, introducing a wealth of new features and addressing numerous small issues to significantly enhance functionality, robustness, and user experience (#215).
 
-#### ✨ New features
+## ✨ New features
 
-##### Enhanced reporting and visualization:
+### Enhanced reporting and visualization:
 
 -   **Progressive preprocessing summary plots** can now be generated and saved, visualizing the effects of each preprocessing step on pupil data and updating report structures to include these visualizations. The `plot.eyeris()` function now includes an `add_progressive_summary` parameter to optionally generate these plots by @shawntz in #212.
 
@@ -44,7 +68,7 @@ This is the largest update yet for `eyeris`, introducing a wealth of new feature
 
 -   The `html_report` parameter in `bidsify()` now **defaults to `TRUE`** by @shawntz in #212.
 
-##### Core data processing functions:
+### Core data processing functions:
 
 -   New `bin()` and `downsample()` functions are introduced for **pupil time series data processing**, including anti-aliasing filtering for downsampling and averaging for binning. Both functions are integrated into the `eyeris::glassbox()` pipeline by @shawntz and @mh105 in #204.
 
@@ -52,15 +76,15 @@ This is the largest update yet for `eyeris`, introducing a wealth of new feature
 
 -   **Confounds calculation and export** are integrated into the processing pipelines, with `eyeris::summarize_confounds()` now included in `eyeris::glassbox()` and `eyeris::epoch()` pipelines by @shawntz in #182.
 
-##### Pipeline robustness and reproducibility:
+### Pipeline robustness and reproducibility:
 
 -   **Tracking of pipeline step provenance** is improved, adding the original function call and parameters for each step via a new `call_info` argument. This metadata is passed to `eyeris` functions to enhance reproducibility and debugging by @shawntz in #209.
 
 -   The `eyelogger()` utility documentation has been **updated with a new section in the README**, detailing its purpose, usage examples, parameters, and generated log files for improved reproducibility and debugging by @shawntz in #214.
 
-#### 🔧 Minor improvements and fixes
+## 🔧 Minor improvements and fixes
 
-##### Robustness and error handling:
+### Robustness and error handling:
 
 -   **Enhanced plotting robustness** includes `tryCatch` blocks to handle errors and display informative messages in plots, and time series plotting now iterates over all intermediate steps to ensure plots are generated even with missing or incomplete data by @shawntz in #181, #183.
 
@@ -78,7 +102,7 @@ This is the largest update yet for `eyeris`, introducing a wealth of new feature
 
 -   **Baseline handling in `eyeris::epoch()`** is simplified by **_deprecating_** `calc_baseline` and `apply_baseline` in favor of a single `baseline` parameter, also resolving bugs related to baseline computation and event mismatches by @shawntz in #177.
 
-##### Pipeline and data logic:
+### Pipeline and data logic:
 
 -   The `eyeris::glassbox()` function has been **refactored to process each block** in the time series _individually_ (except `load_asc`), improving modularity and ensuring correct error handling of multi-block data by @shawntz in #189.
 
@@ -90,7 +114,7 @@ This is the largest update yet for `eyeris`, introducing a wealth of new feature
 
 -   The **recalculation of epoched confounding variables** is now performed _when new epochs are created_ by @shawntz in #182.
 
-##### Documentation and internal clean-up:
+### Documentation and internal clean-up:
 
 -   **Extensive documentation cleanup** has been performed, including fixing various spelling errors/typos in multiple function documentations by @shawntz in #179, #214.
 
@@ -104,13 +128,13 @@ This is the largest update yet for `eyeris`, introducing a wealth of new feature
 
 ------------------------------------------------------------------------
 
-## eyeris 1.2.1 "Tree Trunks" ![Tree Trunks](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/tree-trunks.png){width="50"}
+# eyeris 1.2.1 "Tree Trunks" ![Tree Trunks](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/tree-trunks.png){width="50"}
 
-#### ✨ New features
+## ✨ New features
 
 -   `eyelogger()`: a new utility function to automatically capture and record R console output, errors, and the evaluated `eyeris` command into timestamped log files (`.out`, `.err`, and `.cmd`) for improved reproducibility, record keeping, and debugging by @shawntz in #171
 
-    ##### `eyelogger()` usage example
+    ### `eyelogger()` usage example
 
     Logging your `eyeris` commands with `eyelogger()` is as simple as wrapping your command like this:
 
@@ -120,21 +144,21 @@ This is the largest update yet for `eyeris`, introducing a wealth of new feature
     }, log_dir = file.path("~/Documents", "eyeris_logs"))
     ```
 
-#### 🐛 Bugs fixed
+## 🐛 Bugs fixed
 
 -   Fixed edge case related to non-finite samples in `bidsify` epoch plotting function by @gustxsr in #166
 -   Fixed multi-block epoch bug by extracting data from blocks using their names rather than their indices by @hyang336 in #168
 -   Fixed plotting bug (#165) by @shawntz in #169
 
-#### 🔧 Other minor improvements and fixes
+## 🔧 Other minor improvements and fixes
 
 -   ENH: make plot color scheme more accessible/easier to read by @shawntz in #169
 -   FF: missing x-axis labels on histograms in rendered reports by @shawntz in #169
 -   NF: add detrend fitted values diagnostic plot to rendered reports by @shawntz in #169
 
-## eyeris 1.2.0 "Tree Trunks" ![Tree Trunks](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/tree-trunks.png){alt="Tree Trunks" width="50"}
+# eyeris 1.2.0 "Tree Trunks" ![Tree Trunks](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/tree-trunks.png){alt="Tree Trunks" width="50"}
 
-#### ✨ New features
+## ✨ New features
 
 -   NF: Add vertical lines to plots to indicate where missing data (such as blinks and/or removed artifacts) are located in the time series
 -   ENH: Plotting now takes time ranges in seconds directly and does the conversion to row index using tracker Hz on the backend, making plotting in `eyeris` more intuitive. To demonstrate:
@@ -146,7 +170,7 @@ plot(eyeris_preproc,
 )
 ```
 
-#### 🐛 Bug fixes
+## 🐛 Bug fixes
 
 -   BF: `NA` slot offset in diagnostic plotting (#161)
 -   BF: normalize physical machine time bins and convert to seconds / start at 0 seconds (#162)
@@ -154,7 +178,7 @@ plot(eyeris_preproc,
 -   BF: minor issue where a manually specified block number in `load_asc()` wasn't being translated to the column `block` in the resulting list of time series data frames
 -   BF: minor issue where setting `block = NULL` in `load_asc()` didn't actually omit the block column values from the resulting data frames within the returned `eyeris` list object
 
-#### 🔧 Minor improvements and fixes
+## 🔧 Minor improvements and fixes
 
 -   RF: update package title to match that of the published bioRxiv preprint
 -   RF: Deprecated the `num_previews` parameter in `plot()`.
@@ -168,18 +192,18 @@ plot(eyeris_preproc,
     -   Update funders and contributors list
     -   Add funders disclaimer statement to the footer
 
-## eyeris 1.1.0 "Princess Bubblegum" ![Princess Bubblegum](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/princess-bubblegum.png){alt="Princess Bubblegum" width="25"}
+# eyeris 1.1.0 "Princess Bubblegum" ![Princess Bubblegum](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/princess-bubblegum.png){alt="Princess Bubblegum" width="25"}
 
-#### ✨ New features
+## ✨ New features
 
 -   NF: Simplify `glassbox()` caller with redesigned parameters that enhance continuity across all pipeline steps (#148)
 
-#### 📚 Documentation
+## 📚 Documentation
 
 -   DOC: Improved function documentation across the package and added more usage notes for clarity.
 -   DOC: Updated styling of documentation website.
 
-#### 🔧 Minor improvements and fixes
+## 🔧 Minor improvements and fixes
 
 -   ENH: Make histograms disabled by default when plotting an `eyeris` object (#156).
 -   RF: Deprecated the `confirm` parameter in `glassbox()`.
@@ -189,11 +213,11 @@ plot(eyeris_preproc,
 -   BF: Random seed assignment was not behaving as expected within the `glassbox()` pipeline.
 -   RF: Modify paths to documentation assets to fix broken links at build.
 
-## eyeris 1.0.1 "Ice King" ![Ice King](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/ice-king.png){alt="Ice King" width="50"}
+# eyeris 1.0.1 "Ice King" ![Ice King](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/ice-king.png){alt="Ice King" width="50"}
 
 This non-CRAN release patches a small handful of documentation-related chores that have no direct impact on the functionality of `eyeris` for the end user. The minor improvements and fixes contained within this release will soon be bundled with a more substantial feature upgrade when submitted to CRAN to reduce burden on the CRAN reviewers at this time. Stay tuned!
 
-#### 🔧 Minor improvements and fixes (#159)
+## 🔧 Minor improvements and fixes (#159)
 
 -   CHORE: fix duplicate `LICENSE` file issue in `release/**` branches (#145)
 -   CHORE: update funders list on `DESCRIPTION` (#149)
@@ -205,13 +229,13 @@ This non-CRAN release patches a small handful of documentation-related chores th
 -   DOC: add `CONTRIBUTING.md` guidelines file for GitHub (#157)
 -   DOC: fix `/man/figures/...` image ref issues which is leading to broken links on the `R CRAN read-only` [GitHub mirror repo](https://github.com/cran/eyeris) (#158)
 
-## eyeris 1.0.0 "Ice King" ![Ice King](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/ice-king.png){alt="Ice King" width="50"}
+# eyeris 1.0.0 "Ice King" ![Ice King](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/ice-king.png){alt="Ice King" width="50"}
 
-### 🎉 **First CRAN release!** (#144)
+## 🎉 **First CRAN release!** (#144)
 
 This version marks the official launch of the `eyeris` package on CRAN.
 
-#### ✨ New features (#125)
+## ✨ New features (#125)
 
 -   Added example vignettes to demonstrate core functionality:
     -   Preprocessing pipelines with `glassbox()`
@@ -219,20 +243,20 @@ This version marks the official launch of the `eyeris` package on CRAN.
     -   BIDS-style export with `bidsify()`
     -   Custom pipeline extensions using `pipeline_handler()`
 
-#### 📚 Documentation (#125)
+## 📚 Documentation (#125)
 
 -   Improved function documentation across the package
 -   Added citation guidance and reproducibility tips
 
-Thanks for checking out `eyeris`! 🧠👁️
+Thanks for checking out `eyeris`! 🧠
 
 ------------------------------------------------------------------------
 
-**Pre-CRAN `dev` GitHub releases:**
+**Pre-CRAN `dev` GitHub releases:** 
 
-## eyeris 0.1.1.9000 "Jake the Dog"![Jake the Dog](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/jake.png){alt="Jake the Dog" width="40"}
+# eyeris 0.1.1.9000 "Jake the Dog" ![Jake the Dog](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/jake.png){alt="Jake the Dog" width="40"}
 
-#### 🔧 Minor improvements and fixes
+## 🔧 Minor improvements and fixes
 
 -   FF (#115): add more aggressive handling of edge cases in `eyeris::detransient()` (#121)
     -   Specifically, situations where pupil data appear to have already undergone some type of online filtering directly from the EyeLink Host PC machine.
@@ -240,9 +264,9 @@ Thanks for checking out `eyeris`! 🧠👁️
     -   Furthermore, a new `mad_thresh` override parameter has been added to `eyeris::detransient()` for advanced users to override the `mad_thresh` computed property. *Note:* this new `mad_thresh` parameter defaults to `NULL` (and should pretty much always stay as such).
 -   FF (#122): fixed issue with incompatible unicode character in plot titles (#123)
 
-## eyeris 0.1.0.9000 "Jake the Dog"![Jake the Dog](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/jake.png){width="40"}
+# eyeris 0.1.0.9000 "Jake the Dog" ![Jake the Dog](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/jake.png){width="40"}
 
-#### 💥 Breaking changes
+## 💥 Breaking changes
 
 -   NF (#10): add support for `.asc` files containing multiple recording segments within the same file (#120)
     -   There is a new `block` argument added to the `load_asc()` function
@@ -250,13 +274,13 @@ Thanks for checking out `eyeris`! 🧠👁️
     -   You can also manually specify a different block value (numeric) instead of "auto", which can be helpful for multi-block experiments where each block/run was recorded to a separate `.asc` file. This is especially important to consider when running the downstream `epoch()` and `bidsify()` functions so that derived files and summary reports are properly labeled with the correction block/run number
     -   Currently, there is also a `NULL` option; however, this is likely going to just be a part of `beta` testing and will probably be removed in a future version given the foregoing 2 options should cover most (if not all) use cases
 
-#### ✨ New features
+## ✨ New features
 
 -   NF: robust HTML and PDF output summary sidecar reports within `bidsify()` (#120)
     -   Here, reports are well-organized both by block/run and any specific event message epochs that have been processed using the `epoch()` function
     -   For epoched data, we now provide a useful *interactive utility* within the epoch-specific HTML reports: you can now use your mouse and/or keyboard to swiftly navigate through an interactive gallery of pupil plot segments from every single trial from any given subject, right out-of-the-box! We hope this alleviates some of the complexities/roadblocks users might face when needing to perform manual inspections of their data for quality assurance and/or diagnostic purposes.
 
-#### 🔧 Minor improvements and fixes
+## 🔧 Minor improvements and fixes
 
 -   FF (#118): resolved a minor bug in the EyeLink EDF header `model` and `version` fields for data collected on newer EyeLink hardware/software (#120)
 -   ENH: event epoching is now both **more robust** and **super fast** (#120)
@@ -265,13 +289,13 @@ Thanks for checking out `eyeris`! 🧠👁️
     -   Similarly, these added benefits coincide nicely with the new multi-block support (#10)
 -   General bug fixes and enhancements to codebase and front-end UX (#120)
 
-## eyeris 0.0.0.9000 "Finn the Human" ![Finn the Human](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/release/v2.0.0/inst/figures/adventure-time/finn.png){width="35"}
+# eyeris 0.0.0.9000 "Finn the Human" ![Finn the Human](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/finn.png){width="35"}
 
 -   Initial beta release
 
 ------------------------------------------------------------------------
 
-#### Commit message tags reference:
+## Commit message tags reference:
 
 -   **BF:** bug fix (in the *release* branch)
 -   **FF:** feature fix (bug fixes in the *dev* branch)

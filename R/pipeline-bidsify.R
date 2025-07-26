@@ -413,7 +413,7 @@ run_bidsify <- function(
   n_epochs <- length(epochs)
   any_epochs <- n_epochs > 0
 
-  if (verbose) {
+  if (verbose && any_epochs) {
     cli::cli_alert_info(
       sprintf("[INFO] Filtered epochs: %s", paste(epochs, collapse = ", "))
     )
@@ -508,7 +508,7 @@ run_bidsify <- function(
     )
 
     if (verbose) {
-      cli::cli_alert_info("[INFO] Writing blinks data to '%s'...", file.path(dir, p, bids_fname))
+      alert("info", "[INFO] Writing blinks data to '%s'...", file.path(dir, p, bids_fname))
     }
 
     if (is_binocular_object(eyeris)) {
@@ -525,7 +525,7 @@ run_bidsify <- function(
     }
 
     if (verbose) {
-      cli::cli_alert_success("[OKAY] Blinks data written to: '%s'", file.path(dir, p, bids_fname))
+      alert("success", "[OKAY] Blinks data written to: '%s'", file.path(dir, p, bids_fname))
     }
   }
 
@@ -540,7 +540,7 @@ run_bidsify <- function(
     )
 
     if (verbose) {
-      cli::cli_alert_info("[INFO] Writing events data to '%s'...", file.path(dir, p, bids_fname))
+      alert("info", "[INFO] Writing events data to '%s'...", file.path(dir, p, bids_fname))
     }
 
     if (is_binocular_object(eyeris)) {
@@ -557,7 +557,7 @@ run_bidsify <- function(
     }
 
     if (verbose) {
-      cli::cli_alert_success("[OKAY] Events data written to: '%s'", file.path(dir, p, bids_fname))
+      alert("success", "[OKAY] Events data written to: '%s'", file.path(dir, p, bids_fname))
     }
   }
 
@@ -1323,6 +1323,48 @@ run_bidsify <- function(
             )
           }
         })
+      }
+    } else {
+      # single run (monocular) case: write the raw timeseries
+      if (is.list(eyeris$timeseries) && length(eyeris$timeseries) > 0) {
+        run_data <- eyeris$timeseries[[1]]
+      } else {
+        cli::cli_abort("[EXIT] eyeris$timeseries is either not a list or is empty. Cannot access the first element.")
+      }
+      # use run_num if provided, otherwise default to 1
+      run_num_to_use <- if (!is.null(run_num)) {
+        run_num_numeric <- suppressWarnings(as.numeric(run_num))
+        if (!is.na(run_num_numeric)) {
+          sprintf("%02d", run_num_numeric)
+        } else {
+          cli::cli_alert_warning("[WARN] Invalid run_num provided. Defaulting to '01'.")
+          "01"
+        }
+      } else {
+        "01"
+      }
+      f <- make_bids_fname(
+        sub_id = sub,
+        ses_id = ses,
+        task_name = task,
+        run_num = run_num_to_use,
+        desc = "timeseries",
+        eye_suffix = eye_suffix
+      )
+      if (verbose) {
+        alert(
+          "info",
+          "[INFO] Writing raw pupil timeseries to '%s'...",
+          file.path(dir, p, f)
+        )
+      }
+      write.csv(run_data, file.path(dir, p, f), row.names = FALSE)
+      if (verbose) {
+        alert(
+          "success",
+          "[OKAY] Raw pupil timeseries written to: '%s'",
+          file.path(dir, p, f)
+        )
       }
     }
   }
@@ -2280,8 +2322,7 @@ run_bidsify <- function(
         dev.off()
 
         if (verbose) {
-          alert("info", "Created gaze heatmap for run-%02d", i_run)
-          alert("info", "[INFO] Created gaze heatmap for run-%02d", i_run)
+          alert("success", "[OKAY] Created gaze heatmap for run-%02d", i_run)
         }
       }
 
@@ -2529,7 +2570,7 @@ run_bidsify <- function(
               dev.off()
 
               if (verbose) {
-                alert("info", "[INFO] Created gaze heatmap for epoch %s (run-%02d)", group, run_dir_num)
+                alert("success", "[OKAY] Created gaze heatmap for epoch %s (run-%02d)", group, run_dir_num)
               }
             }
           }

@@ -48,9 +48,8 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -61,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -362,7 +361,7 @@ data from each step of the preprocessing pipeline to make quality
 control and assurance intuitive and accessible for any dataset (without
 needing to write any additional code)!</p>
 <div id="load-and-preprocess-your-data" class="section level2">
-<h2>1️⃣ Load and Preprocess Your Data</h2>
+<h2>1 Load and Preprocess Your Data</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Load eyeris</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(eyeris)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
@@ -384,7 +383,7 @@ needing to write any additional code)!</p>
 <span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::summarize_confounds()</span></span></code></pre></div>
 </div>
 <div id="extract-data-epochs" class="section level2">
-<h2>2️⃣ Extract Data Epochs</h2>
+<h2>2 Extract Data Epochs</h2>
 <p><code>epoch()</code> enables flexible extraction of trials using:</p>
 <ul>
 <li>start/stop events,</li>
@@ -481,7 +480,7 @@ label to the resulting epoch set.</p>
 <span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Block 1: found 5 matching events for PROBESTARTtrial</span></span>
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Done!</span></span>
 <span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Block 1: pupil data from 5 unique event messages extracted</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Pupil epoching completed in 0.02 seconds</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Pupil epoching completed in 0.03 seconds</span></span>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Recalculating epoched confounds for new epochs...</span></span>
 <span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
 <span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>eye_1b <span class="sc">|&gt;</span></span>
@@ -594,7 +593,7 @@ subtracting the average pupil size from the pre-probe delay period
 </div>
 </div>
 <div id="export-to-a-bids-like-format" class="section level2">
-<h2>3️⃣ Export to a BIDS-like Format</h2>
+<h2>3 Export to a BIDS-like Format</h2>
 <p>Once epoched, your data is ready to be exported with
 <code>bidsify()</code>, which saves the raw and epoched data in a
 structured, <code>BIDS</code>-inspired format.</p>
