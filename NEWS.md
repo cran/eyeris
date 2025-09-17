@@ -1,3 +1,131 @@
+# eyeris 3.0.0 "Lumpy Space Princess" ![Lumpy Space Princess](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/lsp.png){width="50"}
+
+This major release delivers multiple performance enhancements and feature improvements, reducing processing time and improving overall efficiency across the pipeline.
+
+## 🚨 **Breaking changes & deprecations**
+
+- **DEPRECATED: `merge_runs` and `merge_epochs` parameters in `bidsify()`**: Both `merge_runs` and `merge_epochs` parameters are now deprecated. All runs and epochs are now saved as separate files following proper BIDS conventions, which is the recommended approach for neuroimaging data standards. Users relying on these features should update their analysis workflows to handle separate run and epoch files. Deprecation warnings will be shown when these parameters are used.
+
+## 🚀 New features
+
+- **NF**: **Zip-based epoch gallery system**: Replaced individual epoch image files with zip-based storage and loading system. The `make_gallery()` function now creates epoch images in zip files instead of individual PNG files, and uses `zip.js` to dynamically load images in the HTML gallery. This reduces file count, improves organization, and provides more efficient loading while maintaining full backward compatibility with existing individual image files. This is particularly beneficial for high-throughput compute environments with limited inode quotas and simplifies file transfers to cloud storage providers like GitHub LFS, by @shawntz in #254.
+
+- **NF**: **Automated source figure cleanup**: Added post-render cleanup functionality that automatically zips all `png` and `jpg` files in each `source/figures/run-xx/` directory after the main HTML report is generated before deleting the individual image files, further reducing file count burden while preserving all figure data in compressed format, creating only one zip file per run per subject instead of hundreds of individual image files, by @shawntz in #255.
+
+- **NF - DuckDB database integration**: Added optional `DuckDB` database functionality to `bidsify()` as an alternative to CSV files for large-scale analyses. When `db_enabled = TRUE`, all `eyeris` data (timeseries, epochs, events, blinks, confounds) are written to a centralized database for efficient querying and analysis. Features include seamless out-of-the-box configuration, user-friendly database functions (`eyeris_db_collect()`, `eyeris_db_connect()`, `eyeris_db_read()`, `eyeris_db_list_tables()`), and `dplyr`-style data access. CSV file generation can be optionally disabled with `csv_enabled = FALSE` for cloud compute environments, by @shawntz in #256.
+
+- **NF**: **Added parallel processing support for DuckDB database operations** to prevent concurrency issues during batch processing. Implemented temporary database creation with automatic merging and cleanup mechanisms. Added environment variable detection for common HPC schedulers (SLURM, PBS, SGE, LSF) and manual `parallel_processing` parameter override. Includes comprehensive file locking, process/job ID logging, and full test coverage, by @shawntz in #262.
+
+ > This enhancement enables seamless parallel compute and batch processing when using `db_enabled = TRUE`. Each parallel job now writes to a unique temporary database, preventing the crashes that occurred when multiple processes attempted concurrent writes to the same DuckDB file.
+  >
+  > Key features:
+  > - **Automatic Detection**: Detects HPC environments (SLURM_JOB_ID, PBS_JOBID, etc.)
+  > - **Temporary Databases**: Each job uses PID + timestamp for unique temp database names
+  > - **Safe Merging**: File-based locking prevents concurrent access during merge operations
+  > - **Rich Logging**: Job ID and process ID included in all parallel processing messages
+  > - **Zero Breaking Changes**: All existing functionality preserved
+  >
+  > Usage examples:
+  > ```r
+  > # Automatic detection in HPC environments
+  > data |> bidsify(db_enabled = TRUE)
+  > 
+  > # Manual enable for testing/development
+  > data |> bidsify(db_enabled = TRUE, parallel_processing = TRUE)
+  > 
+  > # Environment variable override
+  > Sys.setenv(PARALLEL_PROCESSING = "1")
+  > data |> bidsify(db_enabled = TRUE)
+  > ```
+
+- **NF**: **Large-scale database export functionality**. Added `eyeris_db_to_chunked_files()` and `process_chunked_query()` functions to handle really large `eyerisdb` databases by processing data in configurable chunks (default `1M rows`) with automatic file size limits (default `500MB`) and numbered file splitting (`_01-of-N` pattern). Supports both `CSV` and `Parquet` output formats with memory-efficient streaming processing, by @shawntz in #266.
+
+- **NF**: **Robust parquet export/read for `eyerisdb` mixed schemas**. `eyeris_db_to_parquet()` and `read_eyeris_parquet()` now combine tables/files using schema-aligned binding (by column name; fill missing) via `data.table::rbindlist(use.names = TRUE, fill = TRUE)`. Fixes "numbers of columns of arguments do not match" when different `epochs_*` tables have slightly different columns, by @shawntz in #266.
+
+  > **Key Features:**
+  > - **Chunked Processing**: Handles databases of any size without memory issues using configurable chunk sizes
+  > - **Automatic File Splitting**: Creates numbered files when size limits exceeded (e.g., `data_01-of-03.csv`)
+  > - **Smart Schema Grouping**: Dynamically groups tables by column structure to prevent SQL UNION errors
+  > - **Database Safety**: Comprehensive temp table cleanup and contamination prevention
+  > - **Comprehensive Documentation**: Detailed vignette with real-world examples and troubleshooting
+
+- **NF**: **Database sharing and distribution functionality**. Added `eyeris_db_split_for_sharing()` and `eyeris_db_reconstruct_from_chunks()` functions to facilitate sharing of large eyeris databases via platforms with file size limits (GitHub, OSF, data repositories). Supports chunking strategies by data type, count, or size limits with epoch label grouping for efficient organization. Includes comprehensive metadata for reliable database reconstruction, by @shawntz in #269.
+
+## 🔧 Major code improvements
+
+- **Simplified `bidsify()` function**: Significantly refactored and streamlined the `pipeline-bidsify.R` file to improve maintainability and reduce code complexity:
+  - **Removed merge_runs and merge_epochs logic**: Eliminated ~250+ lines of complex conditional logic for merging runs and epochs, simplifying the codebase while ensuring BIDS compliance
+  - **Consolidated baseline data access**: Updated helper functions to prioritize baseline information stored within `epoch_xx$block_1$baseline` structure, providing consistent data access patterns while maintaining backward compatibility with legacy storage locations
+  - **Simplified epoch summary generation**: Replaced 257 lines of repetitive `sapply()` calls with a clean 77-line implementation using `unlist()` approach for generating `*_desc-epoch_summary.csv` files, improving code readability and maintainability
+  - **Added helper functions**: Created centralized functions (`get_epoch_info()`, `get_baseline_events()`, `get_baseline_type()`, `has_baseline()`) to eliminate code duplication and provide consistent data access across the pipeline
+
+- **ENH**: Added post-render cleanup of figures directories in `pipeline-bidsify.R`. Enhanced `zip_and_cleanup_source_figures` to remove existing zip files before reprocessing, move new zip files to the parent figures directory, and delete run directories after successful zipping. This streamlines figures management and prevents leftover files from previous runs, by @shawntz in #261.
+
+  > Further cleans up number of derived files in `eyeris` BIDS directories (which is especially useful for cloud compute deployments).
+  >
+  > The new behavior will be:
+  > 
+  > 1. Create zip files in the `figures/` directory (i.e., one level up from the run directories)
+  > 2. Remove existing zip files when reprocessing
+  > 3. Remove the entire `run-XX/` directories after successful zip creation
+  >
+  > As such, the final file structure will be:
+  
+  ```bash
+    sub-01/
+    └── ses-enc/
+        ├── sub-01.html
+        └── source/
+            ├── figures/
+            │   ├── run-01.zip  # now contains all images from run-01/
+            │   ├── run-02.zip  # now contains all images from run-02/
+            │   └── run-03.zip  # now contains all images from run-03/
+            └── logs/
+                ├── run-01_metadata.json
+                ├── run-02_metadata.json
+                └── run-03_metadata.json
+  ```
+
+- **FF**: Handle non-finite values in plotting xlim ranges to prevent `plot.window()` crashes. Added `finite=TRUE` parameter to `range()` calls and fallback logic when no finite values exist in timebin or x_seq data. Resolves "need finite 'xlim' values" error during epoch visualization, by @shawntz in #263.
+
+- **FF**: Standardize column structure before rbind in epoch summaries to prevent column mismatch errors. Different epochs can have varying metadata structures (9 vs 10 fields), causing `rbind()` to fail. Added logic to collect all unique column names, standardize structure with NA values for missing columns, and ensure consistent column ordering before combining data frames, by @shawntz in #264.
+
+- **ENH**: **Improved database summary performance**. `eyeris_db_summary()` now extracts subject/session/task information directly from table names instead of sampling database contents, providing complete coverage of all subjects and much faster execution, by @shawntz in #266.
+
+- **ENH**: **Enhanced temp table safety**. All database export functions now automatically detect, warn about, and exclude temporary tables from processing. Added safe temporary table operations with guaranteed cleanup even on process crashes, by @shawntz in #266.
+
+- **ENH**: **Optimized database export performance and reliability**. `eyeris_db_to_chunked_files()` now uses a hybrid approach: database-level export via DuckDB's `COPY` command for large file size limits (≥500MB) for maximum performance, and chunked processing for smaller limits (<500MB) to ensure proper file size splitting for git-lfs workflows. Additionally, parquet file handling has been improved to eliminate unreliable appending that caused `_chunk_` files, now using a cleaner numbered file approach with 80% size thresholds to prevent append failures, by @shawntz in #268.
+
+- **ENH**: **Enhanced chunked database export with epoch label grouping**. `eyeris_db_to_chunked_files()` now supports `group_by_epoch_label` parameter (default: TRUE) that processes epoch-related data types separately by epoch label, reducing memory footprint and creating label-specific output files. Added helper functions for epoch label extraction and improved table grouping logic for better organization of exported data, by @shawntz in #270.
+
+## 🔧 Minor improvements and fixes
+
+- **BF (#250)**: Updated functions in `pipeline-confounds.R` and `pipeline-epoch.R` to handle cases where 'start_matched_event' is used instead of 'matched_event' in epoched data. Resolved an issue with inconsistent variable naming introduced in #a8df0c0, and fixed time and duration calculations in `epoch_start_end_msg()` to use correct units and sample counts, by @shawntz in #251.
+
+- **RF**: **Added Bootstrap and Lightbox assets** (CSS, JS, fonts, images) to `inst/www` and updated `.Rbuildignore` to exclude them from builds. Refactored make_gallery to use local copies of these dependencies with CDN fallbacks, improving offline support and reliability of gallery reports, by @shawntz in #252.
+
+- **DOC**: Added a comprehensive 'Internal API Reference' vignette documenting all internal functions for advanced users and developers and updated the README to link to the new vignette/included it in the pkgdown docs site configuration, by @shawntz in #257.
+
+- **RF**: Updated documentation and comments across multiple files to improve clarity and align terminology throughout the codebase, especially in function descriptions, parameter names, and return value documentation, by @shawntz in #257.
+
+- **FF**: Updated the `log_message()` function to use `tryCatch` when applying `glue` interpolation, ensuring that errors (e.g., from malformed braces or embedded `JSON`) do not interrupt logging; now, the original message is used if interpolation fails, by @shawntz in #258.
+
+- **CHORE**: Add a GitHub Actions workflow to auto-render vignettes and publish them to the `eyeris` GitHub repo wiki, by @shawntz in #259.
+
+- **RF - post-render cleanup to remove figures directory**: The `cleanup_source_figures_post_render()` function now removes the entire `source/figures` directory after report generation, as images are embedded in the `HTML`. Documentation and comments updated to reflect this change, and unused parameters are noted for compatibility, by @shawntz in #261.
+
+- **RF - increase zip file embed size limit to 1GB**: Raised the maximum allowed zip file size for data `URL` embedding from `10MB` to `1GB` in `print_lightbox_img_html()`. Updated warning message to reflect the new limit, by @shawntz in #261.
+
+- **RF - update report title in `make_report` function**: Changed the report title from 'preprocessing summary report' to 'preprocessing report' for consistency and clarity, by @shawntz in #261.
+
+- **CHORE - update logo image URL**: Changed the `logo` image source in `README` files to use a `GitHub raw URL` for better compatibility, by @shawntz in #261.
+
+- **FF**: Detect grouping column for epoch diagnostic plots. For start/end epochs (e.g., `"PROBE_S {STIM}"` to `"PROBE_E {STIM}"`), the epoched data contains `start_matched_event` instead of `matched_event`. Added automatic detection logic with priority: requested column → `start_matched_event` → `end_matched_event`. Includes informative logging and graceful fallback when no suitable column found, by @shawntz in #265.
+
+- **FF**: Improved handling of mismatched start/end events in `epoch()`. When using start/end event pairs (e.g., `c("PROBE_S {STIM}", "PROBE_E {STIM}")`), the function now automatically matches events by extracting identifiers from event messages instead of failing with "Start and end timestamps must have the same number of rows". Unmatched events are filtered out and the process continues with matched pairs only, with informative logging about the filtering process, by @shawntz in #267.
+
+- **DOC**: Updated package documentation to include newly exported database functions in `_pkgdown.yml`, core function reference table in `README.Rmd`, and internal API vignette. Enhanced documentation coverage for database export and management functionality, by @shawntz in #270.
+
 # eyeris 2.1.1 "Lumpy Space Princess" ![Lumpy Space Princess](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/lsp.png){width="50"}
 
 This release patches a few bugs that emerged as a result of the `v2.1.0` minor release.
@@ -292,16 +420,3 @@ Thanks for checking out `eyeris`! 🧠
 # eyeris 0.0.0.9000 "Finn the Human" ![Finn the Human](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/inst/figures/adventure-time/finn.png){width="35"}
 
 -   Initial beta release
-
-------------------------------------------------------------------------
-
-## Commit message tags reference:
-
--   **BF:** bug fix (in the *release* branch)
--   **FF:** feature fix (bug fixes in the *dev* branch)
--   **RF:** refactoring
--   **NF:** new feature
--   **ENH:** enhancement
--   **DOC:** for documentation-related updates and changes
--   **TEST:** for commits that add or change unit tests
--   **CHORE:** like **RF** but usually less important changes

@@ -9,7 +9,8 @@ save_progressive_summary_plots(
   out_dir,
   preview_n = 3,
   plot_params = list(),
-  eye_suffix = NULL
+  eye_suffix = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -22,12 +23,14 @@ save_progressive_summary_plots(
 \item{plot_params}{Additional plotting parameters}
 
 \item{eye_suffix}{Optional eye suffix for binocular data}
+
+\item{verbose}{Logical. Whether to print verbose output (default TRUE).}
 }
 \value{
 A character string containing markdown references to the saved plots
 }
 \description{
-Generates and saves progressive summary plots for each block in the eyeris
+Generates and saves progressive summary plots for each block in the \code{eyeris}
 object.
 }
 \keyword{internal}

@@ -9,7 +9,8 @@ save_detrend_plots(
   out_dir,
   preview_n = 3,
   plot_params = list(),
-  eye_suffix = NULL
+  eye_suffix = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -22,12 +23,14 @@ save_detrend_plots(
 \item{plot_params}{Additional plotting parameters}
 
 \item{eye_suffix}{Optional eye suffix for binocular data}
+
+\item{verbose}{Logical. Whether to print verbose output (default TRUE).}
 }
 \value{
 No return value; saves detrend plots to the specified directory
 }
 \description{
-Generates and saves detrend diagnostic plots for each block in the eyeris
+Generates and saves detrend diagnostic plots for each block in the \code{eyeris}
 object.
 }
 \keyword{internal}

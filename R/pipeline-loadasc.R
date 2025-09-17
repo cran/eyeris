@@ -38,6 +38,7 @@
 #'   * "left": Uses only the left eye pupil size.
 #'   * "right": Uses only the right eye pupil size.
 #'   * "both": Uses both the left and right eye pupil sizes independently.
+#' @param verbose Logical. Whether to print verbose output (default TRUE).
 #'
 #' @return An object of S3 class `eyeris` with the following attributes:
 #' \enumerate{
@@ -63,7 +64,7 @@
 #' @seealso [eyelinker::read.asc()] which this function wraps.
 #'
 #' @seealso [eyeris::glassbox()] for the recommended way to run this step
-#' as part of the full eyeris glassbox preprocessing pipeline.
+#' as part of the full `eyeris` glassbox preprocessing pipeline.
 #'
 #' @examples
 #' demo_data <- eyelink_asc_demo_dataset()
@@ -93,17 +94,13 @@
 load_asc <- function(
   file,
   block = "auto",
-  binocular_mode = c(
-    "average",
-    "left",
-    "right",
-    "both"
-  )
+  binocular_mode = c("average", "left", "right", "both"),
+  verbose = TRUE
 ) {
   binocular_mode <- match.arg(binocular_mode)
 
   if (!tools::file_ext(file) %in% c("asc", "gz")) {
-    cli::cli_abort(sprintf("[EXIT] Error: The file '%s' is not a .asc file.", file))
+    log_error("Error: The file '{file}' is not a .asc file.")
   }
 
   x <- eyelinker::read.asc(
@@ -134,8 +131,9 @@ load_asc <- function(
   binocular <- has_left && has_right
 
   if (binocular) {
-    cli::cli_alert_info(
-      "[INFO] Binocular data detected. Processing {.val {binocular_mode}} mode."
+    log_info(
+      "Binocular data detected. Processing {binocular_mode} mode.",
+      verbose = verbose
     )
 
     # create left and right eye data frames to store original binocular data before merging
@@ -276,9 +274,19 @@ load_asc <- function(
 #' @param binoc Boolean binocular data detected
 #' @param binoc_mode Binocular mode ("average", "left", "right", "both")
 #'
-#' @return An eyeris object
+#' @return An `eyeris` object
+#'
 #' @keywords internal
-process_eyeris_data <- function(x, block, eye, hz, pupil_type, file, binoc, binoc_mode) {
+process_eyeris_data <- function(
+  x,
+  block,
+  eye,
+  hz,
+  pupil_type,
+  file,
+  binoc,
+  binoc_mode
+) {
   # raw data processing
   if (eye == "left") {
     eye_meta <- "L"
@@ -296,11 +304,7 @@ process_eyeris_data <- function(x, block, eye, hz, pupil_type, file, binoc, bino
       eye_x = xp,
       eye_y = yp
     ) |>
-    dplyr::mutate(
-      eye = eye_meta,
-      hz = hz,
-      type = pupil_type
-    ) |>
+    dplyr::mutate(eye = eye_meta, hz = hz, type = pupil_type) |>
     dplyr::relocate(pupil_raw, .after = type)
 
   # return list object
@@ -324,18 +328,9 @@ process_eyeris_data <- function(x, block, eye, hz, pupil_type, file, binoc, bino
       existing_blocks <- unique(x$raw$block)
       if (length(existing_blocks) > 1) {
         # split raw data by eyelinker-detected blocks
-        list_out$timeseries <- split(
-          raw_df,
-          paste0("block_", x$raw$block)
-        )
-        list_out$events <- split(
-          x$msg,
-          paste0("block_", x$msg$block)
-        )
-        list_out$blinks <- split(
-          x$blinks,
-          paste0("block_", x$blinks$block)
-        )
+        list_out$timeseries <- split(raw_df, paste0("block_", x$raw$block))
+        list_out$events <- split(x$msg, paste0("block_", x$msg$block))
+        list_out$blinks <- split(x$blinks, paste0("block_", x$blinks$block))
       } else {
         # if eyelinker parses only 1 block, then use that single block
         list_out$timeseries <- list("block_1" = raw_df)
@@ -357,13 +352,13 @@ process_eyeris_data <- function(x, block, eye, hz, pupil_type, file, binoc, bino
         paste0("block_", as.character(block))
       )
     } else {
-      cli::cli_abort("[EXIT] `block` must be either: NULL, numeric, or 'auto'.")
+      log_error("`block` must be either: NULL, numeric, or 'auto'.")
     }
   } else {
     # fallback to direct assignment if all block cases fail
     list_out$timeseries <- list("block_1" = raw_df)
 
-    # omit the block column from the timeseries, events, and blinks
+    # omit the block column from the time series, events, and blinks
     list_out$timeseries$block_1 <- list_out$timeseries$block_1 |>
       dplyr::select(-block)
     list_out$events <- x$msg |> dplyr::select(-block)
@@ -384,10 +379,7 @@ process_eyeris_data <- function(x, block, eye, hz, pupil_type, file, binoc, bino
   list_out$binocular_mode <- binoc_mode
 
   # set latest pointer based on block structure
-  if (
-    is.list(list_out$timeseries) &&
-      !is.data.frame(list_out$timeseries)
-  ) {
+  if (is.list(list_out$timeseries) && !is.data.frame(list_out$timeseries)) {
     # multiblock: set a named list of pointers
     list_out$latest <- setNames(
       as.list(rep("pupil_raw", length(list_out$timeseries))),
@@ -470,15 +462,14 @@ any_block_entries <- function(eyeris_obj) {
 normalize_time_orig <- function(eyeris_obj) {
   if (any_block_entries(eyeris_obj)) {
     # case: one or more multiple "blocks"
-    eyeris_obj$timeseries <-
-      lapply(eyeris_obj$timeseries, function(block_df) {
-        block_df |>
-          dplyr::mutate(
-            time_secs = (time_orig - dplyr::first(time_orig)) / 1000,
-            time_scaled = (time_orig - dplyr::first(time_orig)) / 1000,
-            .after = "time_orig"
-          )
-      })
+    eyeris_obj$timeseries <- lapply(eyeris_obj$timeseries, function(block_df) {
+      block_df |>
+        dplyr::mutate(
+          time_secs = (time_orig - dplyr::first(time_orig)) / 1000,
+          time_scaled = (time_orig - dplyr::first(time_orig)) / 1000,
+          .after = "time_orig"
+        )
+    })
   } else {
     # safety mechanism: shouldn't ever get to this condition b/c of 167
     # case: no tibble "block_{}" in list timeseries; ts is the tibble

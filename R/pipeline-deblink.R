@@ -54,10 +54,7 @@
 #' @export
 deblink <- function(eyeris, extend = 50, call_info = NULL) {
   call_info <- if (is.null(call_info)) {
-    list(
-      call_stack = match.call(),
-      parameters = list(extend = extend)
-    )
+    list(call_stack = match.call(), parameters = list(extend = extend))
   } else {
     call_info
   }
@@ -149,26 +146,28 @@ deblink_pupil <- function(x, prev_op, extend) {
     extend_backward <- extend[1]
     extend_forward <- extend[2]
   } else {
-    cli::cli_abort(
-      paste(
-        "[EXIT] extend must either be a single integer (symmetric) or a vector of",
-        "length 2 (asymmetric) in the format `c(backward, forward)`!"
-      )
+    log_error(
+      "extend must either be a single integer (symmetric) or a vector of length 2 (asymmetric) in the format `c(backward, forward)`!"
     )
   }
 
   x |>
-    dplyr::select(
-      time = time_orig,
-      pupil = !!column
-    ) |>
+    dplyr::select(time = time_orig, pupil = !!column) |>
     dplyr::mutate(
       blink = ifelse(is.na(pupil), 1, 0),
       blink.lag = dplyr::lag(blink),
       blink.lead = dplyr::lead(blink),
-      blink.start = ifelse(blink == 1 & !is.na(blink.lag) & blink.lag == 0, time, as.numeric(NA)),
+      blink.start = ifelse(
+        blink == 1 & !is.na(blink.lag) & blink.lag == 0,
+        time,
+        as.numeric(NA)
+      ),
       blink.start = zoo::na.locf(blink.start, na.rm = FALSE, fromLast = TRUE),
-      blink.end = ifelse(blink == 1 & !is.na(blink.lead) & blink.lead == 0, time, as.numeric(NA)),
+      blink.end = ifelse(
+        blink == 1 & !is.na(blink.lead) & blink.lead == 0,
+        time,
+        as.numeric(NA)
+      ),
       blink.end = zoo::na.locf(blink.end, na.rm = FALSE),
       blink = ifelse(
         !is.na(blink.start) &

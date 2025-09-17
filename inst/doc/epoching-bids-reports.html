@@ -48,8 +48,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -60,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -368,19 +369,20 @@ needing to write any additional code)!</p>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Load the example memory task file and run default glassbox preproc workflow</span></span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>demo_data <span class="ot">&lt;-</span> <span class="fu">eyelink_asc_demo_dataset</span>()</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>eye <span class="ot">&lt;-</span> <span class="fu">glassbox</span>(demo_data)</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::load_asc()</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Processing block: block_1</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::deblink() for block_1</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::detransient() for block_1</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::interpolate() for block_1</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::lpfilt() for block_1</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; ! [WARN] Skipping eyeris::downsample() for block_1</span></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; ! [WARN] Skipping eyeris::bin() for block_1</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; ! [WARN] Skipping eyeris::detrend() for block_1</span></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::zscore() for block_1</span></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Block processing summary:</span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] block_1: OK (steps: 6, latest: pupil_raw_deblink_detransient_interpolate_lpfilt_z)</span></span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Running eyeris::summarize_confounds()</span></span></code></pre></div>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:48] [OKAY] Running eyeris::load_asc()</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; ℹ [2025-09-16 16:14:48] [INFO] Processing block: block_1</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:48] [OKAY] Running eyeris::deblink() for block_1</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:48] [OKAY] Running eyeris::detransient() for block_1</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:48] [OKAY] Running eyeris::interpolate() for block_1</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:48] [OKAY] Running eyeris::lpfilt() for block_1</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; ! [2025-09-16 16:14:48] [WARN] Skipping eyeris::downsample() for block_1</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; ! [2025-09-16 16:14:48] [WARN] Skipping eyeris::bin() for block_1</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; ! [2025-09-16 16:14:48] [WARN] Skipping eyeris::detrend() for block_1</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:48] [OKAY] Running eyeris::zscore() for block_1</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; ℹ [2025-09-16 16:14:48] [INFO] Block processing summary:</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; ℹ [2025-09-16 16:14:48] [INFO] block_1: OK (steps: 6, latest:</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; pupil_raw_deblink_detransient_interpolate_lpfilt_z)</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:48] [OKAY] Running eyeris::summarize_confounds()</span></span></code></pre></div>
 </div>
 <div id="extract-data-epochs" class="section level2">
 <h2>2 Extract Data Epochs</h2>
@@ -397,12 +399,14 @@ needing to write any additional code)!</p>
 </blockquote>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>eye_1a <span class="ot">&lt;-</span> eye <span class="sc">|&gt;</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">epoch</span>(<span class="at">events =</span> <span class="st">&quot;PROBE*&quot;</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; ℹ Epoching pupil data...</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Block 1: found 10 matching events for PROBE</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Done!</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Block 1: pupil data from 10 unique event messages extracted</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Pupil epoching completed in 0.11 seconds</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Recalculating epoched confounds for new epochs...</span></span></code></pre></div>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; ℹ [2025-09-16 16:14:49] [INFO] Epoching pupil data...</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; ℹ [2025-09-16 16:14:49] [INFO] Block 1: found 10 matching events for PROBE</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:49] [OKAY] Done!</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:49] [OKAY] Block 1: pupil data from 10 unique event</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; messages extracted</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:49] [OKAY] Pupil epoching completed in 0.09 seconds</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; ℹ [2025-09-16 16:14:49] [INFO] Recalculating epoched confounds for new</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; epochs...</span></span></code></pre></div>
 <p>Now, if you take a look at <code>eye</code>, you’ll notice there’s a
 new list element within this <code>eyeris</code> object:
 <code>epoch_probe</code>.</p>
@@ -476,54 +480,57 @@ label to the resulting epoch set.</p>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;probeAfter&quot;</span></span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  )</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; ℹ Epoching pupil data...</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Block 1: found 5 matching events for PROBESTARTtrial</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Done!</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Block 1: pupil data from 5 unique event messages extracted</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ✔ [OKAY] Pupil epoching completed in 0.03 seconds</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; ℹ [INFO] Recalculating epoched confounds for new epochs...</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>eye_1b <span class="sc">|&gt;</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">pluck</span>(<span class="st">&quot;epoch_probeAfter&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="fu">head</span>()</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; $block_1</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; # A tibble: 5,000 × 21</span></span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt;    block time_orig timebin time_secs time_scaled eye_x eye_y eye      hz type   </span></span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt;    &lt;dbl&gt;     &lt;int&gt;   &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  </span></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt;  1     1  11336474 0            1.98        1.98  972.  550. R      1000 diamet…</span></span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt;  2     1  11336475 0.00100      1.98        1.98  971.  551. R      1000 diamet…</span></span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt;  3     1  11336476 0.00200      1.98        1.98  970.  551. R      1000 diamet…</span></span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt;  4     1  11336477 0.00300      1.99        1.99  970.  550. R      1000 diamet…</span></span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt;  5     1  11336478 0.00400      1.99        1.99  971.  548. R      1000 diamet…</span></span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt;  6     1  11336479 0.00501      1.99        1.99  972.  547. R      1000 diamet…</span></span>
-<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt;  7     1  11336480 0.00601      1.99        1.99  972.  548. R      1000 diamet…</span></span>
-<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt;  8     1  11336481 0.00701      1.99        1.99  972.  548. R      1000 diamet…</span></span>
-<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt;  9     1  11336482 0.00801      1.99        1.99  972.  550. R      1000 diamet…</span></span>
-<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt; 10     1  11336483 0.00901      1.99        1.99  972.  550. R      1000 diamet…</span></span>
-<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co">#&gt; # ℹ 4,990 more rows</span></span>
-<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a><span class="co">#&gt; # ℹ 11 more variables: pupil_raw &lt;dbl&gt;, pupil_raw_deblink &lt;dbl&gt;,</span></span>
-<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient &lt;dbl&gt;,</span></span>
-<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate &lt;dbl&gt;,</span></span>
-<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate_lpfilt &lt;dbl&gt;,</span></span>
-<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate_lpfilt_z &lt;dbl&gt;,</span></span>
-<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a><span class="co">#&gt; #   text_unique &lt;chr&gt;, template &lt;chr&gt;, matching_pattern &lt;chr&gt;, …</span></span>
-<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a><span class="co">#&gt; $info</span></span>
-<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a><span class="co">#&gt; $info$block_1</span></span>
-<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a><span class="co">#&gt; $info$block_1$calc_baseline</span></span>
-<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span>
-<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a><span class="co">#&gt; $info$block_1$apply_baseline</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; ℹ [2025-09-16 16:14:49] [INFO] Epoching pupil data...</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ℹ [2025-09-16 16:14:49] [INFO] Block 1: found 5 matching events for</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; PROBESTARTtrial</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:49] [OKAY] Done!</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:49] [OKAY] Block 1: pupil data from 5 unique event messages</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; extracted</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; ✔ [2025-09-16 16:14:49] [OKAY] Pupil epoching completed in 0.03 seconds</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; ℹ [2025-09-16 16:14:49] [INFO] Recalculating epoched confounds for new</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; epochs...</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>eye_1b <span class="sc">|&gt;</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">pluck</span>(<span class="st">&quot;epoch_probeAfter&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  <span class="fu">head</span>()</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; $block_1</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; # A tibble: 5,000 × 21</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt;    block time_orig timebin time_secs time_scaled eye_x eye_y eye      hz type   </span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt;    &lt;dbl&gt;     &lt;int&gt;   &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  </span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt;  1     1  11336474 0            1.98        1.98  972.  550. R      1000 diamet…</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt;  2     1  11336475 0.00100      1.98        1.98  971.  551. R      1000 diamet…</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt;  3     1  11336476 0.00200      1.98        1.98  970.  551. R      1000 diamet…</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt;  4     1  11336477 0.00300      1.99        1.99  970.  550. R      1000 diamet…</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt;  5     1  11336478 0.00400      1.99        1.99  971.  548. R      1000 diamet…</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt;  6     1  11336479 0.00501      1.99        1.99  972.  547. R      1000 diamet…</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt;  7     1  11336480 0.00601      1.99        1.99  972.  548. R      1000 diamet…</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co">#&gt;  8     1  11336481 0.00701      1.99        1.99  972.  548. R      1000 diamet…</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a><span class="co">#&gt;  9     1  11336482 0.00801      1.99        1.99  972.  550. R      1000 diamet…</span></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a><span class="co">#&gt; 10     1  11336483 0.00901      1.99        1.99  972.  550. R      1000 diamet…</span></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a><span class="co">#&gt; # ℹ 4,990 more rows</span></span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a><span class="co">#&gt; # ℹ 11 more variables: pupil_raw &lt;dbl&gt;, pupil_raw_deblink &lt;dbl&gt;,</span></span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient &lt;dbl&gt;,</span></span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate &lt;dbl&gt;,</span></span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate_lpfilt &lt;dbl&gt;,</span></span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a><span class="co">#&gt; #   pupil_raw_deblink_detransient_interpolate_lpfilt_z &lt;dbl&gt;,</span></span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a><span class="co">#&gt; #   text_unique &lt;chr&gt;, template &lt;chr&gt;, matching_pattern &lt;chr&gt;, …</span></span>
+<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a><span class="co">#&gt; $info</span></span>
+<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a><span class="co">#&gt; $info$block_1</span></span>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a><span class="co">#&gt; $info$block_1$calc_baseline</span></span>
 <span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span>
 <span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a><span class="co">#&gt; $info$block_1$epoch_events</span></span>
-<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="co">#&gt; [1] &quot;PROBE_START_{trial}&quot;</span></span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a><span class="co">#&gt; $info$block_1$apply_baseline</span></span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span>
 <span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a><span class="co">#&gt; $info$block_1$epoch_limits</span></span>
-<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co">#&gt; [1] 0 1</span></span>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a><span class="co">#&gt; $info$block_1$epoch_events</span></span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co">#&gt; [1] &quot;PROBE_START_{trial}&quot;</span></span>
 <span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a><span class="co">#&gt; $info$block_1$n_epochs</span></span>
-<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a><span class="co">#&gt; [1] 5</span></span></code></pre></div>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a><span class="co">#&gt; $info$block_1$epoch_limits</span></span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a><span class="co">#&gt; [1] 0 1</span></span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a><span class="co">#&gt; $info$block_1$n_epochs</span></span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a><span class="co">#&gt; [1] 5</span></span></code></pre></div>
 <div class="alert alert-light">
 <p>💡 <strong>Note:</strong> You can customize <code>epoch()</code> with
 trial-level metadata!</p>

@@ -10,9 +10,9 @@ get_block_numbers(x)
 \item{x}{Either a character vector of block names or an \code{eyeris} object}
 }
 \value{
-A numeric vector of block numbers, or NULL if no blocks found
+A numeric vector of block numbers, defaults to 1 if no blocks found
 }
 \description{
-Extracts numeric block numbers from block names or an eyeris object.
+Extracts numeric block numbers from block names or an \code{eyeris} object.
 }
 \keyword{internal}

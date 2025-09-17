@@ -1,7 +1,7 @@
 #' Plot pre-processed pupil data from `eyeris`
 #'
 #' S3 plotting method for objects of class `eyeris`. Plots a single-panel
-#' timeseries for a subset of the pupil timeseries at each preprocessing step.
+#' timeseries for a subset of the pupil time series at each preprocessing step.
 #' The intended use of this function is to provide a simple method for
 #' qualitatively assessing the consequences of the preprocessing recipe and
 #' parameters on the raw pupillary signal.
@@ -10,9 +10,9 @@
 #' @param ... Additional arguments to be passed to `plot`
 #' @param steps Which steps to plot; defaults to `all` (i.e., plot all steps).
 #' Otherwise, pass in a vector containing the index of the step(s) you want to
-#' plot, with index `1` being the original raw pupil timeseries
+#' plot, with index `1` being the original raw pupil time series
 #' @param preview_n Number of random example "epochs" to generate for
-#' previewing the effect of each preprocessing step on the pupil timeseries
+#' previewing the effect of each preprocessing step on the pupil time series
 #' @param preview_duration Time in seconds of each randomly selected preview
 #' @param preview_window The start and stop raw timestamps used to subset the
 #' preprocessed data from each step of the `eyeris` workflow for visualization
@@ -32,11 +32,11 @@
 #' parameters within and across `eyeris` workflow steps
 #' @param block For multi-block recordings, specifies which block to plot.
 #' Defaults to 1. When a single `.asc` data file contains multiple
-#' recording blocks, this parameter determines which block's timeseries to
+#' recording blocks, this parameter determines which block's time series to
 #' visualize. Must be a positive integer not exceeding the total number of
 #' blocks in the recording
 #' @param plot_distributions Logical flag to indicate whether to plot both
-#' diagnostic pupil timeseries *and* accompanying histograms of the pupil
+#' diagnostic pupil time series *and* accompanying histograms of the pupil
 #' samples at each processing step. Defaults to `FALSE`
 #' @param suppress_prompt Logical flag to disable interactive confirmation
 #' prompts during plotting. Defaults to `TRUE`, which avoids hanging behavior in
@@ -57,7 +57,7 @@
 #' (use eye="right" for right eye data)
 #' @param num_previews **(Deprecated)** Use `preview_n` instead
 #'
-#' @return No return value; iteratively plots a subset of the pupil timeseries
+#' @return No return value; iteratively plots a subset of the pupil time series
 #' from each preprocessing step run
 #'
 #' @seealso [lifecycle::deprecate_warn()]
@@ -72,7 +72,7 @@
 #'   eyeris::lpfilt(plot_freqz = TRUE) |>
 #'   eyeris::zscore()
 #'
-#' # controlling the timeseries range (i.e., preview window) in your plots:
+#' # controlling the time series range (i.e., preview window) in your plots:
 #'
 #' ## example 1: using the default 10000 to 20000 ms time subset
 #' plot(my_eyeris_data, seed = 0, add_progressive_summary = TRUE)
@@ -123,11 +123,7 @@ plot.eyeris <- function(
 ) {
   # handle deprecated parameters
   if (is_present(num_previews)) {
-    deprecate_warn(
-      "1.2.0",
-      "plot(num_previews)",
-      "plot(preview_n)"
-    )
+    deprecate_warn("1.2.0", "plot(num_previews)", "plot(preview_n)")
     preview_n <- num_previews
   }
 
@@ -138,20 +134,17 @@ plot.eyeris <- function(
     if (eye == "left") {
       x <- x$left
       eye_suffix <- "eye-L"
-      if (verbose) {
-        cli::cli_alert_info("[INFO] Plotting left eye data")
-      }
+      log_info("Plotting left eye data", verbose = verbose)
     } else if (eye == "right") {
       x <- x$right
       eye_suffix <- "eye-R"
-      if (verbose) {
-        cli::cli_alert_info("[INFO] Plotting right eye data")
-      }
+      log_info("Plotting right eye data", verbose = verbose)
     } else if (eye == "both") {
       x <- x$left
-      if (verbose) {
-        cli::cli_alert_info("[INFO] Plotting left eye data (use eye='right' for right eye)")
-      }
+      log_info(
+        "Plotting left eye data (use eye='right' for right eye)",
+        verbose = verbose
+      )
     }
   }
 
@@ -207,11 +200,9 @@ plot.eyeris <- function(
   # set param defaults outside of function declaration
   if (!is.null(preview_window)) {
     if (!is.null(preview_n) || !is.null(preview_duration)) {
-      cli::cli_alert_warning(
-        paste(
-          "[WARN] preview_n and/or preview_duration will be ignored,",
-          "since preview_window was specified here."
-        )
+      log_warn(
+        "preview_n and/or preview_duration will be ignored,",
+        "since preview_window was specified here."
       )
     }
   }
@@ -242,29 +233,21 @@ plot.eyeris <- function(
   # blocks handler
   if (is.list(x$timeseries) && !is.data.frame(x$timeseries)) {
     available_blocks <- get_block_numbers(x)
+    available_blocks_sorted <- sort(as.numeric(available_blocks), na.last = NA)
 
     if (block %in% available_blocks) {
       pupil_data <- x$timeseries[[paste0("block_", block)]]
-      if (verbose) {
-        cli::cli_alert_info(sprintf(
-          "[INFO] Plotting block %d from possible blocks: %s",
-          block,
-          toString(available_blocks)
-        ))
-      }
+      log_info(
+        "Plotting block {block} with sampling rate {hz} Hz from possible blocks: {toString(available_blocks_sorted)}",
+        verbose = verbose
+      )
     } else {
-      cli::cli_abort(sprintf(
-        "[EXIT] Block %d does not exist. Available blocks: %d",
-        block,
-        toString(available_blocks)
-      ))
+      log_error(
+        "Block {block} does not exist. Available blocks: {toString(available_blocks_sorted)}"
+      )
     }
   } else {
     pupil_data <- x$timeseries$block_1
-  }
-
-  if (verbose) {
-    alert("info", paste("[INFO] Plotting with sampling rate:", hz, "Hz"))
   }
 
   pupil_steps <- grep("^pupil_", names(pupil_data), value = TRUE)
@@ -312,7 +295,10 @@ plot.eyeris <- function(
         header <- paste0(
           gsub("_", " > ", gsub("pupil_", "", pupil_steps[i])),
           if (is.list(x$timeseries) && !is.data.frame(x$timeseries)) {
-            paste(sprintf(" (Run %d)", block), if (!is.null(eye_suffix)) paste0(" (", eye_suffix, ")") else "")
+            paste(
+              sprintf(" (Run %d)", block),
+              if (!is.null(eye_suffix)) paste0(" (", eye_suffix, ")") else ""
+            )
           } else {
             ""
           }
@@ -364,9 +350,9 @@ plot.eyeris <- function(
         }
 
         if (!is.null(params$next_step)) {
-          plot_data <- random_epochs[[n]][[
-            params$next_step[length(params$next_step)]
-          ]]
+          plot_data <- random_epochs[[n]][[params$next_step[length(
+            params$next_step
+          )]]]
         } else {
           plot_data <- random_epochs[[n]][[pupil_steps[i]]]
         }
@@ -377,7 +363,15 @@ plot.eyeris <- function(
         no_valid_data <- is.null(plot_data) || all(is.na(plot_data))
 
         if (is_placeholder || no_valid_data) {
-          plot(NA, xlim = c(0, 1), ylim = c(0, 1), type = "n", xlab = "", ylab = "", main = title)
+          plot(
+            NA,
+            xlim = c(0, 1),
+            ylim = c(0, 1),
+            type = "n",
+            xlab = "",
+            ylab = "",
+            main = title
+          )
           text(
             0.5,
             0.5,
@@ -432,15 +426,16 @@ plot.eyeris <- function(
         end_index > nrow(pupil_data) ||
         start_index >= end_index
     ) {
-      cli::cli_abort(
-        "[EXIT] Invalid preview_window: start/end index out of range or invalid."
+      log_error(
+        "Invalid preview_window: start/end index out of range or invalid."
       )
     }
 
     sliced_pupil_data <- pupil_data[start_index:end_index, ]
 
     # time axis in ms for proper scaling
-    time_ms <- (sliced_pupil_data$time_scaled - min(sliced_pupil_data$time_scaled))
+    time_ms <- (sliced_pupil_data$time_scaled -
+      min(sliced_pupil_data$time_scaled))
 
     for (i in seq_along(pupil_steps)) {
       st <- pupil_data$time_orig[start_index]
@@ -457,7 +452,10 @@ plot.eyeris <- function(
       do.call(
         robust_plot,
         c(
-          list(y = sliced_pupil_data[[pupil_steps[i]]], x = sliced_pupil_data$time_scaled),
+          list(
+            y = sliced_pupil_data[[pupil_steps[i]]],
+            x = sliced_pupil_data$time_scaled
+          ),
           plot_params,
           list(
             type = "l",
@@ -513,11 +511,10 @@ plot.eyeris <- function(
 
   # add progressive summary plot at the end (if requested)
   if (add_progressive_summary) {
-    if (verbose) {
-      cli::cli_alert_info(
-        sprintf("[INFO] Creating progressive summary plot for block_%d", block)
-      )
-    }
+    log_info(
+      "Creating progressive summary plot for block_{block}",
+      verbose = verbose
+    )
 
     tryCatch(
       {
@@ -534,18 +531,16 @@ plot.eyeris <- function(
           cex = 1.15
         )
 
-        if (verbose) {
-          cli::cli_alert_success(
-            "[OKAY] Progressive summary plot created successfully!"
-          )
-        }
+        log_success(
+          "Progressive summary plot created successfully!",
+          verbose = verbose
+        )
       },
       error = function(e) {
-        if (verbose) {
-          cli::cli_alert_warning(
-            paste("[WARN] Could not create progressive summary plot:", e$message)
-          )
-        }
+        log_warn(
+          "Could not create progressive summary plot: {e$message}",
+          verbose = verbose
+        )
       }
     )
   }
@@ -556,14 +551,14 @@ plot.eyeris <- function(
 
 #' Draw random epochs for plotting
 #'
-#' Generates random time segments from the timeseries data for preview plotting.
+#' Generates random time segments from the time series data for preview plotting.
 #'
-#' @param x A dataframe containing timeseries data
+#' @param x A data frame containing time series data
 #' @param n Number of random epochs to draw
 #' @param d Duration of each epoch in seconds
 #' @param hz Sampling rate in Hz
 #'
-#' @return A list of dataframes, each containing a random epoch segment
+#' @return A list of data frames, each containing a random epoch segment
 #'
 #' @keywords internal
 draw_random_epochs <- function(x, n, d, hz) {
@@ -574,7 +569,7 @@ draw_random_epochs <- function(x, n, d, hz) {
   max_time_secs <- max(x$time_secs, na.rm = TRUE)
 
   if ((max_time_secs - min_time_secs) < d) {
-    cli::cli_abort("[EXIT] Example duration is longer than the duration of data.")
+    log_error("Example duration is longer than the duration of data.")
   }
 
   # get step size and ensure it's valid for the time range
@@ -636,13 +631,8 @@ draw_random_epochs <- function(x, n, d, hz) {
       )
       drawn_epochs[[i]] <- placeholder_data
 
-      cli::cli_alert_warning(
-        paste0(
-          "[WARN] Randomly selected plot segment ",
-          i,
-          " had no valid samples. ",
-          "Please re-run with a different `report_seed`."
-        )
+      log_warn(
+        "Randomly selected plot segment {i} had no valid samples. Please re-run with a different `report_seed`."
       )
     }
   }
@@ -666,7 +656,7 @@ robust_plot <- function(y, x = NULL, ...) {
   tryCatch(
     {
       if (length(y) == 0 || all(is.na(y))) {
-        cli::cli_alert_warning("[WARN] No finite data to plot.")
+        log_warn("No finite data to plot.")
         return(invisible(NULL))
       }
 
@@ -684,7 +674,14 @@ robust_plot <- function(y, x = NULL, ...) {
       }
 
       # init placeholder line
-      plot(x_seq, ifelse(is.na(y_orig), NA, y_orig), xlim = range(x_seq, na.rm = TRUE), ...)
+      # handle case where x_seq has no finite values
+      x_range <- range(x_seq, na.rm = TRUE, finite = TRUE)
+      if (any(!is.finite(x_range))) {
+        # fallback to default range if no finite values
+        x_range <- c(0, length(x_seq))
+      }
+
+      plot(x_seq, ifelse(is.na(y_orig), NA, y_orig), xlim = x_range, ...)
 
       # add vertical lines where there are NAs (using x values if available)
       na_idx <- which(is.na(y_orig))
@@ -702,14 +699,10 @@ robust_plot <- function(y, x = NULL, ...) {
       lines(x_seq, y_clean, col = col_user)
     },
     error = function(e) {
-      cli::cli_alert_warning(
-        paste("[WARN] An error occurred during plotting:", e$message)
-      )
+      log_warn("An error occurred during plotting: {e$message}")
     },
     warning = function(w) {
-      cli::cli_alert_warning(
-        paste("[WARN] A warning occurred during plotting:", w$message)
-      )
+      log_warn("A warning occurred during plotting: {w$message}")
     }
   )
 }
@@ -775,7 +768,7 @@ draw_na_lines <- function(x, y, ...) {
 #' `glassbox()` interactive preview mode. It uses `robust_plot()` to show the
 #' most recent detrended pupil signal overlaid with the fitted linear trend.
 #'
-#' @param pupil_data A single block of pupil timeseries data
+#' @param pupil_data A single block of pupil time series data
 #' (e.g. `eyeris$timeseries$block_1`)
 #' @param preview_n Number of columns for `par(mfrow)`. Default = 3.
 #' @param plot_params A named list of additional parameters to forward to
@@ -805,16 +798,14 @@ plot_detrend_overlay <- function(
 
   # guard if detrend_fitted_values exists and has a valid previous column
   if (length(detrend_fitted_index) == 0) {
-    cli::cli_alert_danger(
-      "[WARN] detrend_fitted_values not found in eyeris S3 object."
-    )
+    log_warn("detrend_fitted_values not found in eyeris S3 object.")
     par(mfrow = c(1, preview_n), oma = c(0, 0, 3, 0))
     return(FALSE)
   }
 
   if (detrend_fitted_index <= 1) {
-    cli::cli_alert_warning(
-      "[WARN] No previous pupil column found to plot detrend overlay against. ",
+    log_warn(
+      "No previous pupil column found to plot detrend overlay against.",
       "This can happen when detrend is the only preprocessing step enabled."
     )
     # restore main plotting func layout
@@ -826,8 +817,8 @@ plot_detrend_overlay <- function(
 
   # ensure prev col is a pupil col
   if (!grepl("^pupil_", prev_col)) {
-    cli::cli_alert_warning(
-      "[WARN] Previous column is not a pupil column. Cannot plot detrend overlay."
+    log_warn(
+      "Previous column is not a pupil column. Cannot plot detrend overlay."
     )
     # restore main plotting func layout
     par(mfrow = c(1, preview_n), oma = c(0, 0, 3, 0))
@@ -856,9 +847,22 @@ plot_detrend_overlay <- function(
     )
   )
 
-  lines(pupil_data$time_secs, pupil_data$detrend_fitted_values, type = "l", col = "blue", lwd = 2, lty = 1)
+  lines(
+    pupil_data$time_secs,
+    pupil_data$detrend_fitted_values,
+    type = "l",
+    col = "blue",
+    lwd = 2,
+    lty = 1
+  )
 
-  legend("topleft", legend = c("pupil timeseries", "linear trend"), col = c("black", "blue"), lwd = 2, lty = c(1, 1))
+  legend(
+    "topleft",
+    legend = c("pupil time series", "linear trend"),
+    col = c("black", "blue"),
+    lwd = 2,
+    lty = c(1, 1)
+  )
 
   par(mfrow = c(1, preview_n), oma = c(0, 0, 3, 0))
   if (!suppress_prompt) {
@@ -876,8 +880,8 @@ plot_detrend_overlay <- function(
 #'
 #' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
 #' @param block Block number to plot (default: 1)
-#' @param screen_width Screen width in pixels from eyeris$info$screen.x
-#' @param screen_height Screen height in pixels from eyeris$info$screen.y
+#' @param screen_width Screen width in pixels from `eyeris$info$screen.x`
+#' @param screen_height Screen height in pixels from `eyeris$info$screen.y`
 #' @param n_bins Number of bins for the heatmap grid (default: 50)
 #' @param col_palette Color palette for the heatmap (default: "viridis")
 #' @param main Title for the plot (default: "Fixation Heatmap")
@@ -918,24 +922,26 @@ plot_gaze_heatmap <- function(
 
     df <- eyeris$timeseries[[block_str]]
     if (!is.data.frame(df)) {
-      cli::cli_alert_warning("[WARN] Block not found in eyeris object.")
+      log_warn("Block not found in eyeris object.")
       return(invisible(NULL))
     }
   } else {
     df <- eyeris
     if (is.null(screen_width) || is.null(screen_height)) {
-      cli::cli_abort("[EXIT] Screen width and height must be provided with dataframe inputs.")
+      log_error(
+        "Screen width and height must be provided with data frame inputs."
+      )
     }
   }
 
   if (!all(c("eye_x", "eye_y") %in% colnames(df))) {
-    cli::cli_alert_warning("[WARN] eye_x and/or eye_y columns not found in input data.")
+    log_warn("eye_x and/or eye_y columns not found in input data.")
     return(invisible(NULL))
   }
 
   valid_coords <- !is.na(df$eye_x) & !is.na(df$eye_y)
   if (sum(valid_coords) == 0) {
-    cli::cli_alert_warning("[WARN] No valid eye coordinates found")
+    log_warn("No valid eye coordinates found")
     return(invisible(NULL))
   }
 
@@ -948,7 +954,12 @@ plot_gaze_heatmap <- function(
 
   tryCatch(
     {
-      dens <- MASS::kde2d(x_coords, y_coords, n = n_bins, lims = c(0, screen_width, 0, screen_height))
+      dens <- MASS::kde2d(
+        x_coords,
+        y_coords,
+        n = n_bins,
+        lims = c(0, screen_width, 0, screen_height)
+      )
       norm_density <- dens$z / max(dens$z, na.rm = TRUE)
 
       if (col_palette == "viridis") {
@@ -978,7 +989,13 @@ plot_gaze_heatmap <- function(
         zlim = c(0, 1)
       )
       rect(0, 0, screen_width, screen_height, border = "black", lwd = 2)
-      points(screen_width / 2, screen_height / 2, pch = 3, col = "red", cex = 1.5)
+      points(
+        screen_width / 2,
+        screen_height / 2,
+        pch = 3,
+        col = "red",
+        cex = 1.5
+      )
     },
     error = function(e) {
       plot(
@@ -994,7 +1011,13 @@ plot_gaze_heatmap <- function(
         ylim = c(screen_height, 0)
       )
       rect(0, 0, screen_width, screen_height, border = "black", lwd = 2)
-      points(screen_width / 2, screen_height / 2, pch = 3, col = "red", cex = 1.5)
+      points(
+        screen_width / 2,
+        screen_height / 2,
+        pch = 3,
+        col = "red",
+        cex = 1.5
+      )
     }
   )
 }
@@ -1062,14 +1085,10 @@ plot_binocular_correlation <- function(
 
   if (has_binocular) {
     if (!block_str %in% names(left_data$timeseries)) {
-      cli::cli_alert_danger(
-        sprintf("[WARN] Block %d not found in left eye data", block)
-      )
+      log_warn("Block {block} not found in left eye data")
     }
     if (!block_str %in% names(right_data$timeseries)) {
-      cli::cli_alert_danger(
-        sprintf("[WARN] Block %d not found in right eye data", block)
-      )
+      log_warn("Block {block} not found in right eye data")
     }
 
     left_df <- left_data$timeseries[[block_str]]
@@ -1079,12 +1098,12 @@ plot_binocular_correlation <- function(
     if (!"pupil_raw" %in% colnames(left_df)) {
       plot.new()
       title(main = "Skipped: No pupil_raw column found in left eye data")
-      cli::cli_alert_warning("[WARN] Skipped: No pupil_raw column found in left eye data")
+      log_warn("Skipped: No pupil_raw column found in left eye data")
       return(invisible(NULL))
     }
     pupil_col <- grep("^pupil_", colnames(left_df), value = TRUE)
     if (length(pupil_col) == 0) {
-      cli::cli_alert_danger("[WARN] No pupil columns found in left eye data")
+      log_warn("No pupil columns found in left eye data")
     }
     pupil_col <- pupil_col[1] # use the first pupil column
 
@@ -1098,20 +1117,15 @@ plot_binocular_correlation <- function(
   } else {
     # for regular eyeris objects, check for binocular columns
     if (!block_str %in% names(left_data$timeseries)) {
-      cli::cli_alert_danger(
-        sprintf("[WARN] Block %d not found in eyeris data", block)
-      )
+      log_warn("Block {block} not found in eyeris data")
     }
 
     df <- left_data$timeseries[[block_str]]
 
     if (!has_binocular) {
-      cli::cli_alert_danger(
-        paste(
-          "[WARN] No binocular columns (psl, psr, xpl, xpr, ypl, ypr) found in",
-          "data. Use binocular_mode = 'both' when loading data to enable",
-          "this function."
-        )
+      log_warn(
+        "No binocular columns (psl, psr, xpl, xpr, ypl, ypr) found in data.",
+        "Use binocular_mode = 'both' when loading data to enable this function."
       )
     }
 
@@ -1165,18 +1179,14 @@ plot_binocular_correlation <- function(
       ylab <- "Right Eye Y-Coordinate"
       title <- ""
     } else {
-      cli::cli_alert_warning(
-        sprintf("[WARN] Unknown variable '%s', skipping", var)
-      )
+      log_warn("Unknown variable '{var}', skipping")
       next
     }
 
     # remove NA values for correlation calculation
     valid_data <- !is.na(left_var) & !is.na(right_var)
     if (sum(valid_data) == 0) {
-      cli::cli_alert_warning(
-        sprintf("[WARN] No valid data for %s correlation", var)
-      )
+      log_warn("No valid data for {var} correlation")
       next
     }
 
@@ -1195,16 +1205,20 @@ plot_binocular_correlation <- function(
           main = sprintf("%s\nr = %.3f", title, cor_value),
           xlab = xlab,
           ylab = ylab,
-          xlim = c(min(min(left_clean), min(right_clean)), max(max(left_clean), max(right_clean))),
-          ylim = c(min(min(left_clean), min(right_clean)), max(max(left_clean), max(right_clean))),
+          xlim = c(
+            min(min(left_clean), min(right_clean)),
+            max(max(left_clean), max(right_clean))
+          ),
+          ylim = c(
+            min(min(left_clean), min(right_clean)),
+            max(max(left_clean), max(right_clean))
+          ),
           col = grDevices::adjustcolor("blue", alpha.f = 0.6)
         )
         abline(0, 1, col = "red", lwd = 2, lty = 2)
       },
       error = function(e) {
-        cli::cli_alert_warning(
-          sprintf("[WARN] Error creating correlation plot for %s: %s", var, e$message)
-        )
+        log_warn("Error creating correlation plot for {var}: {e$message}")
       }
     )
   }
@@ -1214,9 +1228,8 @@ plot_binocular_correlation <- function(
   # reset plotting parameters
   par(mfrow = c(1, 1))
 
-  if (verbose) {
-    cli::cli_alert_success(
-      sprintf("[OKAY] Created binocular correlation plots for block %d", block)
-    )
-  }
+  log_success(
+    "Created binocular correlation plots for block {block}",
+    verbose = verbose
+  )
 }

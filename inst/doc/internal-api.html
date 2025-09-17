@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Internal API Reference</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Internal API Reference</h1>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Below is comprehensive documentation for all internal functions in
+the <code>eyeris</code> <code>R</code> package. These functions are
+primarily intended for advanced users and developers who need to
+customize the preprocessing pipeline or understand the internal workings
+of the package.</p>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>The <code>eyeris</code> package is built with a modular architecture
+where each preprocessing step is implemented through both public
+(exported) and internal functions. The public functions provide the
+user-facing API, while the internal functions contain the core
+processing logic.</p>
+<p><strong>Note</strong>: Functions marked with
+<code>@keywords internal</code> are not exported and should be accessed
+using the <code>:::</code> operator (e.g.,
+<code>eyeris:::function_name()</code>). Use these functions at your own
+discretion as they may change without notice in future versions.</p>
+<hr />
+</div>
+<div id="core-processing-functions" class="section level2">
+<h2>Core Processing Functions</h2>
+<div id="blink-removal" class="section level3">
+<h3>Blink Removal</h3>
+<div id="deblink_pupil" class="section level4">
+<h4><code>deblink_pupil()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-deblink.R</code><br />
+<strong>Description</strong>: Internal function to remove blink
+artifacts from pupil data by extending NA padding around detected
+blinks.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">deblink_pupil</span>(x, prev_op, extend)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: A data frame containing pupil data</li>
+<li><code>prev_op</code>: The name of the previous operation’s pupil
+column</li>
+<li><code>extend</code>: Number of samples to extend padding
+before/after blinks</li>
+</ul>
+<p><strong>Returns</strong>: A numeric vector with blink artifacts
+removed (set to NA)</p>
+<hr />
+</div>
+</div>
+<div id="transient-artifact-removal" class="section level3">
+<h3>Transient Artifact Removal</h3>
+<div id="detransient_pupil" class="section level4">
+<h4><code>detransient_pupil()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-detransient.R</code><br />
+<strong>Description</strong>: Internal function to remove transient
+artifacts from pupil data using speed-based thresholding.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">detransient_pupil</span>(x, prev_op, n, mad_thresh)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: A data frame containing pupil data with columns
+<code>time_secs</code> and the previous operation’s pupil column</li>
+<li><code>prev_op</code>: The name of the previous operation’s pupil
+column</li>
+<li><code>n</code>: The constant used to compute the median absolute
+deviation (MAD) threshold (default: 16)</li>
+<li><code>mad_thresh</code>: Optional threshold override</li>
+</ul>
+<p><strong>Returns</strong>: A numeric vector with transient artifacts
+removed (set to NA)</p>
+</div>
+<div id="speed" class="section level4">
+<h4><code>speed()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-detransient.R</code><br />
+<strong>Description</strong>: Calculate pupil speed using finite
+differences between consecutive time points.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">speed</span>(x, y)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: A numeric vector of pupil data</li>
+<li><code>y</code>: A numeric vector of time data</li>
+</ul>
+<p><strong>Returns</strong>: A vector of pupil speeds at each time
+point</p>
+<hr />
+</div>
+</div>
+<div id="interpolation" class="section level3">
+<h3>Interpolation</h3>
+<div id="interpolate_pupil" class="section level4">
+<h4><code>interpolate_pupil()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-interpolate.R</code><br />
+<strong>Description</strong>: Interpolate missing pupil data using
+linear interpolation.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">interpolate_pupil</span>(x, prev_op, verbose)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: A data frame containing pupil data</li>
+<li><code>prev_op</code>: The name of the previous operation’s pupil
+column</li>
+<li><code>verbose</code>: Logical, whether to print verbose output</li>
+</ul>
+<p><strong>Returns</strong>: A vector of interpolated pupil values</p>
+<hr />
+</div>
+</div>
+<div id="filtering-and-signal-processing" class="section level3">
+<h3>Filtering and Signal Processing</h3>
+<div id="lpfilt_pupil" class="section level4">
+<h4><code>lpfilt_pupil()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-lpfilt.R</code><br />
+<strong>Description</strong>: Internal function to apply low-pass
+filtering to pupil data using Butterworth filter design.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">lpfilt_pupil</span>(x, prev_op, wp, ws, rp, rs, fs, plot_freqz)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: A data frame containing pupil data</li>
+<li><code>prev_op</code>: Previous operation’s pupil column name</li>
+<li><code>wp</code>: Passband frequency (Hz)</li>
+<li><code>ws</code>: Stopband frequency (Hz)</li>
+<li><code>rp</code>: Maximum ripple in passband (dB)</li>
+<li><code>rs</code>: Minimum attenuation in stopband (dB)</li>
+<li><code>fs</code>: Sampling frequency</li>
+<li><code>plot_freqz</code>: Whether to plot frequency response</li>
+</ul>
+<p><strong>Returns</strong>: A vector of filtered pupil data</p>
+</div>
+<div id="downsample_pupil" class="section level4">
+<h4><code>downsample_pupil()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-downsample.R</code><br />
+<strong>Description</strong>: Internal function to downsample pupil data
+with anti-aliasing filtering.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">downsample_pupil</span>(x, prev_op, target_fs, plot_freqz, current_fs, rp, rs)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: Data frame containing pupil data</li>
+<li><code>prev_op</code>: Previous operation’s column name</li>
+<li><code>target_fs</code>: Target sampling frequency</li>
+<li><code>plot_freqz</code>: Whether to plot frequency response</li>
+<li><code>current_fs</code>: Current sampling frequency</li>
+<li><code>rp</code>, <code>rs</code>: Filter design parameters</li>
+</ul>
+<p><strong>Returns</strong>: A list containing the downsampled data and
+the decimated sample rate</p>
+</div>
+<div id="bin_pupil" class="section level4">
+<h4><code>bin_pupil()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-bin.R</code><br />
+<strong>Description</strong>: Bin pupil data into specified time bins
+using averaging or other methods.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">bin_pupil</span>(x, prev_op, bins_per_second, method, current_fs)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: Data frame containing pupil data</li>
+<li><code>prev_op</code>: Previous operation’s column name</li>
+<li><code>bins_per_second</code>: Number of bins per second</li>
+<li><code>method</code>: Binning method (“mean”, “median”, etc.)</li>
+<li><code>current_fs</code>: Current sampling frequency</li>
+</ul>
+<p><strong>Returns</strong>: A data frame with binned pupil data</p>
+<hr />
+</div>
+</div>
+<div id="statistical-processing" class="section level3">
+<h3>Statistical Processing</h3>
+<div id="detrend_pupil" class="section level4">
+<h4><code>detrend_pupil()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-detrend.R</code><br />
+<strong>Description</strong>: Internal function to detrend pupil data
+using linear regression.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">detrend_pupil</span>(x, prev_op)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: Data frame containing pupil data</li>
+<li><code>prev_op</code>: Previous operation’s column name</li>
+</ul>
+<p><strong>Returns</strong>: A list containing the fitted values,
+coefficients, and residuals</p>
+</div>
+<div id="zscore_pupil" class="section level4">
+<h4><code>zscore_pupil()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-zscore.R</code><br />
+<strong>Description</strong>: Internal function to z-score normalize
+pupil data.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">zscore_pupil</span>(x, prev_op)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: Data frame containing pupil data</li>
+<li><code>prev_op</code>: Previous operation’s column name</li>
+</ul>
+<p><strong>Returns</strong>: A numeric vector of z-scored pupil data</p>
+</div>
+<div id="get_zscores" class="section level4">
+<h4><code>get_zscores()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-zscore.R</code><br />
+<strong>Description</strong>: Calculate z-scores for a numeric
+vector.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_zscores</span>(x)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: Numeric vector</li>
+</ul>
+<p><strong>Returns</strong>: A numeric vector of z-scores</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="epoching-functions" class="section level2">
+<h2>Epoching Functions</h2>
+<div id="core-epoching-logic" class="section level3">
+<h3>Core Epoching Logic</h3>
+<div id="epoch_pupil" class="section level4">
+<h4><code>epoch_pupil()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
+<strong>Description</strong>: Main epoching and baselining logic that
+coordinates the epoching process.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_pupil</span>(x, prev_op, evs, lims, label, c_bline, a_bline, bline_type, bline_evs, bline_per, hz, verbose)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>x</code>: Data frame containing pupil data</li>
+<li><code>prev_op</code>: Previous operation’s column name</li>
+<li><code>evs</code>: Event specification (start/end messages or
+timestamps)</li>
+<li><code>lims</code>: Time limits around events</li>
+<li><code>label</code>: Epoch label</li>
+<li><code>c_bline</code>, <code>a_bline</code>:
+<strong>Deprecated</strong> baseline calculation and application
+options</li>
+<li><code>bline_type</code>: Baseline type (“divisive”,
+“subtractive”)</li>
+<li><code>bline_evs</code>: Baseline events</li>
+<li><code>bline_per</code>: Baseline period</li>
+<li><code>hz</code>: Sampling frequency</li>
+<li><code>verbose</code>: Verbose output</li>
+</ul>
+<p><strong>Returns</strong>: A list containing epoch and baseline
+results</p>
+</div>
+<div id="epoch_and_baseline_block" class="section level4">
+<h4><code>epoch_and_baseline_block()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
+<strong>Description</strong>: Block-by-block epoch and baseline handler
+for multi-block data.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_and_baseline_block</span>(x, blk, lab, evs, lims, msg_s, msg_e, c_bline, a_bline, bline_type, bline_evs, bline_per, hz, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: A list containing epoch and baseline
+results for the specified block</p>
+</div>
+<div id="process_epoch_and_baselines" class="section level4">
+<h4><code>process_epoch_and_baselines()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
+<strong>Description</strong>: Epoch and baseline processor that handles
+the core epoching mathematics.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">process_epoch_and_baselines</span>(eyeris, timestamps, evs, lims, hz, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: A list containing epoch and baseline
+results</p>
+</div>
+</div>
+<div id="epoching-strategies" class="section level3">
+<h3>Epoching Strategies</h3>
+<div id="epoch_manually" class="section level4">
+<h4><code>epoch_manually()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
+<strong>Description</strong>: Manually epoch using provided start/end
+dataframes of timestamps.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_manually</span>(eyeris, ts_list, hz, verbose)</span></code></pre></div>
+</div>
+<div id="epoch_only_start_msg" class="section level4">
+<h4><code>epoch_only_start_msg()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
+<strong>Description</strong>: Epoch based on a single event message
+without explicit limits.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_only_start_msg</span>(eyeris, start, hz, verbose)</span></code></pre></div>
+</div>
+<div id="epoch_start_msg_and_limits" class="section level4">
+<h4><code>epoch_start_msg_and_limits()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
+<strong>Description</strong>: Epoch using a start message with fixed
+limits around it.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_start_msg_and_limits</span>(eyeris, start, lims, hz, verbose)</span></code></pre></div>
+</div>
+<div id="epoch_start_end_msg" class="section level4">
+<h4><code>epoch_start_end_msg()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
+<strong>Description</strong>: Epoch using both start and end messages
+with explicit timestamps.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_start_end_msg</span>(eyeris, start, end, hz, verbose)</span></code></pre></div>
+<hr />
+</div>
+</div>
+</div>
+<div id="confounds-analysis-functions" class="section level2">
+<h2>Confounds Analysis Functions</h2>
+<div id="core-confounds-calculation" class="section level3">
+<h3>Core Confounds Calculation</h3>
+<div id="get_confounds_for_step" class="section level4">
+<h4><code>get_confounds_for_step()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
+<strong>Description</strong>: Calculate comprehensive confounding
+variables for a single pupil data processing step.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_confounds_for_step</span>(pupil_df, pupil_vec, screen_width, screen_height, hz)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>pupil_df</code>: Data frame containing pupil data</li>
+<li><code>pupil_vec</code>: Vector of pupil values for current step</li>
+<li><code>screen_width</code>, <code>screen_height</code>: Screen
+dimensions in pixels</li>
+<li><code>hz</code>: Sampling frequency</li>
+</ul>
+<p><strong>Returns</strong>: A data frame containing confounds metrics
+for the current step</p>
+</div>
+<div id="calculate_epoched_confounds" class="section level4">
+<h4><code>calculate_epoched_confounds()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
+<strong>Description</strong>: Calculate confounds specifically for
+epoched data.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">calculate_epoched_confounds</span>(eyeris, epoch_names, hz, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: An updated <code>eyeris</code> object with
+epoched confounds</p>
+</div>
+</div>
+<div id="data-quality-metrics" class="section level3">
+<h3>Data Quality Metrics</h3>
+<div id="tag_blinks" class="section level4">
+<h4><code>tag_blinks()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
+<strong>Description</strong>: Tag blinks in pupil data based on missing
+values and physiological constraints.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">tag_blinks</span>(pupil_df, pupil_vec)</span></code></pre></div>
+<p><strong>Returns</strong>: A data frame with added column:
+<code>is_blink</code></p>
+</div>
+<div id="calc_euclidean_dist" class="section level4">
+<h4><code>calc_euclidean_dist()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
+<strong>Description</strong>: Calculate Euclidean distance between
+consecutive gaze points.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">calc_euclidean_dist</span>(x1, y1, x2, y2)</span></code></pre></div>
+<p><strong>Returns</strong>: A numeric vector of Euclidean distances</p>
+</div>
+<div id="normalize_gaze_coords" class="section level4">
+<h4><code>normalize_gaze_coords()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
+<strong>Description</strong>: Normalize gaze coordinates to
+screen-relative units (0-1 range).</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">normalize_gaze_coords</span>(pupil_df, screen_width, screen_height)</span></code></pre></div>
+<p><strong>Returns</strong>: A data frame with added normalized
+coordinate columns</p>
+</div>
+<div id="tag_gaze_coords" class="section level4">
+<h4><code>tag_gaze_coords()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
+<strong>Description</strong>: Tag gaze coordinates as on-screen or
+off-screen.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">tag_gaze_coords</span>(pupil_df, screen_width, screen_height, overshoot_buffer)</span></code></pre></div>
+<p><strong>Returns</strong>: A data frame with added column:
+<code>is_offscreen</code></p>
+</div>
+</div>
+<div id="export-functions" class="section level3">
+<h3>Export Functions</h3>
+<div id="export_confounds_to_csv" class="section level4">
+<h4><code>export_confounds_to_csv()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
+<strong>Description</strong>: Export confounds data to CSV files and/or
+database with comprehensive error handling.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">export_confounds_to_csv</span>(confounds_list, output_dir, filename_prefix, verbose, run_num, csv_enabled, db_con, sub, ses, task, eye_suffix, epoch_label)</span></code></pre></div>
+<p><strong>Returns</strong>: Invisibly returns a vector of created file
+paths</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="logging-system" class="section level2">
+<h2>Logging System</h2>
+<div id="core-logging-functions" class="section level3">
+<h3>Core Logging Functions</h3>
+<div id="get_log_timestamp" class="section level4">
+<h4><code>get_log_timestamp()</code></h4>
+<p><strong>File</strong>: <code>R/core-logging.R</code><br />
+<strong>Description</strong>: Generate formatted timestamp for logging
+messages.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_log_timestamp</span>()</span></code></pre></div>
+<p><strong>Returns</strong>: Character string with current timestamp in
+format <code>[YYYY-MM-DD HH:MM:SS]</code></p>
+</div>
+<div id="log_message" class="section level4">
+<h4><code>log_message()</code></h4>
+<p><strong>File</strong>: <code>R/core-logging.R</code><br />
+<strong>Description</strong>: Core logging function with timestamp and
+<code>glue</code>-style string interpolation.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_message</span>(level, ..., verbose, wrap, .envir)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>level</code>: Log level (“INFO”, “SUCCESS”, “WARN”,
+“ERROR”)</li>
+<li><code>...</code>: Message components (supports <code>glue</code>
+syntax)</li>
+<li><code>verbose</code>: Whether to display the message</li>
+<li><code>wrap</code>: Whether to wrap long messages</li>
+<li><code>.envir</code>: Environment for variable evaluation</li>
+</ul>
+</div>
+<div id="log_info-log_success-log_warn-log_error" class="section level4">
+<h4><code>log_info()</code>, <code>log_success()</code>,
+<code>log_warn()</code>, <code>log_error()</code></h4>
+<p><strong>File</strong>: <code>R/core-logging.R</code><br />
+<strong>Description</strong>: Specialized logging functions for
+different message types.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_info</span>(..., <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_success</span>(..., <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_warn</span>(..., <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_error</span>(..., <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span></code></pre></div>
+<hr />
+</div>
+</div>
+</div>
+<div id="validation-and-quality-control" class="section level2">
+<h2>Validation and Quality Control</h2>
+<div id="input-validation" class="section level3">
+<h3>Input Validation</h3>
+<div id="check_input" class="section level4">
+<h4><code>check_input()</code></h4>
+<p><strong>File</strong>: <code>R/utils-checks.R</code><br />
+<strong>Description</strong>: Check if input argument is provided and
+not <code>NULL</code>.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_input</span>(arg)</span></code></pre></div>
+</div>
+<div id="check_data" class="section level4">
+<h4><code>check_data()</code></h4>
+<p><strong>File</strong>: <code>R/utils-checks.R</code><br />
+<strong>Description</strong>: Comprehensive validation of
+<code>eyeris</code> object data structure.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_data</span>(eyeris, fun)</span></code></pre></div>
+</div>
+<div id="check_time_monotonic" class="section level4">
+<h4><code>check_time_monotonic()</code></h4>
+<p><strong>File</strong>: <code>R/utils-checks.R</code><br />
+<strong>Description</strong>: Verify that time series data is
+monotonically increasing.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_time_monotonic</span>(time_vector, time_col_name)</span></code></pre></div>
+</div>
+<div id="is_binocular_object" class="section level4">
+<h4><code>is_binocular_object()</code></h4>
+<p><strong>File</strong>: <code>R/utils-checks.R</code><br />
+<strong>Description</strong>: Determine if an <code>eyeris</code> object
+contains binocular data.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">is_binocular_object</span>(x)</span></code></pre></div>
+<p><strong>Returns</strong>: Logical indicating if object is
+binocular</p>
+</div>
+</div>
+<div id="directory-management" class="section level3">
+<h3>Directory Management</h3>
+<div id="check_and_create_dir" class="section level4">
+<h4><code>check_and_create_dir()</code></h4>
+<p><strong>File</strong>: <code>R/utils-checks.R</code><br />
+<strong>Description</strong>: Check for directory existence and create
+if needed with proper error handling.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_and_create_dir</span>(basedir, dir, verbose)</span></code></pre></div>
+<hr />
+</div>
+</div>
+</div>
+<div id="database-functions" class="section level2">
+<h2>Database Functions</h2>
+<div id="connection-management" class="section level3">
+<h3>Connection Management</h3>
+<div id="connect_eyeris_database" class="section level4">
+<h4><code>connect_eyeris_database()</code></h4>
+<p><strong>File</strong>: <code>R/utils-database.R</code><br />
+<strong>Description</strong>: Connect to <code>eyeris</code>
+<code>DuckDB</code> database with comprehensive error handling.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">connect_eyeris_database</span>(bids_dir, db_path, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: <code>DuckDB</code> connection object or
+<code>NULL</code> on failure</p>
+</div>
+<div id="disconnect_eyeris_database" class="section level4">
+<h4><code>disconnect_eyeris_database()</code></h4>
+<p><strong>File</strong>: <code>R/utils-database.R</code><br />
+<strong>Description</strong>: Safely disconnect from <code>eyeris</code>
+<code>DuckDB</code> database.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">disconnect_eyeris_database</span>(con, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: <code>TRUE</code> if successful,
+<code>FALSE</code> otherwise</p>
+</div>
+</div>
+<div id="data-management" class="section level3">
+<h3>Data Management</h3>
+<div id="create_table_name" class="section level4">
+<h4><code>create_table_name()</code></h4>
+<p><strong>File</strong>: <code>R/utils-database.R</code><br />
+<strong>Description</strong>: Generate standardized table names for
+<code>eyeris</code> project database storage.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">create_table_name</span>(data_type, sub, ses, task, run, eye_suffix, epoch_label)</span></code></pre></div>
+<p><strong>Returns</strong>: A standardized table name string</p>
+</div>
+<div id="write_eyeris_data_to_db" class="section level4">
+<h4><code>write_eyeris_data_to_db()</code></h4>
+<p><strong>File</strong>: <code>R/utils-database.R</code><br />
+<strong>Description</strong>: Write <code>eyeris</code> data to
+<code>DuckDB</code> database with error handling and validation.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">write_eyeris_data_to_db</span>(data, db_con, data_type, sub, ses, task, run, eye_suffix, epoch_label, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: <code>TRUE</code> if successful,
+<code>FALSE</code> otherwise</p>
+</div>
+<div id="write_csv_and_db" class="section level4">
+<h4><code>write_csv_and_db()</code></h4>
+<p><strong>File</strong>: <code>R/utils-database.R</code><br />
+<strong>Description</strong>: Write data to both CSV file and database
+with fallback handling.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">write_csv_and_db</span>(data, csv_path, csv_enabled, db_con, data_type, sub, ses, task, run, eye_suffix, epoch_label, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: <code>TRUE</code> if at least one write
+operation succeeded</p>
+</div>
+</div>
+<div id="database-export-management" class="section level3">
+<h3>Database Export &amp; Management</h3>
+<div id="create_temp_eyeris_database" class="section level4">
+<h4><code>create_temp_eyeris_database()</code></h4>
+<p><strong>File</strong>: <code>R/utils-database.R</code><br />
+<strong>Description</strong>: Create temporary database for parallel
+processing with unique naming.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">create_temp_eyeris_database</span>(base_db_path, parallel_id, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: List with temporary database path and
+connection info</p>
+</div>
+<div id="merge_temp_database" class="section level4">
+<h4><code>merge_temp_database()</code></h4>
+<p><strong>File</strong>: <code>R/utils-database.R</code><br />
+<strong>Description</strong>: Merge temporary database into main
+database with file locking.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">merge_temp_database</span>(temp_db_path, main_db_path, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: <code>TRUE</code> if merge successful,
+<code>FALSE</code> otherwise</p>
+</div>
+<div id="cleanup_temp_database" class="section level4">
+<h4><code>cleanup_temp_database()</code></h4>
+<p><strong>File</strong>: <code>R/utils-database.R</code><br />
+<strong>Description</strong>: Clean up temporary database files with
+comprehensive error handling.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">cleanup_temp_database</span>(temp_db_info, verbose)</span></code></pre></div>
+<p><strong>Returns</strong>: <code>TRUE</code> if cleanup successful</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="utility-functions" class="section level2">
+<h2>Utility Functions</h2>
+<div id="string-processing" class="section level3">
+<h3>String Processing</h3>
+<div id="clean_string" class="section level4">
+<h4><code>clean_string()</code></h4>
+<p><strong>File</strong>: <code>R/utils-parsers.R</code><br />
+<strong>Description</strong>: Clean and sanitize strings for use in
+filenames or labels.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">clean_string</span>(str)</span></code></pre></div>
+<p><strong>Returns</strong>: Cleaned string with special characters
+removed/replaced</p>
+</div>
+<div id="sanitize_event_tag" class="section level4">
+<h4><code>sanitize_event_tag()</code></h4>
+<p><strong>File</strong>: <code>R/utils-epoch.R</code><br />
+<strong>Description</strong>: Sanitize event tags for safe use in
+filenames and labels.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">sanitize_event_tag</span>(string, prefix)</span></code></pre></div>
+<p><strong>Returns</strong>: Sanitized string suitable for file system
+use</p>
+</div>
+</div>
+<div id="data-parsing" class="section level3">
+<h3>Data Parsing</h3>
+<div id="get_block_numbers" class="section level4">
+<h4><code>get_block_numbers()</code></h4>
+<p><strong>File</strong>: <code>R/utils-parsers.R</code><br />
+<strong>Description</strong>: Extract block numbers from
+<code>eyeris</code> object or block names.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_block_numbers</span>(x)</span></code></pre></div>
+<p><strong>Returns</strong>: Numeric vector of block numbers</p>
+</div>
+</div>
+<div id="bids-compliance" class="section level3">
+<h3>BIDS Compliance</h3>
+<div id="make_bids_fname" class="section level4">
+<h4><code>make_bids_fname()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-bidsify.R</code><br />
+<strong>Description</strong>: Generate BIDS-compatible filenames for
+data export.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">make_bids_fname</span>(sub_id, task_name, run_num, desc, ses_id, epoch_name, epoch_events, baseline_events, baseline_type, eye_suffix)</span></code></pre></div>
+<p><strong>Returns</strong>: A BIDS-compatible filename string</p>
+</div>
+<div id="run_bidsify" class="section level4">
+<h4><code>run_bidsify()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-bidsify.R</code><br />
+<strong>Description</strong>: Internal function to run bidsify operation
+on a single eye’s data.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">run_bidsify</span>(eyeris, save_all, epochs_list, bids_dir, participant_id, session_num, task_name, run_num, save_raw, html_report, ...)</span></code></pre></div>
+<p><strong>Returns</strong>: An <code>eyeris</code> object (typically
+for chaining)</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="progress-and-error-handling" class="section level2">
+<h2>Progress and Error Handling</h2>
+<div id="progress-bars" class="section level3">
+<h3>Progress Bars</h3>
+<div id="progress_bar" class="section level4">
+<h4><code>progress_bar()</code></h4>
+<p><strong>File</strong>: <code>R/utils-progress_bar.R</code><br />
+<strong>Description</strong>: Create a customizable progress bar for
+long-running operations.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">progress_bar</span>(total, msg, width, show_eta, clear)</span></code></pre></div>
+<p><strong>Returns</strong>: A progress bar object from the progress
+package</p>
+</div>
+<div id="counter_bar" class="section level4">
+<h4><code>counter_bar()</code></h4>
+<p><strong>File</strong>: <code>R/utils-progress_bar.R</code><br />
+<strong>Description</strong>: Create a simple counter-style progress
+bar.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">counter_bar</span>(total, msg, width)</span></code></pre></div>
+</div>
+<div id="tick" class="section level4">
+<h4><code>tick()</code></h4>
+<p><strong>File</strong>: <code>R/utils-progress_bar.R</code><br />
+<strong>Description</strong>: Advance a progress bar by specified number
+of steps.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">tick</span>(pb, by)</span></code></pre></div>
+</div>
+</div>
+<div id="error-handling" class="section level3">
+<h3>Error Handling</h3>
+<div id="error_handler" class="section level4">
+<h4><code>error_handler()</code></h4>
+<p><strong>File</strong>: <code>R/utils-error_handler.R</code><br />
+<strong>Description</strong>: Generic error handler for
+<code>eyeris</code> functions with standardized error reporting.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">error_handler</span>(e, e_class)</span></code></pre></div>
+<hr />
+</div>
+</div>
+</div>
+<div id="report-generation" class="section level2">
+<h2>Report Generation</h2>
+<div id="r-markdown-reports" class="section level3">
+<h3>R Markdown Reports</h3>
+<div id="render_report" class="section level4">
+<h4><code>render_report()</code></h4>
+<p><strong>File</strong>: <code>R/utils-render_report.R</code><br />
+<strong>Description</strong>: Render an <code>R Markdown</code> report
+to <code>HTML</code> with proper error handling.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">render_report</span>(rmd_f)</span></code></pre></div>
+</div>
+<div id="make_report" class="section level4">
+<h4><code>make_report()</code></h4>
+<p><strong>File</strong>: <code>R/utils-render_report.R</code><br />
+<strong>Description</strong>: Generate comprehensive <code>eyeris</code>
+preprocessing report in <code>R Markdown</code> format.</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">make_report</span>(eyeris, out, plots, eye_suffix, ...)</span></code></pre></div>
+<p><strong>Returns</strong>: Path to the generated
+<code>R Markdown</code> file</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="advanced-usage-notes" class="section level2">
+<h2>Advanced Usage Notes</h2>
+<div id="function-chaining" class="section level3">
+<h3>Function Chaining</h3>
+<p>Many internal functions are designed to work within the pipeline
+architecture:</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="co"># example of internal function chaining</span></span>
+<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a>eyeris_obj <span class="sc">|&gt;</span></span>
+<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">deblink_pupil</span>(<span class="at">prev_op =</span> <span class="st">&quot;pupil_raw&quot;</span>, <span class="at">extend =</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
+<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">detransient_pupil</span>(<span class="at">prev_op =</span> <span class="st">&quot;pupil_raw_deblink&quot;</span>, <span class="at">n =</span> <span class="dv">16</span>) <span class="sc">|&gt;</span></span>
+<span id="cb52-5"><a href="#cb52-5" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">interpolate_pupil</span>(<span class="at">prev_op =</span> <span class="st">&quot;pupil_raw_deblink_detransient&quot;</span>, <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="error-handling-1" class="section level3">
+<h3>Error Handling</h3>
+<p>All internal functions include comprehensive error handling:</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="co"># Internal functions validate inputs and provide informative errors</span></span>
+<span id="cb53-2"><a href="#cb53-2" tabindex="-1"></a><span class="fu">try</span>({</span>
+<span id="cb53-3"><a href="#cb53-3" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">check_data</span>(invalid_object, <span class="st">&quot;function_name&quot;</span>)</span>
+<span id="cb53-4"><a href="#cb53-4" tabindex="-1"></a>}, <span class="at">silent =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="performance-considerations" class="section level3">
+<h3>Performance Considerations</h3>
+<ul>
+<li>Internal functions are optimized for performance within the
+pipeline</li>
+<li>Use vectorized operations where possible</li>
+<li>Progress bars are available for long-running operations</li>
+<li>Database operations include connection pooling and error
+recovery</li>
+</ul>
+</div>
+<div id="development-guidelines" class="section level3">
+<h3>Development Guidelines</h3>
+<p>When using internal functions:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Stability</strong>: Internal functions may change without
+notice</li>
+<li><strong>Documentation</strong>: Always refer to this documentation
+for current signatures</li>
+<li><strong>Testing</strong>: Test thoroughly when using internal
+functions directly</li>
+<li><strong>Error Handling</strong>: Implement appropriate error
+handling in your code</li>
+<li><strong>Performance</strong>: Consider performance implications of
+bypassing the main pipeline</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

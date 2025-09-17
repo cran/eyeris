@@ -13,24 +13,24 @@
 #'     \item all operations follow a predictable structure, and
 #'     \item that new pupil data columns based on previous operations in the
 #'       chain are able to be dynamically constructed within the core
-#'       timeseries data frame.
+#'       time series data frame.
 #' }
-#' @param eyeris An object of class `eyeris` containing timeseries data
-#' in a list of dataframes (one per block), various metadata collected
+#' @param eyeris An object of class `eyeris` containing time series data
+#' in a list of data frames (one per block), various metadata collected
 #' by the tracker, and `eyeris` specific pointers for tracking the
 #' preprocessing history for that specific instance of the `eyeris` object
-#' @param operation The name of the function to apply to the timeseries data.
-#' This custom function should accept a dataframe `x`, a string `prev_op`
+#' @param operation The name of the function to apply to the time series data.
+#' This custom function should accept a data frame `x`, a string `prev_op`
 #' (i.e., the name of the previous pupil column -- which you DO NOT need to
 #' supply as a literal string as this is inferred from the `latest` pointer
 #' within the `eyeris` object), and any custom parameters you would like
 #' @param new_suffix A character string indicating the suffix you would like
 #' to be appended to the name of the previous operation's column, which will
-#' be used for the new column name in the updated preprocessed dataframe(s)
+#' be used for the new column name in the updated preprocessed data frame(s)
 #' @param ... Additional (optional) arguments passed to the `operation` method
 #'
 #' @return An updated `eyeris` object with the new column added to the
-#' `timeseries` dataframe and the `latest` pointer updated to the name of the
+#' `timeseries` data frame and the `latest` pointer updated to the name of the
 #' most recently added column plus all previous columns (ie, the history "trace"
 #' of preprocessing steps from start-to-present)
 #'
@@ -126,7 +126,7 @@ pipeline_handler <- function(eyeris, operation, new_suffix, ...) {
   dots <- list(...)
   if ("call_info" %in% names(dots)) {
     call_info <- dots$call_info
-    dots$call_info <- NULL # Remove call_info from dots
+    dots$call_info <- NULL # remove call_info from dots
   }
   if (!is.list(eyeris$params)) {
     eyeris$params <- list()
@@ -161,19 +161,14 @@ pipeline_handler <- function(eyeris, operation, new_suffix, ...) {
         length(prev_operation) == 0 ||
         prev_operation == ""
     ) {
-      cli::cli_abort(
-        paste0(
-          "[EXIT] Latest pointer is empty or NULL.",
-          "This indicates a pipeline initialization error."
-        )
+      log_error(
+        "Latest pointer is empty or NULL. This indicates a pipeline initialization error."
       )
     }
     if (grepl("_([^_]+)_\\1", prev_operation)) {
-      cli::cli_abort(paste(
-        "[EXIT] Corrupted latest pointer detected:",
-        prev_operation,
-        "This indicates a pipeline error. Please restart the pipeline."
-      ))
+      log_error(
+        "Corrupted latest pointer detected: {prev_operation}. This indicates a pipeline error. Please restart the pipeline."
+      )
     }
     is_multiblock <- FALSE
   }
@@ -182,11 +177,9 @@ pipeline_handler <- function(eyeris, operation, new_suffix, ...) {
   if (!is_multiblock) {
     output_col <- paste0(prev_operation, "_", new_suffix)
     if (grepl("_([^_]+)_\\1", output_col)) {
-      cli::cli_abort(paste(
-        "[EXIT] Attempting to create corrupted column name:",
-        output_col,
-        "This indicates a pipeline processing error. Please check your data."
-      ))
+      log_error(
+        "Attempting to create corrupted column name: {output_col}. This indicates a pipeline processing error. Please check your data."
+      )
     }
   }
 
@@ -213,30 +206,18 @@ pipeline_handler <- function(eyeris, operation, new_suffix, ...) {
             length(block_prev_operation) == 0 ||
             block_prev_operation == ""
         ) {
-          cli::cli_abort(paste(
-            "[EXIT] Latest pointer for block",
-            i_block,
-            "is empty or NULL."
-          ))
+          log_error("Latest pointer for block {i_block} is empty or NULL.")
         }
         if (grepl("_([^_]+)_\\1", block_prev_operation)) {
-          cli::cli_abort(paste(
-            "[EXIT] Corrupted latest pointer detected for block",
-            i_block,
-            ":",
-            block_prev_operation,
-            "This indicates a pipeline error. Please restart the pipeline."
-          ))
+          log_error(
+            "Corrupted latest pointer detected for block {i_block}: {block_prev_operation}. This indicates a pipeline error. Please restart the pipeline."
+          )
         }
         block_output_col <- paste0(block_prev_operation, "_", new_suffix)
         if (grepl("_([^_]+)_\\1", block_output_col)) {
-          cli::cli_abort(paste(
-            "[EXIT] Attempting to create corrupted column name for block",
-            i_block,
-            ":",
-            block_output_col,
-            "This indicates a pipeline error. Please check your data."
-          ))
+          log_error(
+            "Attempting to create corrupted column name for block {i_block}: {block_output_col}. This indicates a pipeline error. Please check your data."
+          )
         }
         if (new_suffix == "detrend") {
           list_detrend <- do.call(
@@ -263,10 +244,7 @@ pipeline_handler <- function(eyeris, operation, new_suffix, ...) {
               -dplyr::starts_with("pupil_"),
               dplyr::starts_with("pupil_")
             ) |>
-            dplyr::relocate(
-              dplyr::ends_with("_bin"),
-              .after = last_col()
-            )
+            dplyr::relocate(dplyr::ends_with("_bin"), .after = last_col())
         } else {
           data[[block_output_col]] <- do.call(
             operation,
@@ -281,9 +259,7 @@ pipeline_handler <- function(eyeris, operation, new_suffix, ...) {
       }
     }
     if (
-      new_suffix != "bin" &&
-        new_suffix != "downsample" &&
-        new_suffix != "epoch"
+      new_suffix != "bin" && new_suffix != "downsample" && new_suffix != "epoch"
     ) {
       for (i_block in names(eyeris$timeseries)) {
         block_prev_operation <- eyeris$latest[[i_block]]

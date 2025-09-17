@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Working with eyeris Databases: A Complete Guide</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Working with eyeris Databases: A Complete
+Guide</h1>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The <code>eyeris</code> package provides powerful database
+functionality that serves as an alternative to CSV file storage for your
+pupillometry data. This guide will walk you through the complete
+database workflow, from creation to data extraction, and explain why you
+might want to choose database storage over traditional CSV files.</p>
+<div id="why-use-databases-instead-of-csv-files" class="section level2">
+<h2>Why Use Databases Instead of CSV Files?</h2>
+<div id="the-case-for-database-storage" class="section level3">
+<h3>The Case for Database Storage</h3>
+<p><strong>1. Scalability and Performance</strong></p>
+<ul>
+<li><strong>Massive datasets</strong>: When processing hundreds or
+thousands of subjects, CSV files can become unwieldy. A single database
+file can efficiently store data from thousands of participants.</li>
+<li><strong>Faster queries</strong>: Instead of reading multiple CSV
+files and filtering in <code>R</code>, databases can filter and
+aggregate data at the storage level, dramatically reducing memory usage
+and processing time.</li>
+<li><strong>Concurrent access</strong>: Multiple researchers can query
+the same database simultaneously without file locking issues.</li>
+</ul>
+<p><strong>2. Cloud Computing Advantages</strong></p>
+<ul>
+<li><strong>Reduced I/O costs</strong>: On cloud platforms (AWS, GCP,
+Azure), reading many small CSV files incurs significant I/O costs. A
+single database file reduces these costs dramatically.</li>
+<li><strong>Bandwidth efficiency</strong>: Transferring one database
+file is much faster than syncing thousands of CSV files.</li>
+<li><strong>Storage optimization</strong>: Databases compress data more
+efficiently than individual CSV files.</li>
+</ul>
+<p><strong>3. Data Integrity and Management</strong></p>
+<ul>
+<li><strong>Schema validation</strong>: Built-in data type validation
+prevents corruption.</li>
+<li><strong>Metadata storage</strong>: Databases automatically track
+creation timestamps, data types, and relationships.</li>
+</ul>
+<p><strong>4. Analysis Efficiency</strong></p>
+<ul>
+<li><strong><code>SQL</code> queries</strong>: Leverage the power of
+<code>SQL</code> for complex filtering, aggregation, and joins.</li>
+<li><strong>Memory efficiency</strong>: Load only the data you need
+instead of entire datasets.</li>
+<li><strong>Cross-platform compatibility</strong>: <code>DuckDB</code>
+databases work across <code>R</code>, <code>Python</code>, and other
+analysis platforms.</li>
+</ul>
+</div>
+<div id="when-to-use-csv-vs-a-database" class="section level3">
+<h3>When to Use CSV vs a Database</h3>
+<p><strong>Use CSV files when:</strong></p>
+<ul>
+<li>Small datasets (&lt; 10 subjects)</li>
+<li>Simple analysis workflows</li>
+<li>Need human-readable data formats</li>
+<li>Working with external tools that require CSV input</li>
+</ul>
+<p><strong>Use databases when:</strong></p>
+<ul>
+<li>Large datasets (&gt; 20 subjects)</li>
+<li>Complex queries across multiple data types</li>
+<li>Cloud computing environments</li>
+<li>Collaborative research projects</li>
+<li>Long-term data storage and archival</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="getting-started-creating-your-first-eyeris-database" class="section level1">
+<h1>Getting Started: Creating Your First <code>eyeris</code>
+Database</h1>
+<div id="basic-database-creation" class="section level2">
+<h2>Basic Database Creation</h2>
+<p>The simplest way to create an <code>eyeris</code> database is by
+enabling database output during the <code>bidsify()</code> process:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># load your EyeLink eye-tracking data ASC file</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>eyeris_data <span class="ot">&lt;-</span> <span class="fu">load_asc</span>(<span class="st">&quot;path/to/your/data.asc&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># preprocess and epoch your data with eyeris glassbox functions</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>processed_data <span class="ot">&lt;-</span> eyeris_data <span class="sc">%&gt;%</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">glassbox</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">epoch</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    <span class="at">events =</span> <span class="st">&quot;TRIAL_START_{trial_type}_{trial_number}&quot;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="fl">2.0</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;trial_epochs&quot;</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  )</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Enable eyeris database alongside CSV files</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">bidsify</span>(</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>  processed_data,</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/my_eyetracking_study&quot;</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>  <span class="at">participant_id =</span> <span class="st">&quot;001&quot;</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  <span class="at">session_num =</span> <span class="st">&quot;01&quot;</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>  <span class="at">task_name =</span> <span class="st">&quot;memory_task&quot;</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>  <span class="at">csv_enabled =</span> <span class="cn">TRUE</span>,    <span class="co"># still create CSV files</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>  <span class="at">db_enabled =</span> <span class="cn">TRUE</span>,     <span class="co"># while also creating your eyeris project database</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;study_database&quot;</span>  <span class="co"># creates study_database.eyerisdb</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="database-only-workflow-cloud-optimized" class="section level2">
+<h2>Database-Only Workflow (Cloud Optimized)</h2>
+<p>For cloud computing or large-scale processing, you can <em>(and
+probably should)</em> considering skipping CSV creation entirely:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">bidsify</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  processed_data,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/my_eyetracking_study&quot;</span>, </span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">participant_id =</span> <span class="st">&quot;001&quot;</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">session_num =</span> <span class="st">&quot;01&quot;</span>, </span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">task_name =</span> <span class="st">&quot;memory_task&quot;</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">csv_enabled =</span> <span class="cn">FALSE</span>,   <span class="co"># skip CSV creation</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="at">db_enabled =</span> <span class="cn">TRUE</span>,     <span class="co"># use an eyeris project database only</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;study_database&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="batch-processing-multiple-subjects" class="section level2">
+<h2>Batch Processing Multiple Subjects</h2>
+<p>Here’s how to efficiently process multiple subjects into a single
+database:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>subjects <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;001&quot;</span>, <span class="st">&quot;002&quot;</span>, <span class="st">&quot;003&quot;</span>, <span class="st">&quot;004&quot;</span>, <span class="st">&quot;005&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>data_dir <span class="ot">&lt;-</span> <span class="st">&quot;~/raw_eyetracking_data&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>bids_dir <span class="ot">&lt;-</span> <span class="st">&quot;~/processed_study_data&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="cf">for</span> (subject_id <span class="cf">in</span> subjects) {</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Processing subject&quot;</span>, subject_id, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  </span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  subject_data <span class="ot">&lt;-</span> <span class="fu">file.path</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>      data_dir, </span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="st">&quot;sub-&quot;</span>, subject_id),</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>      <span class="st">&quot;eye&quot;</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="st">&quot;sub-&quot;</span>, subject_id, <span class="st">&quot;.asc&quot;</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="fu">glassbox</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="fu">epoch</span>(</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>      <span class="at">events =</span> <span class="st">&quot;STIMULUS_{condition}_{trial}&quot;</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>      <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">3</span>),</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>      <span class="at">label =</span> <span class="st">&quot;stimulus_response&quot;</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>    )</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  </span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="co"># then add to eyeris database (which automatically handles subject cleanup)</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>  <span class="fu">bidsify</span>(</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>    subject_data,</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>    <span class="at">bids_dir =</span> bids_dir,</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>    <span class="at">participant_id =</span> subject_id,</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>    <span class="at">session_num =</span> <span class="st">&quot;01&quot;</span>,</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>    <span class="at">task_name =</span> <span class="st">&quot;attention_task&quot;</span>, </span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>    <span class="at">csv_enabled =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>    <span class="at">db_enabled =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a>    <span class="at">db_path =</span> <span class="st">&quot;attention_study_db&quot;</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a>  )</span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+<div id="connecting-to-and-exploring-eyeris-databases" class="section level1">
+<h1>Connecting to and Exploring <code>eyeris</code> Databases</h1>
+<div id="basic-database-connection" class="section level2">
+<h2>Basic Database Connection</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">eyeris_db_connect</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;attention_study_db&quot;</span>  <span class="co"># will look for attention_study_db.eyerisdb</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co"># be sure to always disconnect when done (or use on.exit to ensure cleanup)</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">on.exit</span>(<span class="fu">eyeris_db_disconnect</span>(con))</span></code></pre></div>
+</div>
+<div id="eyeris-database-overview-and-exploration" class="section level2">
+<h2><code>eyeris</code> Database Overview and Exploration</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># first get a comprehensive summary of your eyeris project database</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>summary_info <span class="ot">&lt;-</span> <span class="fu">eyeris_db_summary</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="st">&quot;~/processed_study_data&quot;</span>, </span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="st">&quot;attention_study_db&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>summary_info<span class="sc">$</span>subjects      <span class="co"># all subjects in database</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>summary_info<span class="sc">$</span>data_types    <span class="co"># available data types</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>summary_info<span class="sc">$</span>sessions      <span class="co"># session information</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>summary_info<span class="sc">$</span>tasks         <span class="co"># task names</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>summary_info<span class="sc">$</span>total_tables  <span class="co"># total number of tables</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co"># list all available tables</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>all_tables <span class="ot">&lt;-</span> <span class="fu">eyeris_db_list_tables</span>(con)</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="fu">print</span>(all_tables)</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co"># filter tables by data type</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>timeseries_tables <span class="ot">&lt;-</span> <span class="fu">eyeris_db_list_tables</span>(con, <span class="at">data_type =</span> <span class="st">&quot;timeseries&quot;</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>confounds_tables <span class="ot">&lt;-</span> <span class="fu">eyeris_db_list_tables</span>(con, <span class="at">data_type =</span> <span class="st">&quot;run_confounds&quot;</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co"># filter tables by subject</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>subject_001_tables <span class="ot">&lt;-</span> <span class="fu">eyeris_db_list_tables</span>(con, <span class="at">subject =</span> <span class="st">&quot;001&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="data-extraction-from-simple-to-advanced" class="section level1">
+<h1>Data Extraction: From Simple to Advanced</h1>
+<div id="simple-data-extraction" class="section level2">
+<h2>Simple Data Extraction</h2>
+<p>The <code>eyeris_db_collect()</code> function provides easy one-liner
+access to your data:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># extract ALL data for ALL subjects (returns a named list)</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>all_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(<span class="st">&quot;~/processed_study_data&quot;</span>, <span class="st">&quot;attention_study_db&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co"># view available data types</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">names</span>(all_data)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co"># access specific data types</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>timeseries_data <span class="ot">&lt;-</span> all_data<span class="sc">$</span>timeseries</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>events_data <span class="ot">&lt;-</span> all_data<span class="sc">$</span>events</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>confounds_data <span class="ot">&lt;-</span> all_data<span class="sc">$</span>run_confounds</span></code></pre></div>
+</div>
+<div id="targeted-data-extraction" class="section level2">
+<h2>Targeted Data Extraction</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># extract data for specific subjects only</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>subset_subjects <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;attention_study_db&quot;</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">subjects =</span> <span class="fu">c</span>(<span class="st">&quot;001&quot;</span>, <span class="st">&quot;002&quot;</span>, <span class="st">&quot;003&quot;</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co"># extract specific data types only</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>behavioral_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/processed_study_data&quot;</span>, </span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;attention_study_db&quot;</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="at">data_types =</span> <span class="fu">c</span>(<span class="st">&quot;events&quot;</span>, <span class="st">&quot;epochs&quot;</span>, <span class="st">&quot;confounds_summary&quot;</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>)</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co"># extract data for specific sessions and tasks</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>session_01_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;attention_study_db&quot;</span>, </span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>  <span class="at">sessions =</span> <span class="st">&quot;01&quot;</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>  <span class="at">tasks =</span> <span class="st">&quot;attention_task&quot;</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="working-with-binocular-data" class="section level2">
+<h2>Working with Binocular Data</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># extract data from both eyes</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>binocular_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;attention_study_db&quot;</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co"># the function automatically combines left and right eye data</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co"># check if you have binocular data</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">unique</span>(binocular_data<span class="sc">$</span>timeseries<span class="sc">$</span>eye_suffix)  <span class="co"># should show &quot;eyeL&quot; and &quot;eyeR&quot;</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co"># extract data for specific eye only</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>left_eye_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;attention_study_db&quot;</span>, </span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  <span class="at">eye_suffixes =</span> <span class="st">&quot;eyeL&quot;</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="epoch-specific-extraction" class="section level2">
+<h2>Epoch-Specific Extraction</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># extract specific epoch data</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>trial_epochs <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;attention_study_db&quot;</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">data_types =</span> <span class="fu">c</span>(<span class="st">&quot;epochs&quot;</span>, <span class="st">&quot;confounds_events&quot;</span>, <span class="st">&quot;confounds_summary&quot;</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">epoch_labels =</span> <span class="st">&quot;stimulus_response&quot;</span>  <span class="co"># match your epoch label</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co"># multiple epoch types</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>multiple_epochs <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/processed_study_data&quot;</span>, </span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;attention_study_db&quot;</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="at">data_types =</span> <span class="st">&quot;epochs&quot;</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>  <span class="at">epoch_labels =</span> <span class="fu">c</span>(<span class="st">&quot;stimulus_response&quot;</span>, <span class="st">&quot;baseline_period&quot;</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="output-format-options" class="section level2">
+<h2>Output Format Options</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>list_format <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(<span class="st">&quot;~/processed_study_data&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co"># access individual data types</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>pupil_data <span class="ot">&lt;-</span> list_format<span class="sc">$</span>timeseries</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>trial_data <span class="ot">&lt;-</span> list_format<span class="sc">$</span>epochs</span></code></pre></div>
+</div>
+</div>
+<div id="advanced-database-operations" class="section level1">
+<h1>Advanced Database Operations</h1>
+<div id="direct-sql-queries" class="section level2">
+<h2>Direct SQL Queries</h2>
+<p>For maximum flexibility, you can also write and execute custom SQL
+queries:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># first connect to your eyeris project database</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">eyeris_db_connect</span>(<span class="st">&quot;~/processed_study_data&quot;</span>, <span class="st">&quot;attention_study_db&quot;</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># write your custom SQL query</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>custom_query <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="st">  SELECT subject_id, session_id, task_name, </span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="st">         AVG(pupil_raw_deblink_detransient_interpolate_lpfilt_z) as mean_pupil,</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="st">         COUNT(*) as n_samples</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="st">  FROM timeseries_001_01_attention_task_run01_eyeL </span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="st">  WHERE pupil_clean IS NOT NULL</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="st">  GROUP BY subject_id, session_id, task_name</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>results <span class="ot">&lt;-</span> DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, custom_query)</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="fu">print</span>(results)</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co"># a complex cross-table query</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>complex_query <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="st">  SELECT e.subject_id,</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="st">         e.matched_event,</span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="st">         e.text_unique,</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="st">         AVG(t.pupil_raw_deblink_detransient_interpolate_lpfilt_z) as mean_pupil_in_epoch,</span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="st">         c.blink_rate_hz</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="st">  FROM epochs_001_01_attention_task_run01_stimulus_response_eyeL e</span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="st">  JOIN timeseries_001_01_attention_task_run01_eyeL t </span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="st">    ON e.subject_id = t.subject_id </span></span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="st">    AND t.time_orig BETWEEN e.epoch_start AND e.epoch_end</span></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="st">  JOIN run_confounds_001_01_attention_task_run01_eyeL c</span></span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="st">    ON e.subject_id = c.subject_id</span></span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="st">  GROUP BY e.subject_id, e.matched_event, e.text_unique, c.blink_rate_hz</span></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a></span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a>complex_results <span class="ot">&lt;-</span> DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, complex_query)</span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a><span class="fu">print</span>(complex_results)</span></code></pre></div>
+</div>
+<div id="reading-individual-tables" class="section level2">
+<h2>Reading Individual Tables</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># read a specific table directly</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>specific_table <span class="ot">&lt;-</span> <span class="fu">eyeris_db_read</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">con =</span> con,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">table_name =</span> <span class="st">&quot;timeseries_001_01_attention_task_run01_eyeL&quot;</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co"># read from eyeris database with filters</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>filtered_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_read</span>(</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>  <span class="at">con =</span> con,</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>  <span class="at">data_type =</span> <span class="st">&quot;events&quot;</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  <span class="at">subject =</span> <span class="st">&quot;001&quot;</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>  <span class="at">session =</span> <span class="st">&quot;01&quot;</span>, </span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>  <span class="at">task =</span> <span class="st">&quot;attention_task&quot;</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>)</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co"># read epoch data from eyeris database with specific epoch label</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>epoch_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_read</span>(</span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a>  <span class="at">con =</span> con,</span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>  <span class="at">data_type =</span> <span class="st">&quot;epochs&quot;</span>, </span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>  <span class="at">subject =</span> <span class="st">&quot;001&quot;</span>,</span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a>  <span class="at">epoch_label =</span> <span class="st">&quot;stimulus_response&quot;</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+<div id="real-world-analysis-examples" class="section level1">
+<h1>Real-World Analysis Examples</h1>
+<div id="example-1-pupil-response-analysis-across-subjects" class="section level2">
+<h2>Example 1: Pupil Response Analysis Across Subjects</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># extract all timeseries data</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>pupil_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">data_types =</span> <span class="st">&quot;timeseries&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>)<span class="sc">$</span>timeseries</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co"># analyze pupil responses by subject and condition</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>pupil_summary <span class="ot">&lt;-</span> pupil_data <span class="sc">%&gt;%</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(pupil_clean)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  <span class="fu">group_by</span>(subject_id, session_id) <span class="sc">%&gt;%</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>    <span class="at">mean_pupil =</span> <span class="fu">mean</span>(pupil_clean),</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>    <span class="at">sd_pupil =</span> <span class="fu">sd</span>(pupil_clean),</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>    <span class="at">samples_per_subject =</span> <span class="fu">n</span>(),</span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>  )</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="fu">print</span>(pupil_summary)</span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co"># compare to loading individual CSV files (which should be much slower!)</span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a><span class="co"># csv_files &lt;- list.files(&quot;~/processed_study_data&quot;, </span></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="co">#                        pattern = &quot;*timeseries*.csv&quot;, </span></span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a><span class="co">#                        recursive = TRUE, full.names = TRUE)</span></span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a><span class="co"># csv_data &lt;- map_dfr(csv_files, read_csv)</span></span></code></pre></div>
+</div>
+<div id="example-2-quality-control-and-confounds-analysis" class="section level2">
+<h2>Example 2: Quality Control and Confounds Analysis</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># extract confounds data for quality control</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>confounds_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">data_types =</span> <span class="fu">c</span>(<span class="st">&quot;run_confounds&quot;</span>, <span class="st">&quot;confounds_summary&quot;</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># identify subjects with poor data quality</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>quality_control <span class="ot">&lt;-</span> confounds_data<span class="sc">$</span>run_confounds <span class="sc">%&gt;%</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  <span class="fu">group_by</span>(subject_id, session_id) <span class="sc">%&gt;%</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>    <span class="at">mean_blink_rate =</span> <span class="fu">mean</span>(blink_rate_hz, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>    <span class="at">mean_prop_invalid =</span> <span class="fu">mean</span>(prop_invalid, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>    <span class="at">mean_gaze_variance =</span> <span class="fu">mean</span>(gaze_x_var_px, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>    <span class="at">high_blink_rate =</span> mean_blink_rate <span class="sc">&gt;</span> <span class="fl">0.5</span>,  <span class="co"># arbitrary thresholds</span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>    <span class="at">high_invalid_data =</span> mean_prop_invalid <span class="sc">&gt;</span> <span class="fl">0.3</span>,</span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>    <span class="at">high_gaze_variance =</span> mean_gaze_variance <span class="sc">&gt;</span> <span class="dv">10000</span>,</span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>    <span class="at">exclude_subject =</span> high_blink_rate <span class="sc">|</span> high_invalid_data <span class="sc">|</span> high_gaze_variance</span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>  )</span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a><span class="co"># then view the subjects recommended for exclusion</span></span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>exclude_list <span class="ot">&lt;-</span> quality_control <span class="sc">%&gt;%</span></span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a>  <span class="fu">filter</span>(exclude_subject) <span class="sc">%&gt;%</span></span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a>  <span class="fu">select</span>(subject_id, session_id, exclude_subject)</span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a><span class="fu">print</span>(exclude_list)</span></code></pre></div>
+</div>
+</div>
+<div id="performance-comparison-database-vs-csv" class="section level1">
+<h1>Performance Comparison: Database vs CSV</h1>
+<div id="speed-and-memory-benchmarks" class="section level2">
+<h2>Speed and Memory Benchmarks</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># benchmark database approach</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">system.time</span>({</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  db_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>    <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>    <span class="at">subjects =</span> <span class="fu">c</span>(<span class="st">&quot;001&quot;</span>, <span class="st">&quot;002&quot;</span>, <span class="st">&quot;003&quot;</span>, <span class="st">&quot;004&quot;</span>, <span class="st">&quot;005&quot;</span>),</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>    <span class="at">data_types =</span> <span class="st">&quot;timeseries&quot;</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>  )</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>})</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co"># benchmark CSV approach</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co"># system.time({</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#   csv_files &lt;- list.files(&quot;~/processed_study_data&quot;, </span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#                          pattern = &quot;*timeseries*.csv&quot;, </span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#                          recursive = TRUE, full.names = TRUE)</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#   csv_data &lt;- map_dfr(csv_files[1:5], read_csv)  # only first 5 subjects</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co"># })</span></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co"># memory usage comparison</span></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="fu">object.size</span>(db_data)  <span class="co"># database extraction</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co"># object.size(csv_data)  # CSV loading</span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co"># file size comparison</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a>db_file_size <span class="ot">&lt;-</span> <span class="fu">file.size</span>(<span class="st">&quot;~/processed_study_data/derivatives/attention_study_db.eyerisdb&quot;</span>)</span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a>csv_total_size <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">file.size</span>(<span class="fu">list.files</span>(<span class="st">&quot;~/processed_study_data&quot;</span>, </span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a>                                          <span class="at">pattern =</span> <span class="st">&quot;*.csv&quot;</span>, </span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a>                                          <span class="at">recursive =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a>                                          <span class="at">full.names =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a></span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Database file size:&quot;</span>, <span class="fu">round</span>(db_file_size <span class="sc">/</span> <span class="dv">1024</span><span class="sc">^</span><span class="dv">2</span>, <span class="dv">2</span>), <span class="st">&quot;MB</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Total CSV file size:&quot;</span>, <span class="fu">round</span>(csv_total_size <span class="sc">/</span> <span class="dv">1024</span><span class="sc">^</span><span class="dv">2</span>, <span class="dv">2</span>), <span class="st">&quot;MB</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Storage efficiency:&quot;</span>, <span class="fu">round</span>(db_file_size <span class="sc">/</span> csv_total_size <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">&quot;% of CSV size</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="best-practices-and-tips" class="section level1">
+<h1>Best Practices and Tips</h1>
+<div id="database-management" class="section level2">
+<h2>Database Management</h2>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># 1. Always use descriptive database names</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">bidsify</span>(data, <span class="at">db_path =</span> <span class="st">&quot;study_name_pilot_2024&quot;</span>)  <span class="co"># good</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co"># bidsify(data, db_path = &quot;my-project&quot;)           # default, not descriptive</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="co"># 2. Use database-only mode for large studies</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="fu">bidsify</span>(data, <span class="at">csv_enabled =</span> <span class="cn">FALSE</span>, <span class="at">db_enabled =</span> <span class="cn">TRUE</span>)  <span class="co"># efficient</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co"># 3. Create separate databases for different experiments</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="fu">bidsify</span>(data, <span class="at">db_path =</span> <span class="st">&quot;experiment_1_attention&quot;</span>)</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="fu">bidsify</span>(data, <span class="at">db_path =</span> <span class="st">&quot;experiment_2_memory&quot;</span>) </span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co"># 4. always disconnect from databases</span></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">eyeris_db_connect</span>(<span class="st">&quot;~/data&quot;</span>, <span class="st">&quot;study_db&quot;</span>)</span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co"># ... do your work ...</span></span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co"># then disconnect ...</span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="fu">eyeris_db_disconnect</span>(con)</span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a></span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co"># or use on.exit for automatic cleanup</span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a>process_data <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a>  con <span class="ot">&lt;-</span> <span class="fu">eyeris_db_connect</span>(<span class="st">&quot;~/data&quot;</span>, <span class="st">&quot;study_db&quot;</span>)</span>
+<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a>  <span class="fu">on.exit</span>(<span class="fu">eyeris_db_disconnect</span>(con))</span>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a>  </span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a>  <span class="co"># ... your analysis code here ...</span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a>  </span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(<span class="st">&quot;~/data&quot;</span>, <span class="st">&quot;study_db&quot;</span>)</span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a>  <span class="fu">return</span>(results)</span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="cloud-computing-optimization" class="section level2">
+<h2>Cloud Computing Optimization</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># 1. Use database-only workflow to minimize I/O costs</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>process_cloud_data <span class="ot">&lt;-</span> <span class="cf">function</span>(subject_list, input_bucket, output_bucket) {</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="cf">for</span> (subject <span class="cf">in</span> subject_list) {</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>    <span class="co"># ... for demo purposes only -- download raw data ...</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>    <span class="fu">download_from_cloud</span>(subject, input_bucket)</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>    </span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>    <span class="co"># ... process and add to database (no CSV files) ...</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>    eyeris_data <span class="ot">&lt;-</span> <span class="fu">glassbox</span>(local_file) <span class="sc">%&gt;%</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>      <span class="fu">epoch</span>(...)</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>    </span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>    <span class="fu">bidsify</span>(</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>      eyeris_data,</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>      <span class="at">bids_dir =</span> <span class="st">&quot;local_processing&quot;</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>      <span class="at">participant_id =</span> subject,</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>      <span class="at">csv_enabled =</span> <span class="cn">FALSE</span>,  <span class="co"># skip CSV for cloud efficiency</span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a>      <span class="at">db_enabled =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a>      <span class="at">db_path =</span> <span class="st">&quot;cloud_study_db&quot;</span></span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a>    )</span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a>    </span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a>    <span class="co"># clean up local files</span></span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a>    <span class="fu">unlink</span>(local_file)</span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a>  }</span>
+<span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a>  </span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a>  <span class="co"># upload final database back to your cloud</span></span>
+<span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a>  <span class="fu">upload_to_cloud</span>(<span class="st">&quot;cloud_study_db.eyerisdb&quot;</span>, output_bucket)</span>
+<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a>}</span>
+<span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a></span>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="co"># 2. use database for distributed analysis</span></span>
+<span id="cb17-29"><a href="#cb17-29" tabindex="-1"></a>analyze_cloud_data <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb17-30"><a href="#cb17-30" tabindex="-1"></a>  <span class="co"># download only the database file</span></span>
+<span id="cb17-31"><a href="#cb17-31" tabindex="-1"></a>  <span class="fu">download_from_cloud</span>(<span class="st">&quot;cloud_study_db.eyerisdb&quot;</span>)</span>
+<span id="cb17-32"><a href="#cb17-32" tabindex="-1"></a>  </span>
+<span id="cb17-33"><a href="#cb17-33" tabindex="-1"></a>  <span class="co"># extract only the data you need</span></span>
+<span id="cb17-34"><a href="#cb17-34" tabindex="-1"></a>  analysis_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
+<span id="cb17-35"><a href="#cb17-35" tabindex="-1"></a>    <span class="st">&quot;local_processing&quot;</span>,</span>
+<span id="cb17-36"><a href="#cb17-36" tabindex="-1"></a>    <span class="at">data_types =</span> <span class="fu">c</span>(<span class="st">&quot;epochs&quot;</span>, <span class="st">&quot;confounds_summary&quot;</span>),</span>
+<span id="cb17-37"><a href="#cb17-37" tabindex="-1"></a>    <span class="at">subjects =</span> target_subjects</span>
+<span id="cb17-38"><a href="#cb17-38" tabindex="-1"></a>  )</span>
+<span id="cb17-39"><a href="#cb17-39" tabindex="-1"></a>  </span>
+<span id="cb17-40"><a href="#cb17-40" tabindex="-1"></a>  <span class="co"># run analysis on extracted subset</span></span>
+<span id="cb17-41"><a href="#cb17-41" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">run_statistical_analysis</span>(analysis_data)</span>
+<span id="cb17-42"><a href="#cb17-42" tabindex="-1"></a>  </span>
+<span id="cb17-43"><a href="#cb17-43" tabindex="-1"></a>  <span class="fu">return</span>(results)</span>
+<span id="cb17-44"><a href="#cb17-44" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="error-handling-and-debugging" class="section level2">
+<h2>Error Handling and Debugging</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># safe eyeris project database operations with error handling</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>safe_extract <span class="ot">&lt;-</span> <span class="cf">function</span>(bids_dir, db_path, ...) {</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>  <span class="fu">tryCatch</span>({</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>    data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(bids_dir, db_path, ...)</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>    <span class="fu">return</span>(data)</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>  }, <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Error extracting data:&quot;</span>, e<span class="sc">$</span>message, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>    </span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>    <span class="co"># first check if eyeris project database exists</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>    db_file <span class="ot">&lt;-</span> <span class="fu">file.path</span>(bids_dir, <span class="st">&quot;derivatives&quot;</span>, <span class="fu">paste0</span>(db_path, <span class="st">&quot;.eyerisdb&quot;</span>))</span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(db_file)) {</span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;eyeris project database file not found:&quot;</span>, db_file, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>      <span class="fu">return</span>(<span class="cn">NULL</span>)</span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>    }</span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>    </span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>    <span class="co"># try connecting to your eyeris project database</span></span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a>    con <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>({</span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a>      <span class="fu">eyeris_db_connect</span>(bids_dir, db_path)</span>
+<span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a>    }, <span class="at">error =</span> <span class="cf">function</span>(e2) {</span>
+<span id="cb18-20"><a href="#cb18-20" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;Cannot connect to eyeris project database:&quot;</span>, e2<span class="sc">$</span>message, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-21"><a href="#cb18-21" tabindex="-1"></a>      <span class="fu">return</span>(<span class="cn">NULL</span>)</span>
+<span id="cb18-22"><a href="#cb18-22" tabindex="-1"></a>    })</span>
+<span id="cb18-23"><a href="#cb18-23" tabindex="-1"></a>    </span>
+<span id="cb18-24"><a href="#cb18-24" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(con)) {</span>
+<span id="cb18-25"><a href="#cb18-25" tabindex="-1"></a>      <span class="co"># list available tables for debugging</span></span>
+<span id="cb18-26"><a href="#cb18-26" tabindex="-1"></a>      tables <span class="ot">&lt;-</span> <span class="fu">eyeris_db_list_tables</span>(con)</span>
+<span id="cb18-27"><a href="#cb18-27" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;Available tables:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-28"><a href="#cb18-28" tabindex="-1"></a>      <span class="fu">print</span>(tables)</span>
+<span id="cb18-29"><a href="#cb18-29" tabindex="-1"></a>      <span class="fu">eyeris_db_disconnect</span>(con)</span>
+<span id="cb18-30"><a href="#cb18-30" tabindex="-1"></a>    }</span>
+<span id="cb18-31"><a href="#cb18-31" tabindex="-1"></a>    </span>
+<span id="cb18-32"><a href="#cb18-32" tabindex="-1"></a>    <span class="fu">return</span>(<span class="cn">NULL</span>)</span>
+<span id="cb18-33"><a href="#cb18-33" tabindex="-1"></a>  })</span>
+<span id="cb18-34"><a href="#cb18-34" tabindex="-1"></a>}</span>
+<span id="cb18-35"><a href="#cb18-35" tabindex="-1"></a></span>
+<span id="cb18-36"><a href="#cb18-36" tabindex="-1"></a><span class="co"># example usage</span></span>
+<span id="cb18-37"><a href="#cb18-37" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">safe_extract</span>(<span class="st">&quot;~/my_study&quot;</span>, <span class="st">&quot;study_database&quot;</span>, </span>
+<span id="cb18-38"><a href="#cb18-38" tabindex="-1"></a>                    <span class="at">subjects =</span> <span class="fu">c</span>(<span class="st">&quot;001&quot;</span>, <span class="st">&quot;002&quot;</span>), </span>
+<span id="cb18-39"><a href="#cb18-39" tabindex="-1"></a>                    <span class="at">data_types =</span> <span class="st">&quot;timeseries&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="migration-and-interoperability" class="section level1">
+<h1>Migration and Interoperability</h1>
+<div id="converting-existing-csv-data-to-database" class="section level2">
+<h2>Converting Existing CSV Data to Database</h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># if you have existing eyeris-derived CSV files and want to migrate to a database</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>migrate_csv_to_database <span class="ot">&lt;-</span> <span class="cf">function</span>(bids_dir, db_path) {</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>  <span class="co"># ... find all CSV files ...</span></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>  csv_files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(bids_dir, <span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.csv$&quot;</span>, </span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>                         <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>  </span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>  <span class="co"># ... connect to an eyeris database ...</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>  con <span class="ot">&lt;-</span> <span class="fu">eyeris_db_connect</span>(bids_dir, db_path)</span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>  <span class="fu">on.exit</span>(<span class="fu">eyeris_db_disconnect</span>(con))</span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a>  </span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a>  <span class="cf">for</span> (csv_file <span class="cf">in</span> csv_files) {</span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Processing:&quot;</span>, <span class="fu">basename</span>(csv_file), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a>    </span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a>    <span class="co"># parse filename to extract metadata</span></span>
+<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a>    <span class="co"># ... (which of course depends on your CSV naming convention) ...</span></span>
+<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a>    filename_parts <span class="ot">&lt;-</span> <span class="fu">parse_bids_filename</span>(<span class="fu">basename</span>(csv_file))</span>
+<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a>    </span>
+<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a>    <span class="co"># ... read CSV data ...</span></span>
+<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a>    csv_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(csv_file)</span>
+<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a>    </span>
+<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a>    <span class="co"># ... then write to the eyeris project database ...</span></span>
+<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a>    <span class="fu">write_eyeris_data_to_db</span>(</span>
+<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a>      <span class="at">data =</span> csv_data,</span>
+<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a>      <span class="at">con =</span> con,</span>
+<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a>      <span class="at">data_type =</span> filename_parts<span class="sc">$</span>data_type,</span>
+<span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a>      <span class="at">sub =</span> filename_parts<span class="sc">$</span>subject,</span>
+<span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a>      <span class="at">ses =</span> filename_parts<span class="sc">$</span>session,</span>
+<span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a>      <span class="at">task =</span> filename_parts<span class="sc">$</span>task,</span>
+<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a>      <span class="co"># ... other parameters</span></span>
+<span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a>    )</span>
+<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a>  }</span>
+<span id="cb19-32"><a href="#cb19-32" tabindex="-1"></a>  </span>
+<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Migration complete!</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb19-34"><a href="#cb19-34" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="exporting-database-data-back-to-csv" class="section level2">
+<h2>Exporting Database Data Back to CSV</h2>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># export specific data back to CSV format (if needed)</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>export_database_subset <span class="ot">&lt;-</span> <span class="cf">function</span>(bids_dir, db_path, output_dir) {</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>  </span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>  <span class="co"># ... extract data from the eyeris project database ...</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>  data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(bids_dir, db_path, </span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>                             <span class="at">subjects =</span> <span class="fu">c</span>(<span class="st">&quot;001&quot;</span>, <span class="st">&quot;002&quot;</span>),</span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>                             <span class="at">data_types =</span> <span class="fu">c</span>(<span class="st">&quot;timeseries&quot;</span>, <span class="st">&quot;events&quot;</span>))</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>  </span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>  <span class="co"># ... create an output directory ...</span></span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>  <span class="fu">dir.create</span>(output_dir, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>  </span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>  <span class="co"># ... then export each data type ...</span></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>  <span class="cf">for</span> (data_type <span class="cf">in</span> <span class="fu">names</span>(data)) {</span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a>    filename <span class="ot">&lt;-</span> <span class="fu">file.path</span>(output_dir, <span class="fu">paste0</span>(data_type, <span class="st">&quot;_subset.csv&quot;</span>))</span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a>    <span class="fu">write.csv</span>(data[[data_type]], filename, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Exported:&quot;</span>, filename, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a>  }</span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>The eyeris database functionality provides a powerful, scalable
+alternative to CSV files for eye-tracking data storage and analysis. Key
+advantages include:</p>
+<ul>
+<li><strong>Performance</strong>: Faster queries and reduced memory
+usage</li>
+<li><strong>Scalability</strong>: Handle data from hundreds of subjects
+efficiently<br />
+</li>
+<li><strong>Cloud optimization</strong>: Reduced I/O costs and bandwidth
+usage</li>
+<li><strong>Flexibility</strong>: <code>SQL</code> queries and
+cross-platform compatibility</li>
+</ul>
+<p>Whether you’re running a small pilot study or a large-scale
+multi-session experiment, <code>eyeris</code> databases can streamline
+your workflow and improve analysis efficiency. Start with the simple
+<code>eyeris_db_collect()</code> function for most use cases, and
+leverage direct <code>SQL</code> queries when you need maximum
+flexibility.</p>
+<p>For questions or issues with database functionality, please refer to
+the <code>eyeris</code> documentation or open an issue on the GitHub
+repository.</p>
+</div>
+<div id="session-information" class="section level1">
+<h1>Session Information</h1>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

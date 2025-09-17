@@ -1,7 +1,7 @@
-#' Z-score pupil timeseries data
+#' Z-score pupil time series data
 #'
 #' The intended use of this method is to scale the arbitrary units of the pupil
-#' size timeseries to have a mean of `0` and a standard deviation of `1`. This
+#' size time series to have a mean of `0` and a standard deviation of `1`. This
 #' is accomplished by mean centering the data points and then dividing them by
 #' their standard deviation (i.e., z-scoring the data, similar to
 #' [base::scale()]). Opting to z-score your pupil data helps with trial-level
@@ -42,16 +42,16 @@
 #' NOT set your behavioral outcome (i.e., success/failure) variable as a
 #' grouping variable within your analysis. If you do, you will consequently
 #' obtain a mean pupil size of 0 and standard deviation of 1 within each group
-#' (since the scaled pupil size would be calculated on the timeseries from each
+#' (since the scaled pupil size would be calculated on the time series from each
 #' outcome variable group, separately). Instead, you should compute the z-score
-#' on the entire pupil timeseries (before epoching the data), and then split and
-#' take the mean of the z-scored timeseries as a function of condition variable.
+#' on the entire pupil time series (before epoching the data), and then split and
+#' take the mean of the z-scored time series as a function of condition variable.
 #'
 #' @param eyeris An object of class `eyeris` derived from [eyeris::load_asc()]
 #' @param call_info A list of call information and parameters. If not provided,
 #' it will be generated from the function call
 #'
-#' @return An `eyeris` object with a new column in `timeseries`:
+#' @return An `eyeris` object with a new column in `time series`:
 #' `pupil_raw_{...}_z`
 #'
 #' @seealso [eyeris::glassbox()] for the recommended way to run this step as
@@ -67,10 +67,7 @@
 #' @export
 zscore <- function(eyeris, call_info = NULL) {
   call_info <- if (is.null(call_info)) {
-    list(
-      call_stack = match.call(),
-      parameters = list()
-    )
+    list(call_stack = match.call(), parameters = list())
   } else {
     call_info
   }
@@ -97,8 +94,7 @@ zscore <- function(eyeris, call_info = NULL) {
     return(list_out)
   } else {
     # regular eyeris object, process normally
-    eyeris |>
-      pipeline_handler(zscore_pupil, "z", call_info = call_info)
+    eyeris |> pipeline_handler(zscore_pupil, "z", call_info = call_info)
   }
 }
 
@@ -118,35 +114,25 @@ zscore <- function(eyeris, call_info = NULL) {
 zscore_pupil <- function(x, prev_op) {
   # validate the previous operation column name
   if (is.null(prev_op) || length(prev_op) == 0 || prev_op == "") {
-    cli::cli_abort("[EXIT] Previous operation column name is empty or NULL.")
+    log_error("Previous operation column name is empty or NULL.")
   }
 
   if (!prev_op %in% colnames(x)) {
-    cli::cli_abort(paste(
-      "[EXIT] Column '",
-      prev_op,
-      "' not found in data.",
-      "Available columns:",
-      paste(colnames(x), collapse = ", ")
-    ))
+    log_error(
+      "Column '{prev_op}' not found in data. Available columns: {paste(colnames(x), collapse = ', ')}"
+    )
   }
 
   # check for duplicate suffixes in column name (might indicate corruption)
   if (grepl("_([^_]+)_\\1", prev_op)) {
-    cli::cli_abort(paste(
-      "[EXIT] Corrupted column name detected:",
-      prev_op,
-      "This might indicate an eyeris pipeline processing error."
-    ))
+    log_error(
+      "Corrupted column name detected: {prev_op}. This might indicate an eyeris pipeline processing error."
+    )
   }
 
   pupil_col <- dplyr::sym(prev_op)
 
-  x |>
-    dplyr::mutate(
-      zscore = get_zscores(!!pupil_col)
-    ) |>
-    dplyr::pull(zscore)
+  x |> dplyr::mutate(zscore = get_zscores(!!pupil_col)) |> dplyr::pull(zscore)
 }
 
 get_zscores <- function(x) {

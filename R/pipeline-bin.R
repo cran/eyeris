@@ -43,7 +43,7 @@
 #' @export
 bin <- function(eyeris, bins_per_second, method = "mean", call_info = NULL) {
   if (!method %in% c("mean", "median")) {
-    cli::cli_abort("[EXIT] Method must be either 'mean' or 'median'")
+    log_error("Method must be either 'mean' or 'median'")
   }
 
   if (
@@ -51,7 +51,7 @@ bin <- function(eyeris, bins_per_second, method = "mean", call_info = NULL) {
       !is.numeric(bins_per_second) ||
       bins_per_second != round(bins_per_second)
   ) {
-    cli::cli_abort("[EXIT] bins_per_second must be a positive integer")
+    log_error("bins_per_second must be a positive integer")
   }
 
   current_fs <- eyeris$info$sample.rate
@@ -136,28 +136,20 @@ bin <- function(eyeris, bins_per_second, method = "mean", call_info = NULL) {
 bin_pupil <- function(x, prev_op, bins_per_second, method, current_fs) {
   # debug: check if prev_op is empty or NULL
   if (is.null(prev_op) || length(prev_op) == 0 || prev_op == "") {
-    cli::cli_abort(paste(
-      "[EXIT] Previous operation column name is empty or NULL.",
-      "Expected a valid column name like 'pupil_raw'. This usually means the",
-      "eyeris object's 'latest' pointer is not set correctly.",
-      "Current prev_op value:",
-      deparse(prev_op)
-    ))
+    log_error(
+      "Previous operation column name is empty or NULL. Expected a valid column name like 'pupil_raw'. This usually means the eyeris object's 'latest' pointer is not set correctly. Current prev_op value: {deparse(prev_op)}"
+    )
   }
 
   # debug: check if the column exists
   if (!prev_op %in% colnames(x)) {
-    cli::cli_abort(paste(
-      "[EXIT] Column '",
-      prev_op,
-      "' not found in eyeris data object.",
-      "Available columns:",
-      paste(colnames(x), collapse = ", ")
-    ))
+    log_error(
+      "Column '{prev_op}' not found in eyeris data object. Available columns: {paste(colnames(x), collapse = ', ')}"
+    )
   }
 
   if (any(is.na(x[[prev_op]]))) {
-    cli::cli_abort("[EXIT] NAs detected in pupil data. Need to interpolate first.")
+    log_error("NAs detected in pupil data. Need to interpolate first.")
   } else {
     prev_pupil <- x[[prev_op]]
   }
@@ -181,10 +173,7 @@ bin_pupil <- function(x, prev_op, bins_per_second, method, current_fs) {
     bin_centers - bin_duration / 2
   )
 
-  binned_df <- data.frame(
-    time_secs = bin_centers,
-    stringsAsFactors = FALSE
-  )
+  binned_df <- data.frame(time_secs = bin_centers, stringsAsFactors = FALSE)
 
   # Helper function to bin a vector according to pre-computed bin
   # assignments and bin centers using either mean or median aggregation.
@@ -216,10 +205,7 @@ bin_pupil <- function(x, prev_op, bins_per_second, method, current_fs) {
   binned_bin_col <- bin_vector(prev_pupil, bin_assignments, bin_centers, method)
   binned_df <- cbind(
     binned_df,
-    setNames(
-      list(binned_bin_col),
-      paste0(prev_op, "_bin")
-    )
+    setNames(list(binned_bin_col), paste0(prev_op, "_bin"))
   )
 
   # process all remaining cols from the orig df

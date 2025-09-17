@@ -1,10 +1,12 @@
 
 <!-- README.md is generated from README.Rmd-->
 
-# `eyeris`: Flexible, Extensible, & Reproducible Pupillometry Preprocessing <a href="https://shawnschwartz.com/eyeris/" title="eyeris website"><img src="man/figures/logo.png" align="right" width="100" alt="eyeris website" /></a>
+# `eyeris`: Flexible, Extensible, & Reproducible Pupillometry Preprocessing <a href="https://shawnschwartz.com/eyeris/" title="eyeris website"><img src="https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/dev/man/figures/logo.png" align="right" width="100" alt="eyeris website" /></a>
 
 <!-- badges: start -->
 
+[![dev branch
+status](https://raw.githubusercontent.com/shawntz/eyeris/refs/heads/badges/dev-branch-version.svg)](https://github.com/shawntz/eyeris/tree/dev)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/eyeris)](https://CRAN.R-project.org/package=eyeris)
 [![downloads](http://cranlogs.r-pkg.org/badges/grand-total/eyeris?color=brightgreen)](https://cran.r-project.org/package=badger)
@@ -110,7 +112,16 @@ with links to their documentation and a brief description.
 | **Demo (Monocular) Dataset** | [eyelink_asc_demo_dataset()](https://shawnschwartz.com/eyeris/reference/eyelink_asc_demo_dataset.html) | Load a demo monocular recording EyeLink dataset for testing and examples. |
 | **Demo (Binocular) Dataset** | [eyelink_asc_binocular_demo_dataset()](https://shawnschwartz.com/eyeris/reference/eyelink_asc_binocular_demo_dataset.html) | Load a demo binocular recording EyeLink dataset for testing and examples. |
 | **Logging Commands** | [eyelogger()](https://shawnschwartz.com/eyeris/reference/eyelogger.html) | Automatically capture all console output and errors to timestamped log files. |
+| **Database Storage** | [eyeris_db_collect()](https://shawnschwartz.com/eyeris/reference/eyeris_db_collect.html) | High-performance database storage and querying alternative to CSV files. |
+| **Database Summary** | [eyeris_db_summary()](https://shawnschwartz.com/eyeris/reference/eyeris_db_summary.html) | Get comprehensive overview of database contents and metadata. |
+| **Database Connection** | [eyeris_db_connect()](https://shawnschwartz.com/eyeris/reference/eyeris_db_connect.html) | Connect to eyeris databases for custom queries and operations. |
+| **Database Export (Chunked)** | [eyeris_db_to_chunked_files()](https://shawnschwartz.com/eyeris/reference/eyeris_db_to_chunked_files.html) | Export large databases in configurable chunks with automatic file size limits. |
+| **Database Export (Parquet)** | [eyeris_db_to_parquet()](https://shawnschwartz.com/eyeris/reference/eyeris_db_to_parquet.html) | Export database to high-performance Parquet format files. |
+| **Read Parquet Files** | [read_eyeris_parquet()](https://shawnschwartz.com/eyeris/reference/read_eyeris_parquet.html) | Read and combine eyeris Parquet files with schema-aligned binding. |
+| **Database Sharing (Split)** | [eyeris_db_split_for_sharing()](https://shawnschwartz.com/eyeris/reference/eyeris_db_split_for_sharing.html) | Split databases into chunks for easier sharing and collaboration. |
+| **Database Sharing (Reconstruct)** | [eyeris_db_reconstruct_from_chunks()](https://shawnschwartz.com/eyeris/reference/eyeris_db_reconstruct_from_chunks.html) | Reconstruct complete databases from shared chunks. |
 | **Custom Extensions** | *See vignette: [Custom Extensions](https://shawnschwartz.com/eyeris/articles/custom-extensions.html)* | Learn how to write your own pipeline steps and integrate them with `eyeris`. |
+| **Internal API Reference** | *See vignette: [Internal API Reference](https://shawnschwartz.com/eyeris/articles/internal-api.html)* | Comprehensive documentation of all internal functions for advanced users and developers. |
 
 > For a full list of all functions, see the [eyeris reference
 > index](https://shawnschwartz.com/eyeris/reference/index.html).
@@ -135,6 +146,8 @@ with links to their documentation and a brief description.
   Object](https://shawnschwartz.com/eyeris/articles/anatomy.html)
 - [🛠 Building Your Own Custom Pipeline
   Extensions](https://shawnschwartz.com/eyeris/articles/custom-extensions.html)
+- [🗄 Database Storage Guide: Scalable Alternative to CSV
+  Files](https://shawnschwartz.com/eyeris/articles/database-guide.html)
 
 ## 📦 Package Installation
 
@@ -184,7 +197,7 @@ set.seed(32)
 
 library(eyeris)
 #> 
-#> eyeris v2.1.1 - Lumpy Space Princess ꒰•ᴗ•｡꒱۶
+#> eyeris v3.0.0 - Lumpy Space Princess ꒰•ᴗ•｡꒱۶
 #> Welcome! Type ?`eyeris` to get started.
 
 demo_data <- eyelink_asc_demo_dataset()
@@ -193,19 +206,20 @@ eyeris_preproc <- glassbox(
   demo_data,
   lpfilt = list(plot_freqz = FALSE)
 )
-#> ✔ [OKAY] Running eyeris::load_asc()
-#> ℹ [INFO] Processing block: block_1
-#> ✔ [OKAY] Running eyeris::deblink() for block_1
-#> ✔ [OKAY] Running eyeris::detransient() for block_1
-#> ✔ [OKAY] Running eyeris::interpolate() for block_1
-#> ✔ [OKAY] Running eyeris::lpfilt() for block_1
-#> ! [WARN] Skipping eyeris::downsample() for block_1
-#> ! [WARN] Skipping eyeris::bin() for block_1
-#> ! [WARN] Skipping eyeris::detrend() for block_1
-#> ✔ [OKAY] Running eyeris::zscore() for block_1
-#> ℹ [INFO] Block processing summary:
-#> ℹ [INFO] block_1: OK (steps: 6, latest: pupil_raw_deblink_detransient_interpolate_lpfilt_z)
-#> ✔ [OKAY] Running eyeris::summarize_confounds()
+#> ✔ [2025-09-16 15:54:02] [OKAY] Running eyeris::load_asc()
+#> ℹ [2025-09-16 15:54:02] [INFO] Processing block: block_1
+#> ✔ [2025-09-16 15:54:02] [OKAY] Running eyeris::deblink() for block_1
+#> ✔ [2025-09-16 15:54:02] [OKAY] Running eyeris::detransient() for block_1
+#> ✔ [2025-09-16 15:54:02] [OKAY] Running eyeris::interpolate() for block_1
+#> ✔ [2025-09-16 15:54:02] [OKAY] Running eyeris::lpfilt() for block_1
+#> ! [2025-09-16 15:54:02] [WARN] Skipping eyeris::downsample() for block_1
+#> ! [2025-09-16 15:54:02] [WARN] Skipping eyeris::bin() for block_1
+#> ! [2025-09-16 15:54:02] [WARN] Skipping eyeris::detrend() for block_1
+#> ✔ [2025-09-16 15:54:02] [OKAY] Running eyeris::zscore() for block_1
+#> ℹ [2025-09-16 15:54:02] [INFO] Block processing summary:
+#> ℹ [2025-09-16 15:54:02] [INFO] block_1: OK (steps: 6, latest:
+#> pupil_raw_deblink_detransient_interpolate_lpfilt_z)
+#> ✔ [2025-09-16 15:54:02] [OKAY] Running eyeris::summarize_confounds()
 ```
 
 ### Step-wise correction of pupillary signal
@@ -231,17 +245,17 @@ plot(eyeris_preproc,
   preview_window = c(start_time, end_time),
   add_progressive_summary = TRUE
 )
-#> ℹ [INFO] Plotting block 1 from possible blocks: 1
-#> ℹ [INFO] Plotting with sampling rate: 1000 Hz
+#> ℹ [2025-09-16 15:54:02] [INFO] Plotting block 1 with sampling rate 1000 Hz from
+#> possible blocks: 1
 ```
 
 <img src="man/figures/README-timeseries-plot-1.png" width="100%" /><img src="man/figures/README-timeseries-plot-2.png" width="100%" /><img src="man/figures/README-timeseries-plot-3.png" width="100%" /><img src="man/figures/README-timeseries-plot-4.png" width="100%" /><img src="man/figures/README-timeseries-plot-5.png" width="100%" /><img src="man/figures/README-timeseries-plot-6.png" width="100%" />
 
-    #> ℹ [INFO] Creating progressive summary plot for block_1
+    #> ℹ [2025-09-16 15:54:02] [INFO] Creating progressive summary plot for block_1
 
 <img src="man/figures/README-timeseries-plot-7.png" width="100%" />
 
-    #> ✔ [OKAY] Progressive summary plot created successfully!
+    #> ✔ [2025-09-16 15:54:03] [OKAY] Progressive summary plot created successfully!
 
     plot_gaze_heatmap(
       eyeris = eyeris_preproc,
@@ -250,133 +264,98 @@ plot(eyeris_preproc,
 
 <img src="man/figures/README-timeseries-plot-8.png" width="100%" />
 
-## BIDS-like file structure
+## 🗄 Database Storage: Scalable Alternative to CSV Files
 
-`eyeris` organizes preprocessed data using a BIDS-like directory
-structure that supports both monocular and binocular eye-tracking data.
-The `bidsify()` function creates a standardized directory hierarchy with
-separate organization for different data types.
+`eyeris` includes powerful database functionality powered by `DuckDB`
+that provides a scalable, efficient alternative to CSV file storage.
+This is especially valuable for large studies, cloud computing, and
+collaborative research projects.
 
-### Monocular data structure
+### Why Use Databases?
 
-For single-eye recordings, data are organized in the main eye directory:
+**🚀 Performance at Scale** - Handle hundreds of subjects efficiently
+vs. managing thousands of CSV files - Faster queries: filter and
+aggregate at the database level instead of loading all data into `R` -
+Reduced memory usage: load only the data you need
 
-    bids_dir/
-    └── derivatives/
-        └── sub-001/
-            └── ses-01/
-                ├── sub-001.html
-                └── eye/
-                    ├── sub-001_ses-01_task-test_run-01_desc-timeseries_eye.csv
-                    ├── sub-001_ses-01_task-test_run-01_desc-confounds.csv
-                    ├── sub-001_ses-01_task-test_run-01_epoch-stimulus_desc-preproc_pupil.csv
-                    ├── sub-001_ses-01_task-test_run-01_baseline-stimulus_desc-preproc_pupil.csv
-                    ├── sub-001_ses-01_task-test_run-01_events.csv
-                    ├── sub-001_ses-01_task-test_run-01_blinks.csv
-                    ├── sub-001_ses-01_task-test_run-01_summary.csv
-                    ├── sub-001_ses-01_task-test_run-01.html
-                    └── source/
-                        ├── figures/
-                        │   └── run-01/
-                        │       ├── run-01_fig-1_deblink.jpg
-                        │       ├── run-01_fig-2_detrend.jpg
-                        │       ├── run-01_fig-3_interpolate.jpg
-                        │       ├── run-01_fig-4_lpfilt.jpg
-                        │       ├── run-01_fig-5_zscore.jpg
-                        │       ├── run-01_gaze_heatmap.png
-                        │       ├── run-01_detrend.png
-                        │       └── run-01_desc-progressive_summary.png
-                        └── logs/
-                            └── run-01_metadata.json
+**💯 Cloud Computing Optimized** - Reduce I/O costs on AWS, GCP, Azure -
+Single database file vs. thousands of CSV files for data transfer -
+Bandwidth efficient and cost-effective for large datasets
 
-### Binocular data structure
+**🔒 Data Integrity** - Built-in schema validation prevents data
+corruption - Automatic metadata tracking and timestamps
 
-For binocular recordings, data are organized into separate `left` and
-`right` eye subdirectories:
+### Quick Start: `eyeris` Project Database Creation
 
-    bids_dir/
-    └── derivatives/
-        └── sub-001/
-            └── ses-01/
-                ├── sub-001-L.html
-                ├── sub-001-R.html
-                ├── eye-L/
-                │   ├── sub-001_ses-01_task-test_run-01_desc-timeseries_eye-L.csv
-                │   ├── sub-001_ses-01_task-test_run-01_desc-confounds_eye-L.csv
-                │   ├── sub-001_ses-01_task-test_run-01_epoch-stimulus_desc-preproc_pupil_eye-L.csv
-                │   ├── sub-001_ses-01_task-test_run-01_baseline-stimulus_desc-preproc_pupil_eye-L.csv
-                │   ├── sub-001_ses-01_task-test_run-01_events_eye-L.csv
-                │   ├── sub-001_ses-01_task-test_run-01_blinks_eye-L.csv
-                │   ├── sub-001_ses-01_task-test_run-01_summary_eye-L.csv
-                │   ├── sub-001_ses-01_task-test_run-01_eye-L.html
-                │   └── source/
-                │       ├── figures/
-                │       │   └── run-01/
-                │       └── logs/
-                │           └── run-01_metadata.json
-                └── eye-R/
-                    ├── sub-001_ses-01_task-test_run-01_desc-timeseries_eye-R.csv
-                    ├── sub-001_ses-01_task-test_run-01_desc-confounds_eye-R.csv
-                    ├── sub-001_ses-01_task-test_run-01_epoch-stimulus_desc-preproc_pupil_eye-R.csv
-                    ├── sub-001_ses-01_task-test_run-01_baseline-stimulus_desc-preproc_pupil_eye-R.csv
-                    ├── sub-001_ses-01_task-test_run-01_events_eye-R.csv
-                    ├── sub-001_ses-01_task-test_run-01_blinks_eye-R.csv
-                    ├── sub-001_ses-01_task-test_run-01_summary_eye-R.csv
-                    ├── sub-001_ses-01_task-test_run-01_eye-R.html
-                    └── source/
-                        ├── figures/
-                        │   └── run-01/
-                        └── logs/
-                            └── run-01_metadata.json
+Enable `eyeris` project database storage alongside or instead of CSV
+files:
 
-### File naming convention
+``` r
+bidsify(
+  processed_data,
+  bids_dir = "~/my_study",
+  participant_id = "001",
+  session_num = "01", 
+  task_name = "memory_task",
+  csv_enabled = TRUE,    # keep traditional BIDS-style CSV output files
+  db_enabled = TRUE,     # but also create an eyeris project database
+  db_path = "study_database"
+)
 
-All files follow a consistent BIDS-like naming pattern:
+bidsify(
+  processed_data,
+  bids_dir = "~/my_study",
+  participant_id = "001", 
+  session_num = "01",
+  task_name = "memory_task", 
+  csv_enabled = FALSE,   # skip CSV creation
+  db_enabled = TRUE,     # cloud-optimized: Database only (no CSV files)
+  db_path = "study_database"
+)
+```
 
-- **Timeseries data**: `desc-timeseries_eye` (with `_eye-L` or `_eye-R`
-  suffix for binocular data)
-- **Confounds**: `desc-confounds` (with eye suffix for binocular data)
-- **Epochs**: `epoch-{event}_desc-preproc_pupil` (with eye suffix for
-  binocular data)
-- **Baselines**: `baseline-{event}_desc-preproc_pupil` (with eye suffix
-  for binocular data)
-- **Events**: `events` (with eye suffix for binocular data)
-- **Blinks**: `blinks` (with eye suffix for binocular data)
-- **Reports**: HTML files with eye suffix for binocular data
+### Simple Data Extraction
 
-### Events and blinks data
+Extract all your data with one function call:
 
-The events and blinks CSV files contain the raw event markers and blink
-detection data as stored in the eyeris object:
+``` r
+# extract ALL data for ALL subjects
+all_data <- eyeris_db_collect("~/my_study", "study_database")
 
-**Events file structure:**
+# access specific data types
+timeseries_data <- all_data$timeseries
+confounds_data <- all_data$run_confounds
 
-- `block`: Block/run number
-- `time`: Timestamp of the event
-- `text`: Raw event text from the ASC file
-- `text_unique`: Unique event identifier
+# targeted extraction: specific subjects and data types
+subset_data <- eyeris_db_collect(
+  "~/my_study", 
+  "study_database",
+  subjects = c("001", "002", "003"),
+  data_types = c("timeseries", "epochs", "confounds_summary")
+)
+```
 
-**Blinks file structure:**
+### Database Overview and Management
 
-- `block`: Block/run number
-- `stime`: Start time of the blink
-- `etime`: End time of the blink
-- `dur`: Duration of the blink in milliseconds
-- `eye`: Eye identifier (L/R for binocular data)
+``` r
+# get a comprehensive database summary
+summary <- eyeris_db_summary("~/my_study", "study_database")
+summary$subjects      # all subjects in database
+summary$data_types    # available data types  
+summary$total_tables  # number of tables
 
-### Key features
+# connect to eyeris database for custom operations
+con <- eyeris_db_connect("~/my_study", "study_database")
+# ... custom SQL queries ...
+eyeris_db_disconnect(con)
+```
 
-- **Organized Structure**: Clear separation between monocular and
-  binocular data
-- **Consistent Naming**: Standardized file naming across all data types
-- **Complete Documentation**: HTML reports with preprocessing summaries
-  and visualizations
-- **Quality Assessment**: Gaze heatmaps and binocular correlation plots
-  for data quality evaluation
-- **Reproducibility**: Metadata files documenting preprocessing
-  parameters and call stacks
+> **💡 Pro Tip**: Use `csv_enabled = FALSE, db_enabled = TRUE` for cloud
+> computing to maximize efficiency and minimize costs.
 
-## Logging `eyeris` commands with `eyelogger()`
+> **📖 Complete Guide**: See the [Database Storage
+> Guide](https://shawnschwartz.com/eyeris/articles/database-guide.html)
+> for comprehensive tutorials, advanced usage, and real-world examples.
 
 ## 📁 BIDS-like file structure
 

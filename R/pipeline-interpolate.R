@@ -33,7 +33,7 @@
 #' `pupil_raw_{...}_interpolate`
 #'
 #' @seealso [eyeris::glassbox()] for the recommended way to run this step as
-#' part of the full eyeris glassbox preprocessing pipeline.
+#' part of the full `eyeris` glassbox preprocessing pipeline.
 #'
 #' @examples
 #' demo_data <- eyelink_asc_demo_dataset()
@@ -46,10 +46,7 @@
 #' @export
 interpolate <- function(eyeris, verbose = TRUE, call_info = NULL) {
   call_info <- if (is.null(call_info)) {
-    list(
-      call_stack = match.call(),
-      parameters = list(verbose = verbose)
-    )
+    list(call_stack = match.call(), parameters = list(verbose = verbose))
   } else {
     call_info
   }
@@ -114,20 +111,14 @@ interpolate <- function(eyeris, verbose = TRUE, call_info = NULL) {
 #' @keywords internal
 interpolate_pupil <- function(x, prev_op, verbose) {
   if (!any(is.na(x[[prev_op]]))) {
-    if (verbose) {
-      cli::cli_alert_warning(
-        "[WARN] No NAs detected in pupil data... Skipping interpolation!"
-      )
-    }
+    log_warn(
+      "No NAs detected in pupil data... Skipping interpolation!",
+      verbose = verbose
+    )
     return(x[[prev_op]])
   } else {
     prev_pupil <- x[[prev_op]]
   }
 
-  zoo::na.approx(
-    prev_pupil,
-    na.rm = FALSE,
-    maxgap = Inf,
-    rule = 2
-  )
+  zoo::na.approx(prev_pupil, na.rm = FALSE, maxgap = Inf, rule = 2)
 }

@@ -110,21 +110,38 @@ format_call_stack <- function(callstack) {
 
 #' Extract block numbers from eyeris object or character vector
 #'
-#' Extracts numeric block numbers from block names or an eyeris object.
+#' Extracts numeric block numbers from block names or an `eyeris` object.
 #'
 #' @param x Either a character vector of block names or an `eyeris` object
 #'
-#' @return A numeric vector of block numbers, or NULL if no blocks found
+#' @return A numeric vector of block numbers, defaults to 1 if no blocks found
 #'
 #' @keywords internal
 get_block_numbers <- function(x) {
   if (is.character(x)) {
-    block_nums <- as.numeric(gsub("block_", "", x))
+    # handle both "block_N" format and fallback for other formats
+    if (grepl("^block_", x)) {
+      block_nums <- as.numeric(gsub("block_", "", x))
+    } else {
+      # for non-block_ names, try to extract any number or default to 01
+      numbers <- regmatches(x, gregexpr("[0-9]+", x))[[1]]
+      if (length(numbers) > 0) {
+        block_nums <- as.numeric(numbers[1])
+      } else {
+        block_nums <- 1 # default fallback
+      }
+    }
   } else if (is.list(x$timeseries) && !is.data.frame(x$timeseries)) {
     block_nums <- as.numeric(gsub("block_", "", names(x$timeseries)))
   } else {
-    return(NULL)
+    return(sprintf("%02d", 1)) # default fallback instead of NULL
   }
+
+  # ensure we always return a valid number
+  if (is.na(block_nums)) {
+    return(1) # default fallback instead of NULL
+  }
+
   block_nums
 }
 
@@ -164,7 +181,7 @@ convert_nested_dt <- function(nested_dt) {
 
 #' Filter epoch names from eyeris object
 #'
-#' Extracts names of epoch-related elements from an eyeris object.
+#' Extracts names of epoch-related elements from an `eyeris` object.
 #'
 #' @param eyeris An `eyeris` object
 #' @param epochs A vector of epoch names to filter
@@ -197,8 +214,5 @@ parse_eyelink_info <- function(version_str, model = NA) {
     }
   }
 
-  return(list(
-    version = version_str,
-    model = model
-  ))
+  return(list(version = version_str, model = model))
 }

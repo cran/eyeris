@@ -1,11 +1,11 @@
-#' Index metadata from dataframe
+#' Index metadata from data frame
 #'
-#' Extracts a single row of metadata from a dataframe.
+#' Extracts a single row of metadata from a data frame.
 #'
-#' @param x The dataframe to index
+#' @param x The data frame to index
 #' @param i The row index
 #'
-#' @return A single row from the dataframe
+#' @return A single row from the data frame
 #'
 #' @keywords internal
 index_metadata <- function(x, i) {
@@ -34,7 +34,7 @@ make_epoch_label <- function(evs, label, epoched_data) {
         epoched_data[[1]]$end_msg[1]
       ))
     } else {
-      cli::cli_abort("[EXIT] No epoched data available for label generation")
+      log_error("No epoched data available for label generation")
     }
   } else {
     paste0("epoch_", label)
@@ -68,16 +68,16 @@ sanitize_event_tag <- function(string, prefix = "epoch_") {
   paste0(prefix, gsub("\\d", "", camel_case_str))
 }
 
-#' Slice epoch from raw timeseries data
+#' Slice epoch from raw time series data
 #'
-#' Extracts a time segment from raw timeseries data based on start and
+#' Extracts a time segment from raw time series data based on start and
 #' end times.
 #'
-#' @param x_raw The raw timeseries dataframe
+#' @param x_raw The raw time series data frame
 #' @param s Start time in milliseconds
 #' @param e End time in milliseconds
 #'
-#' @return A dataframe containing the epoch data
+#' @return A data frame containing the epoch data
 #'
 #' @keywords internal
 slice_epoch <- function(x_raw, s, e) {
@@ -92,12 +92,12 @@ slice_epoch <- function(x_raw, s, e) {
 
 #' Slice epochs with no explicit limits
 #'
-#' Creates epochs using adjacent timestamps without explicit time limits.
+#' Creates epochs using adjacent time stamps without explicit time limits.
 #'
-#' @param x_raw The raw timeseries dataframe
-#' @param all_ts A dataframe containing timestamp information
+#' @param x_raw The raw time series data frame
+#' @param all_ts A data frame containing timestamp information
 #'
-#' @return A list of epoch dataframes
+#' @return A list of epoch data frames
 #'
 #' @keywords internal
 slice_epochs_no_limits <- function(x_raw, all_ts) {
@@ -126,12 +126,12 @@ slice_epochs_no_limits <- function(x_raw, all_ts) {
 #'
 #' Creates epochs using explicit time limits around a central timestamp.
 #'
-#' @param x_raw The raw timeseries dataframe
+#' @param x_raw The raw time series data frame
 #' @param cur_ts The central timestamp
 #' @param lims Time limits in seconds (negative for before, positive for after)
 #' @param hz Sampling rate in Hz
 #'
-#' @return A dataframe containing the epoch data
+#' @return A data frame containing the epoch data
 #'
 #' @keywords internal
 slice_epochs_with_limits <- function(x_raw, cur_ts, lims, hz) {
@@ -150,7 +150,7 @@ slice_epochs_with_limits <- function(x_raw, cur_ts, lims, hz) {
 #' Extracts start and end timestamps from events data based on message patterns.
 #'
 #' @param evs Event messages or list of events
-#' @param timestamped_events Events dataframe with timestamps
+#' @param timestamped_events Events data frame with timestamps
 #' @param msg_s Start message pattern
 #' @param msg_e End message pattern
 #' @param limits Time limits for wildcard mode
@@ -159,7 +159,14 @@ slice_epochs_with_limits <- function(x_raw, cur_ts, lims, hz) {
 #' @return A list containing start and end timestamps
 #'
 #' @keywords internal
-get_timestamps <- function(evs, timestamped_events, msg_s, msg_e, limits, baseline_mode = FALSE) {
+get_timestamps <- function(
+  evs,
+  timestamped_events,
+  msg_s,
+  msg_e,
+  limits,
+  baseline_mode = FALSE
+) {
   start_ts <- NULL
   end_ts <- NULL
 
@@ -189,25 +196,76 @@ get_timestamps <- function(evs, timestamped_events, msg_s, msg_e, limits, baseli
       }
     }
   }
-  return(list(
-    start = start_ts,
-    end = end_ts
-  ))
+  return(list(start = start_ts, end = end_ts))
 }
 
-#' Process event messages and merge with timeseries
+#' Extract event identifiers from event messages
+#'
+#' Extracts identifiers (like image names or trial numbers) from event messages
+#' to enable matching between start and end events.
+#'
+#' @param events Data frame containing event messages
+#'
+#' @return A vector of extracted identifiers
+#'
+#' @keywords internal
+extract_event_ids <- function(events) {
+  # get the appropriate message column
+  if ("matched_event" %in% names(events)) {
+    messages <- events$matched_event
+  } else if ("event_message" %in% names(events)) {
+    messages <- events$event_message
+  } else if ("text" %in% names(events)) {
+    messages <- events$text
+  } else {
+    # fallback: look for any text-like column
+    text_cols <- names(events)[sapply(events, is.character)]
+    if (length(text_cols) > 0) {
+      messages <- events[[text_cols[1]]]
+    } else {
+      stop("No text column found in events data frame")
+    }
+  }
+
+  # extract identifiers using common patterns
+  # pattern 1: filename.ext (e.g., "PROBE_S 392.jpg" -> "392.jpg")
+  ids <- stringr::str_extract(messages, "[a-zA-Z0-9_-]+\\.[a-zA-Z0-9]+$")
+
+  # pattern 2: trial numbers (e.g., "TRIAL_01" -> "01")
+  if (all(is.na(ids))) {
+    ids <- stringr::str_extract(messages, "[0-9]+$")
+  }
+
+  # pattern 3: general identifier after last space
+  if (all(is.na(ids))) {
+    ids <- stringr::str_extract(messages, "[^ ]+$")
+  }
+
+  # fallback: use the full message if no pattern matches
+  if (all(is.na(ids))) {
+    ids <- messages
+  }
+
+  return(ids)
+}
+
+#' Process event messages and merge with time series
 #'
 #' Matches event messages against templates and extracts metadata,
 #' supporting both exact matches and pattern matching with wildcards.
 #'
-#' @param events Events dataframe with timestamps and messages
+#' @param events Events data frame with timestamps and messages
 #' @param metadata_template Template pattern to match against
 #' @param merge Whether to merge results (default: `TRUE`)
 #'
-#' @return A dataframe with matched events and extracted metadata
+#' @return A data frame with matched events and extracted metadata
 #'
 #' @keywords internal
-merge_events_with_timeseries <- function(events, metadata_template, merge = TRUE) {
+merge_events_with_timeseries <- function(
+  events,
+  metadata_template,
+  merge = TRUE
+) {
   special_chars <- c(
     "\\",
     ".",
@@ -225,7 +283,7 @@ merge_events_with_timeseries <- function(events, metadata_template, merge = TRUE
     "|"
   )
 
-  # Use text_unique if available, otherwise fall back to text
+  # use text_unique if available, otherwise fall back to text
   if ("text_unique" %in% colnames(events)) {
     event_messages <- dplyr::pull(events, text_unique)
     event_text_original <- dplyr::pull(events, text)

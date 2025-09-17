@@ -14,7 +14,7 @@ render_report <- function(rmd_f) {
 
 #' Create eyeris report
 #'
-#' Generates a comprehensive HTML report for eyeris preprocessing results.
+#' Generates a comprehensive HTML report for `eyeris` preprocessing results.
 #'
 #' @param eyeris An `eyeris` object containing preprocessing results
 #' @param out Output directory for the report
@@ -22,7 +22,7 @@ render_report <- function(rmd_f) {
 #' @param eye_suffix Optional eye suffix (e.g., "eye-L", "eye-R") for binocular data
 #' @param ... Additional parameters passed from bidsify
 #'
-#' @return Path to the generated R Markdown file
+#' @return Path to the generated `R Markdown` file
 #'
 #' @keywords internal
 make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
@@ -40,9 +40,7 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
   rmd_f <- file.path(out, report_filename)
 
   report_date <- format(Sys.time(), "%B %d, %Y | %H:%M:%OS3")
-  package_version <- as.character(
-    utils::packageVersion("eyeris")
-  )
+  package_version <- as.character(utils::packageVersion("eyeris"))
   css <- system.file(
     file.path("rmarkdown", "css", "report.css"),
     package = "eyeris"
@@ -55,11 +53,11 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
     recursive = FALSE,
     full.names = FALSE
   )
-  run_ids <- sort(
-    as.integer(
-      gsub("run-", "", grep("^run-\\d+$", run_ids, value = TRUE))
-    )
-  )
+  run_ids <- sort(as.integer(gsub(
+    "run-",
+    "",
+    grep("^run-\\d+$", run_ids, value = TRUE)
+  )))
 
   run_info <- paste(
     " - Runs: ",
@@ -143,7 +141,10 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
       call_stack = sanitize_call_stack(eyeris$params)
     )
 
-    meta_path <- file.path(metadata_dir, sprintf("run-%02d_metadata.json", run_id))
+    meta_path <- file.path(
+      metadata_dir,
+      sprintf("run-%02d_metadata.json", run_id)
+    )
 
     if (!file.exists(meta_path)) {
       jsonlite::write_json(
@@ -153,9 +154,7 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
         auto_unbox = TRUE
       )
     } else {
-      cli::cli_alert_warning(
-        sprintf("[WARN] Metadata file already exists for %s: %s", run_id, meta_path)
-      )
+      log_warn("Metadata file already exists for {run_id}: {meta_path}")
     }
 
     if (file.exists(meta_path)) {
@@ -195,7 +194,7 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
     }
   }
 
-  title <- "`eyeris` preprocessing summary report"
+  title <- "`eyeris` preprocessing report"
 
   content <- paste0(
     "---\n",
@@ -243,9 +242,19 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
     "@import url('https://cdn.jsdelivr.net/npm/lightbox2/dist/css/",
     "lightbox.min.css');\n</style>\n",
     "\n## Preprocessing Summaries\n\n",
-    save_progressive_summary_plots(eyeris = eyeris, out_dir = out, eye_suffix = eye_suffix),
+    save_progressive_summary_plots(
+      eyeris = eyeris,
+      out_dir = out,
+      eye_suffix = eye_suffix,
+      verbose = params$verbose
+    ),
     "\n\n## Preprocessed Data Previews\n\n",
-    save_detrend_plots(eyeris = eyeris, out_dir = out, eye_suffix = eye_suffix),
+    save_detrend_plots(
+      eyeris = eyeris,
+      out_dir = out,
+      eye_suffix = eye_suffix,
+      verbose = params$verbose
+    ),
     print_plots(plots, eye_suffix = eye_suffix),
     "\n",
     block_heatmaps_md,
@@ -258,6 +267,10 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
     "\n\n---\n\n## Citation\n\n",
     "```{r citation, echo=FALSE, comment=NA}\n",
     "citation('eyeris')\n",
+    "```\n\n",
+    "\n\n---\n\n## Session Information\n\n",
+    "```{r session-info, echo=FALSE, comment=NA}\n",
+    "sessionInfo()\n",
     "```\n\n\n\n\n\n"
   )
 
@@ -266,11 +279,11 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
   rmd_f
 }
 
-#' Create markdown table from dataframe
+#' Create markdown table from data frame
 #'
-#' Converts a dataframe into a markdown table.
+#' Converts a data frame into a markdown table.
 #'
-#' @param df The dataframe to convert
+#' @param df The data frame to convert
 #'
 #' @return A character string containing the markdown table content
 #'
@@ -279,31 +292,29 @@ make_md_table <- function(df) {
   md_table <- "| Property | Value |\n|----|----|\n"
   for (prop in colnames(df)) {
     val <- df[[1, prop]]
-    md_table <- paste0(
-      md_table,
-      "| ",
-      prop,
-      " | ",
-      val,
-      " |\n"
-    )
+    md_table <- paste0(md_table, "| ", prop, " | ", val, " |\n")
   }
 
   md_table
 }
 
-#' Create multiline markdown table from dataframe
+#' Create multiline markdown table from data frame
 #'
-#' Converts a dataframe into a multiline markdown table.
+#' Converts a data frame into a multiline markdown table.
 #'
-#' @param df The dataframe to convert
+#' @param df The data frame to convert
 #'
 #' @return A character string containing the markdown table content
 #'
 #' @keywords internal
 make_md_table_multiline <- function(df) {
   md_table <- paste0("| ", paste(colnames(df), collapse = " | "), " |\n")
-  md_table <- paste0(md_table, "|", paste(rep("---", ncol(df)), collapse = "|"), "|\n")
+  md_table <- paste0(
+    md_table,
+    "|",
+    paste(rep("---", ncol(df)), collapse = "|"),
+    "|\n"
+  )
   for (i in seq_len(nrow(df))) {
     row <- df[i, ]
     md_table <- paste0(
@@ -363,17 +374,14 @@ print_plots <- function(plots, eye_suffix = NULL) {
       if (length(run_plots) > 0) {
         run_num <- sub(".*run-(\\d+).*$", "\\1", run_dir)
 
-        md_plots <- paste0(
-          md_plots,
-          "### run-",
-          run_num,
-          "\n\n"
-        )
+        md_plots <- paste0(md_plots, "### run-", run_num, "\n\n")
 
         # sort by fig number if possible
-        plot_fig_ids <- suppressWarnings(
-          as.numeric(sub(".*_fig-(\\d+)_.*", "\\1", run_plots))
-        )
+        plot_fig_ids <- suppressWarnings(as.numeric(sub(
+          ".*_fig-(\\d+)_.*",
+          "\\1",
+          run_plots
+        )))
         if (all(!is.na(plot_fig_ids))) {
           sorted_plot_paths <- run_plots[order(plot_fig_ids)]
         } else {
@@ -391,13 +399,11 @@ print_plots <- function(plots, eye_suffix = NULL) {
         if (
           length(sorted_plot_paths) == 1 ||
             all(sapply(sorted_plot_paths, function(x) {
-              any(
-                grepl(
-                  paste(placeholder_patterns, collapse = "|"),
-                  x,
-                  ignore.case = TRUE
-                )
-              )
+              any(grepl(
+                paste(placeholder_patterns, collapse = "|"),
+                x,
+                ignore.case = TRUE
+              ))
             }))
         ) {
           placeholder_detected <- TRUE
@@ -446,7 +452,7 @@ print_plots <- function(plots, eye_suffix = NULL) {
 
 #' Save detrend plots for each block
 #'
-#' Generates and saves detrend diagnostic plots for each block in the eyeris
+#' Generates and saves detrend diagnostic plots for each block in the `eyeris`
 #' object.
 #'
 #' @param eyeris An `eyeris` object containing preprocessing results
@@ -454,11 +460,19 @@ print_plots <- function(plots, eye_suffix = NULL) {
 #' @param preview_n Number of preview samples for plotting
 #' @param plot_params Additional plotting parameters
 #' @param eye_suffix Optional eye suffix for binocular data
+#' @param verbose Logical. Whether to print verbose output (default TRUE).
 #'
 #' @return No return value; saves detrend plots to the specified directory
 #'
 #' @keywords internal
-save_detrend_plots <- function(eyeris, out_dir, preview_n = 3, plot_params = list(), eye_suffix = NULL) {
+save_detrend_plots <- function(
+  eyeris,
+  out_dir,
+  preview_n = 3,
+  plot_params = list(),
+  eye_suffix = NULL,
+  verbose = TRUE
+) {
   blocks <- names(eyeris$timeseries)
 
   for (block in blocks) {
@@ -479,7 +493,11 @@ save_detrend_plots <- function(eyeris, out_dir, preview_n = 3, plot_params = lis
     pupil_data <- eyeris$timeseries[[block]]
 
     # only proceed if detrended values exist
-    if ("detrend_fitted_values" %in% names(pupil_data) && any(grepl("_detrend$", names(pupil_data)))) {
+    if (
+      "detrend_fitted_values" %in%
+        names(pupil_data) &&
+        any(grepl("_detrend$", names(pupil_data)))
+    ) {
       pupil_steps <- grep("^pupil_", names(pupil_data), value = TRUE)
 
       grDevices::jpeg(
@@ -499,9 +517,9 @@ save_detrend_plots <- function(eyeris, out_dir, preview_n = 3, plot_params = lis
 
       grDevices::dev.off()
 
-      cli::cli_alert_info(sprintf("[INFO] %s", detrend_path))
+      log_info("{detrend_path}", verbose = verbose)
     } else {
-      cli::cli_alert_warning(sprintf("[WARN] No detrend data found for %s", run_id))
+      log_warn("No detrend data found for {run_id}")
     }
   }
 }
@@ -513,7 +531,7 @@ save_detrend_plots <- function(eyeris, out_dir, preview_n = 3, plot_params = lis
 #' multiple preprocessing stages overlaid on the same time series, allowing
 #' users to see how each step modifies the pupil signal.
 #'
-#' @param pupil_data A data frame containing pupil timeseries data with
+#' @param pupil_data A data frame containing pupil time series data with
 #'   multiple preprocessing columns (e.g., `eyeris$timeseries$block_1`)
 #' @param pupil_steps Character vector of column names containing pupil data
 #'   at different preprocessing stages
@@ -584,7 +602,13 @@ make_prog_summary_plot <- function(
       ylab = "",
       main = paste("Insufficient data for", run_id)
     )
-    text(0.5, 0.5, "Not enough preprocessing steps\nfor progressive summary", cex = 1.2, col = "red")
+    text(
+      0.5,
+      0.5,
+      "Not enough preprocessing steps\nfor progressive summary",
+      cex = 1.2,
+      col = "red"
+    )
     return()
   }
 
@@ -652,7 +676,7 @@ make_prog_summary_plot <- function(
 
 #' Save progressive summary plots for each block
 #'
-#' Generates and saves progressive summary plots for each block in the eyeris
+#' Generates and saves progressive summary plots for each block in the `eyeris`
 #' object.
 #'
 #' @param eyeris An `eyeris` object containing preprocessing results
@@ -660,22 +684,32 @@ make_prog_summary_plot <- function(
 #' @param preview_n Number of preview samples for plotting
 #' @param plot_params Additional plotting parameters
 #' @param eye_suffix Optional eye suffix for binocular data
+#' @param verbose Logical. Whether to print verbose output (default TRUE).
 #'
 #' @return A character string containing markdown references to the saved plots
 #'
 #' @keywords internal
-save_progressive_summary_plots <- function(eyeris, out_dir, preview_n = 3, plot_params = list(), eye_suffix = NULL) {
+save_progressive_summary_plots <- function(
+  eyeris,
+  out_dir,
+  preview_n = 3,
+  plot_params = list(),
+  eye_suffix = NULL,
+  verbose = TRUE
+) {
   run_dirs <- list.dirs(
     file.path(out_dir, "source", "figures"),
     recursive = FALSE,
     full.names = FALSE
   )
-  run_ids <- sort(as.integer(
-    gsub("run-", "", grep("^run-\\d+$", run_dirs, value = TRUE))
-  ))
+  run_ids <- sort(as.integer(gsub(
+    "run-",
+    "",
+    grep("^run-\\d+$", run_dirs, value = TRUE)
+  )))
 
   md_content <- paste(
-    "This visualization shows how the pupil timeseries changes across",
+    "This visualization shows how the pupil time series changes across",
     "preprocessing steps. ",
     "Each layer represents a different",
     "preprocessing step, with the earliest step at the back ",
@@ -720,9 +754,7 @@ save_progressive_summary_plots <- function(eyeris, out_dir, preview_n = 3, plot_
 
     pupil_data <- eyeris$timeseries[[block]]
     if (is.null(pupil_data)) {
-      cli::cli_alert_warning(
-        sprintf("[WARN] No pupil data for %s", run_id)
-      )
+      log_warn("No pupil data for {run_id}")
       next
     }
 
