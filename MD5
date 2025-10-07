@@ -1,7 +1,7 @@
-9bc0e19bd678d48d60e5c05a6348ee63 *DESCRIPTION
+a333c06f11d77599172b654f4c55b1e6 *DESCRIPTION
 4dc58549bbaf635ca9a8af44fc772094 *LICENSE
 a21bfa56b1aeb44340dec571e925fa3e *NAMESPACE
-1cb43f2318de06063d8e62697f606449 *NEWS.md
+9443a9ec9fd2826545913123e9287fdf *NEWS.md
 efb3dd929ec39ecd1f71a043f016e5dd *R/constants.R
 da82fb17c2bf65649a67f13ac0319897 *R/core-logging.R
 9a7545f6e44ec189f79ff7756a455e69 *R/eyeris-package.R
@@ -21,7 +21,7 @@ b2fce04dbcfb98183697cad8dbd2e30c *R/pipeline-lpfilt.R
 eb0229acdff47ab706aed03a15f20923 *R/pipeline-zscore.R
 4383251d496cfe21cf6a36fcd0121fcb *R/plot.eyeris.R
 9a4248f9e569118b90d7315151938e5a *R/utils-baseline.R
-c225184da7e71db23c2c01664f7ef254 *R/utils-checks.R
+528c2ddad63010f16a19449319d460a7 *R/utils-checks.R
 a72730360d02a04e99dc680975fc9270 *R/utils-database.R
 3790c3895a5ddc345afc1eda596af4bd *R/utils-epoch.R
 2bdc4b4ae7b1d69e12ffda461754fd2b *R/utils-error_handler.R
@@ -33,12 +33,12 @@ c3dbb535e1bf2001dcd24e8f39d01880 *R/utils-eyelogger.R
 5f71ccf49dd4cbd42cb55ea494a15f17 *R/utils-render_report.R
 d80ccdeb38cb4c9b034ad9090030d9aa *R/utils-zip-cleanup.R
 0776e22b499f28b26d841bd56b31df78 *R/utils-zip-gallery.R
-a264fc1232ff501e7ee087b294ce8d64 *R/zzz.R
-41feba1c557bcac9c4be7f3f0d7f539f *README.md
+f04c834bafd3e278aaad25653aed4bd7 *R/zzz.R
+a79e9da3242ae80b65a4302d3804dae2 *README.md
 1bf18d9c216b8d95033f0bd2fe2906b2 *build/partial.rdb
 882b76797935b12c708c090261fbb38d *build/vignette.rds
 65258b64f1073e7abd09a9be60e644fc *inst/CITATION
-151349554c29932725d1a19aa21b2621 *inst/WORDLIST
+1c5cca0ecce976a5900fdee86ba5b95c *inst/WORDLIST
 7c09f571705edaa409a1b8db48f6a74d *inst/doc/anatomy.R
 e01ca59ecffbfebf7778574dc1d4c3e8 *inst/doc/anatomy.Rmd
 2e2b033fb184fc43005d9f59e183f99b *inst/doc/anatomy.html
@@ -47,7 +47,7 @@ f74afc4b45ba8ee6e5ed1bd161e22a02 *inst/doc/chunked-database-export.R
 97be25de0ab19fb54320fb725c341f67 *inst/doc/chunked-database-export.html
 b9036e30328d903a3944c26afc80e086 *inst/doc/complete-pipeline.R
 20965e915b81b68aff10d1ca03c3a89a *inst/doc/complete-pipeline.Rmd
-9d6e31dff233328fd84fb294bc5793bd *inst/doc/complete-pipeline.html
+4cbca01dd8cffe8d9c2f2ed854e5ebe4 *inst/doc/complete-pipeline.html
 d3e5c9ab06076fe81723aa3226ef9aaf *inst/doc/custom-extensions.R
 c1dd556f8e87516556b420b793720e75 *inst/doc/custom-extensions.Rmd
 fa6faeb72ede496917de97515ecafad7 *inst/doc/custom-extensions.html
@@ -56,7 +56,7 @@ b4651107649874c90b095734054fc504 *inst/doc/database-guide.Rmd
 0fb4d796c312ddc77dfb0131d981716d *inst/doc/database-guide.html
 47c8de06a4c5c2294ce3aca0be4a2464 *inst/doc/epoching-bids-reports.R
 e37abcbce86ff8efa9737aa711d47767 *inst/doc/epoching-bids-reports.Rmd
-c6f44f48612500fc15582acb305645a9 *inst/doc/epoching-bids-reports.html
+ef973c3768bf35002d3039b4890335ba *inst/doc/epoching-bids-reports.html
 5e270ae6034b339c2a13d20a5f7d2dec *inst/doc/internal-api.R
 5112914cf8c43c04382edbe1a1b05feb *inst/doc/internal-api.Rmd
 18cb8a2089b09d87f4f924bd5904dd56 *inst/doc/internal-api.html
@@ -87,6 +87,7 @@ b830973f5ecd8ab72563207a8e99edde *man/bin_pupil.Rd
 c6fa32f5db3ff34cd4c08fa7d4507afb *man/calc_euclidean_dist.Rd
 07a3a18988c47ffb3164743a3492389e *man/calculate_epoched_confounds.Rd
 fcdfda6d1a1db0fe780c9413fe8f8f01 *man/check_and_create_dir.Rd
+779d9fe06b12d36c2173a84b62f477ea *man/check_arrow.Rd
 4c087af0e520110d32c1843115a6c1e8 *man/check_baseline_epoch_counts.Rd
 e0bacc3e380b3f7d3abe85b2c758bec0 *man/check_baseline_inputs.Rd
 0c135de74cd4781997125051c9f676a3 *man/check_baseline_mean.Rd
@@ -160,7 +161,7 @@ dbe5e8bc6d60033b151e178d404b14cf *man/figures/README-timeseries-plot-4.png
 6eb45dcc03b3c5147a274aa6dcf07dd5 *man/figures/README-timeseries-plot-6.png
 7b0b476b6026729a3e2e719831381ed0 *man/figures/README-timeseries-plot-7.png
 7f1f3fba9558bbe962e5d21ab0273501 *man/figures/README-timeseries-plot-8.png
-99d53b318e2093caefad0cfbff32c766 *man/figures/README-unnamed-chunk-3-1.png
+c4570ee2ba89f7f1e6817c773b23b8b8 *man/figures/README-unnamed-chunk-3-1.png
 5d1e5900e34fd150bb0341b526196e5a *man/figures/logo.png
 faa85f1fdd9f485f292d6a56453f8baa *man/filter_epochs.Rd
 5e5be5477887f2c2c6aef576c338f24e *man/find_baseline_structure.Rd

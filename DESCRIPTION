@@ -1,8 +1,8 @@
 Package: eyeris
 Type: Package
 Title: Flexible, Extensible, & Reproducible Pupillometry Preprocessing
-Version: 3.0.0
-Date: 2025-09-16
+Version: 3.0.1
+Date: 2025-10-06
 Language: en-US
 Authors@R: 
   c(
@@ -20,9 +20,9 @@ Depends: R (>= 4.1)
 Imports: eyelinker, dplyr, gsignal, purrr, zoo, cli, rlang, stringr,
         utils, stats, graphics, grDevices, tidyr, progress, data.table,
         withr, lifecycle, MASS, viridis, fields, jsonlite, rmarkdown,
-        DBI, glue, base64enc, arrow
+        DBI, glue, base64enc
 RoxygenNote: 7.3.3
-Suggests: duckdb, knitr, testthat (>= 3.0.0), devtools
+Suggests: arrow, duckdb, knitr, testthat (>= 3.0.0), devtools
 VignetteBuilder: knitr
 License: MIT + file LICENSE
 Config/testthat/edition: 3
@@ -30,7 +30,7 @@ URL: https://shawnschwartz.com/eyeris/,
         https://github.com/shawntz/eyeris/
 BugReports: https://github.com/shawntz/eyeris/issues
 NeedsCompilation: no
-Packaged: 2025-09-16 23:14:51 UTC; shawn.schwartz
+Packaged: 2025-10-07 04:51:27 UTC; shawn.schwartz
 Author: Shawn Schwartz [aut, cre] (ORCID:
     <https://orcid.org/0000-0001-6444-8451>),
   Mingjian He [ctb],
@@ -39,4 +39,4 @@ Author: Shawn Schwartz [aut, cre] (ORCID:
   Gustavo Santiago-Reyes [ctb]
 Maintainer: Shawn Schwartz <shawn.t.schwartz@gmail.com>
 Repository: CRAN
-Date/Publication: 2025-09-17 07:50:02 UTC
+Date/Publication: 2025-10-07 09:00:09 UTC
