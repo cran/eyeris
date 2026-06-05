@@ -11,11 +11,9 @@ knitr::opts_chunk$set(
 # library(DBI)
 
 ## ----basic-creation-----------------------------------------------------------
-# # load your EyeLink eye-tracking data ASC file
-# eyeris_data <- load_asc("path/to/your/data.asc")
-# 
 # # preprocess and epoch your data with eyeris glassbox functions
-# processed_data <- eyeris_data %>%
+# # Note: Pass the file path directly to glassbox() - eyeris handles .asc reading internally
+# processed_data <- "path/to/your/data.asc" %>%
 #   glassbox() %>%
 #   epoch(
 #     events = "TRIAL_START_{trial_type}_{trial_number}",

@@ -420,29 +420,27 @@ Database</h1>
 <h2>Basic Database Creation</h2>
 <p>The simplest way to create an <code>eyeris</code> database is by
 enabling database output during the <code>bidsify()</code> process:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># load your EyeLink eye-tracking data ASC file</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>eyeris_data <span class="ot">&lt;-</span> <span class="fu">load_asc</span>(<span class="st">&quot;path/to/your/data.asc&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># preprocess and epoch your data with eyeris glassbox functions</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>processed_data <span class="ot">&lt;-</span> eyeris_data <span class="sc">%&gt;%</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">glassbox</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">epoch</span>(</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    <span class="at">events =</span> <span class="st">&quot;TRIAL_START_{trial_type}_{trial_number}&quot;</span>,</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="fl">2.0</span>),</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;trial_epochs&quot;</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  )</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Enable eyeris database alongside CSV files</span></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">bidsify</span>(</span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>  processed_data,</span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/my_eyetracking_study&quot;</span>,</span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>  <span class="at">participant_id =</span> <span class="st">&quot;001&quot;</span>,</span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  <span class="at">session_num =</span> <span class="st">&quot;01&quot;</span>,</span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>  <span class="at">task_name =</span> <span class="st">&quot;memory_task&quot;</span>,</span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>  <span class="at">csv_enabled =</span> <span class="cn">TRUE</span>,    <span class="co"># still create CSV files</span></span>
-<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>  <span class="at">db_enabled =</span> <span class="cn">TRUE</span>,     <span class="co"># while also creating your eyeris project database</span></span>
-<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;study_database&quot;</span>  <span class="co"># creates study_database.eyerisdb</span></span>
-<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># preprocess and epoch your data with eyeris glassbox functions</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co"># Note: Pass the file path directly to glassbox() - eyeris handles .asc reading internally</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>processed_data <span class="ot">&lt;-</span> <span class="st">&quot;path/to/your/data.asc&quot;</span> <span class="sc">%&gt;%</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="fu">glassbox</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="fu">epoch</span>(</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    <span class="at">events =</span> <span class="st">&quot;TRIAL_START_{trial_type}_{trial_number}&quot;</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="fl">2.0</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;trial_epochs&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  )</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># Enable eyeris database alongside CSV files</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="fu">bidsify</span>(</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>  processed_data,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>  <span class="at">bids_dir =</span> <span class="st">&quot;~/my_eyetracking_study&quot;</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>  <span class="at">participant_id =</span> <span class="st">&quot;001&quot;</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>  <span class="at">session_num =</span> <span class="st">&quot;01&quot;</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>  <span class="at">task_name =</span> <span class="st">&quot;memory_task&quot;</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  <span class="at">csv_enabled =</span> <span class="cn">TRUE</span>,    <span class="co"># still create CSV files</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>  <span class="at">db_enabled =</span> <span class="cn">TRUE</span>,     <span class="co"># while also creating your eyeris project database</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>  <span class="at">db_path =</span> <span class="st">&quot;study_database&quot;</span>  <span class="co"># creates study_database.eyerisdb</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 <div id="database-only-workflow-cloud-optimized" class="section level2">
 <h2>Database-Only Workflow (Cloud Optimized)</h2>
