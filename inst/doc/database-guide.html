@@ -718,34 +718,60 @@ queries:</p>
 </div>
 <div id="example-2-quality-control-and-confounds-analysis" class="section level2">
 <h2>Example 2: Quality Control and Confounds Analysis</h2>
+<p><code>eyeris</code> reports the proportion of missing
+(<code>NA</code>) pupil samples as a <code>prop_missing</code> column
+(and its raw count, <code>n_missing</code>) at two levels: per recording
+block (in <code>run_confounds</code>) and per epoched event/trial (in
+<code>confounds_events</code>). <code>eyeris</code> does
+<strong>not</strong> apply a fixed missing-data exclusion cutoff for
+you. Instead, these columns are exposed so you can define your own
+exclusion thresholds at whichever level (block, epoch, or trial) is
+appropriate for your design.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># extract confounds data for quality control</span></span>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>confounds_data <span class="ot">&lt;-</span> <span class="fu">eyeris_db_collect</span>(</span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="st">&quot;~/processed_study_data&quot;</span>,</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">data_types =</span> <span class="fu">c</span>(<span class="st">&quot;run_confounds&quot;</span>, <span class="st">&quot;confounds_summary&quot;</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">data_types =</span> <span class="fu">c</span>(<span class="st">&quot;run_confounds&quot;</span>, <span class="st">&quot;confounds_events&quot;</span>)</span>
 <span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>)</span>
 <span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># identify subjects with poor data quality</span></span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>quality_control <span class="ot">&lt;-</span> confounds_data<span class="sc">$</span>run_confounds <span class="sc">%&gt;%</span></span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  <span class="fu">group_by</span>(subject_id, session_id) <span class="sc">%&gt;%</span></span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>    <span class="at">mean_blink_rate =</span> <span class="fu">mean</span>(blink_rate_hz, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>    <span class="at">mean_prop_invalid =</span> <span class="fu">mean</span>(prop_invalid, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
-<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>    <span class="at">mean_gaze_variance =</span> <span class="fu">mean</span>(gaze_x_var_px, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>    <span class="at">high_blink_rate =</span> mean_blink_rate <span class="sc">&gt;</span> <span class="fl">0.5</span>,  <span class="co"># arbitrary thresholds</span></span>
-<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>    <span class="at">high_invalid_data =</span> mean_prop_invalid <span class="sc">&gt;</span> <span class="fl">0.3</span>,</span>
-<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>    <span class="at">high_gaze_variance =</span> mean_gaze_variance <span class="sc">&gt;</span> <span class="dv">10000</span>,</span>
-<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>    <span class="at">exclude_subject =</span> high_blink_rate <span class="sc">|</span> high_invalid_data <span class="sc">|</span> high_gaze_variance</span>
-<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>  )</span>
-<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a></span>
-<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a><span class="co"># then view the subjects recommended for exclusion</span></span>
-<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>exclude_list <span class="ot">&lt;-</span> quality_control <span class="sc">%&gt;%</span></span>
-<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a>  <span class="fu">filter</span>(exclude_subject) <span class="sc">%&gt;%</span></span>
-<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a>  <span class="fu">select</span>(subject_id, session_id, exclude_subject)</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># block-level QC: identify subjects with poor data quality</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co"># (all thresholds below are illustrative -- choose values appropriate for your</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co"># study; nothing here is enforced by eyeris)</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>quality_control <span class="ot">&lt;-</span> confounds_data<span class="sc">$</span>run_confounds <span class="sc">%&gt;%</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>  <span class="fu">group_by</span>(subject_id, session_id) <span class="sc">%&gt;%</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>    <span class="at">mean_blink_rate =</span> <span class="fu">mean</span>(blink_rate_hz, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>    <span class="at">mean_prop_missing =</span> <span class="fu">mean</span>(prop_missing, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>    <span class="at">mean_prop_invalid =</span> <span class="fu">mean</span>(prop_invalid, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>    <span class="at">mean_gaze_variance =</span> <span class="fu">mean</span>(gaze_x_var_px, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>    <span class="at">high_blink_rate =</span> mean_blink_rate <span class="sc">&gt;</span> <span class="fl">0.5</span>,  <span class="co"># user-defined thresholds</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>    <span class="at">high_missing_data =</span> mean_prop_missing <span class="sc">&gt;</span> <span class="fl">0.5</span>,</span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a>    <span class="at">high_invalid_data =</span> mean_prop_invalid <span class="sc">&gt;</span> <span class="fl">0.3</span>,</span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a>    <span class="at">high_gaze_variance =</span> mean_gaze_variance <span class="sc">&gt;</span> <span class="dv">10000</span>,</span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>    <span class="at">exclude_subject =</span> high_blink_rate <span class="sc">|</span> high_missing_data <span class="sc">|</span></span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a>      high_invalid_data <span class="sc">|</span> high_gaze_variance</span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a>  )</span>
 <span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a></span>
-<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a><span class="fu">print</span>(exclude_list)</span></code></pre></div>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a><span class="co"># then view the subjects you have flagged for exclusion</span></span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a>exclude_list <span class="ot">&lt;-</span> quality_control <span class="sc">%&gt;%</span></span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a>  <span class="fu">filter</span>(exclude_subject) <span class="sc">%&gt;%</span></span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a>  <span class="fu">select</span>(subject_id, session_id, exclude_subject)</span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a></span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="fu">print</span>(exclude_list)</span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a></span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a><span class="co"># trial-level QC: flag individual epochs/trials to drop using your own</span></span>
+<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a><span class="co"># missing-data threshold (e.g., here, &gt; 50% missing on the deblinked signal)</span></span>
+<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a>trial_exclusions <span class="ot">&lt;-</span> confounds_data<span class="sc">$</span>confounds_events <span class="sc">%&gt;%</span></span>
+<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">&quot;deblink&quot;</span>, step)) <span class="sc">%&gt;%</span></span>
+<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">exclude_trial =</span> prop_missing <span class="sc">&gt;</span> <span class="fl">0.5</span>) <span class="sc">%&gt;%</span>  <span class="co"># user-defined threshold</span></span>
+<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb14-41"><a href="#cb14-41" tabindex="-1"></a>    subject_id, session_id, run_number, epoch_label,</span>
+<span id="cb14-42"><a href="#cb14-42" tabindex="-1"></a>    matched_event, n_samples, n_missing, prop_missing, exclude_trial</span>
+<span id="cb14-43"><a href="#cb14-43" tabindex="-1"></a>  )</span>
+<span id="cb14-44"><a href="#cb14-44" tabindex="-1"></a></span>
+<span id="cb14-45"><a href="#cb14-45" tabindex="-1"></a><span class="fu">print</span>(trial_exclusions)</span></code></pre></div>
 </div>
 </div>
 <div id="performance-comparison-database-vs-csv" class="section level1">

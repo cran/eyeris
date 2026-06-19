@@ -29,6 +29,38 @@ library(eyeris)
 ## ----load-data----------------------------------------------------------------
 demo_data <- eyelink_asc_demo_dataset()
 
+## ----load-custom-data, eval=FALSE---------------------------------------------
+# # Point to your own .asc file
+# my_data_path <- "/path/to/your/data/participant_01.asc"
+# 
+# # Load the data file
+# my_data <- eyeris::glassbox(my_data_path)
+
+## ----binocular-example, eval=FALSE--------------------------------------------
+# # Average both eyes (default)
+# my_data <- eyeris::glassbox(
+#   my_data_path,
+#   load_asc = list(binocular_mode = "average")
+# )
+# 
+# # Use only left eye
+# my_data <- eyeris::glassbox(
+#   my_data_path,
+#   load_asc = list(binocular_mode = "left")
+# )
+# 
+# # Use only right eye
+# my_data <- eyeris::glassbox(
+#   my_data_path,
+#   load_asc = list(binocular_mode = "right")
+# )
+# 
+# # Process both eyes independently
+# my_data <- eyeris::glassbox(
+#   my_data_path,
+#   load_asc = list(binocular_mode = "both")
+# )
+
 ## ----out.width='100%'---------------------------------------------------------
 # Run an automated pipeline with no real-time inspection of parameters
 output <- eyeris::glassbox(demo_data)

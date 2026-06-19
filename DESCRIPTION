@@ -1,8 +1,8 @@
 Package: eyeris
 Type: Package
 Title: Flexible, Extensible, & Reproducible Pupillometry Preprocessing
-Version: 3.1.0
-Date: 2026-06-05
+Version: 3.2.0
+Date: 2026-06-18
 Language: en-US
 Authors@R: 
   c(
@@ -30,7 +30,7 @@ URL: https://shawnschwartz.com/eyeris/,
 BugReports: https://github.com/shawntz/eyeris/issues
 Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2026-06-05 14:53:18 UTC; shawnschwartz
+Packaged: 2026-06-19 07:05:57 UTC; shawnschwartz
 Author: Shawn Schwartz [aut, cre] (ORCID:
     <https://orcid.org/0000-0001-6444-8451>),
   Mingjian He [ctb],
@@ -39,4 +39,4 @@ Author: Shawn Schwartz [aut, cre] (ORCID:
   Gustavo Santiago-Reyes [ctb]
 Maintainer: Shawn Schwartz <shawn.t.schwartz@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-06-05 15:30:02 UTC
+Date/Publication: 2026-06-19 07:30:02 UTC

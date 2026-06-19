@@ -279,31 +279,48 @@ knitr::opts_chunk$set(
 # # extract confounds data for quality control
 # confounds_data <- eyeris_db_collect(
 #   "~/processed_study_data",
-#   data_types = c("run_confounds", "confounds_summary")
+#   data_types = c("run_confounds", "confounds_events")
 # )
 # 
-# # identify subjects with poor data quality
+# # block-level QC: identify subjects with poor data quality
+# # (all thresholds below are illustrative -- choose values appropriate for your
+# # study; nothing here is enforced by eyeris)
 # quality_control <- confounds_data$run_confounds %>%
 #   group_by(subject_id, session_id) %>%
 #   summarise(
 #     mean_blink_rate = mean(blink_rate_hz, na.rm = TRUE),
+#     mean_prop_missing = mean(prop_missing, na.rm = TRUE),
 #     mean_prop_invalid = mean(prop_invalid, na.rm = TRUE),
 #     mean_gaze_variance = mean(gaze_x_var_px, na.rm = TRUE),
 #     .groups = 'drop'
 #   ) %>%
 #   mutate(
-#     high_blink_rate = mean_blink_rate > 0.5,  # arbitrary thresholds
+#     high_blink_rate = mean_blink_rate > 0.5,  # user-defined thresholds
+#     high_missing_data = mean_prop_missing > 0.5,
 #     high_invalid_data = mean_prop_invalid > 0.3,
 #     high_gaze_variance = mean_gaze_variance > 10000,
-#     exclude_subject = high_blink_rate | high_invalid_data | high_gaze_variance
+#     exclude_subject = high_blink_rate | high_missing_data |
+#       high_invalid_data | high_gaze_variance
 #   )
 # 
-# # then view the subjects recommended for exclusion
+# # then view the subjects you have flagged for exclusion
 # exclude_list <- quality_control %>%
 #   filter(exclude_subject) %>%
 #   select(subject_id, session_id, exclude_subject)
 # 
 # print(exclude_list)
+# 
+# # trial-level QC: flag individual epochs/trials to drop using your own
+# # missing-data threshold (e.g., here, > 50% missing on the deblinked signal)
+# trial_exclusions <- confounds_data$confounds_events %>%
+#   filter(grepl("deblink", step)) %>%
+#   mutate(exclude_trial = prop_missing > 0.5) %>%  # user-defined threshold
+#   select(
+#     subject_id, session_id, run_number, epoch_label,
+#     matched_event, n_samples, n_missing, prop_missing, exclude_trial
+#   )
+# 
+# print(trial_exclusions)
 
 ## ----performance-comparison---------------------------------------------------
 # # benchmark database approach
