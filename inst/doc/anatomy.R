@@ -7,6 +7,7 @@ knitr::opts_chunk$set(
 ## ----eval=FALSE---------------------------------------------------------------
 # system.file("extdata", "memory.asc", package = "eyeris") |>
 #   eyeris::load_asc(block = "auto") |>
+#   eyeris::resample() |>  # repair the sampling grid (no-op on uniform data)
 #   eyeris::deblink(extend = 50) |>
 #   eyeris::detransient(n = 16) |>
 #   eyeris::interpolate() |>

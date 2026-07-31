@@ -206,31 +206,47 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
   logs_dir <- file.path(out, "source", "logs")
   callstack_md <- ""
 
+  # only (re)generate a run's metadata.json for the run(s) actually present in
+  # the eyeris object being processed. when separate single-run files are
+  # bidsified into a shared bids_dir (each with its own `run_num`), the
+  # figures/ dir accumulates run directories from earlier iterations, so
+  # `run_ids` (scanned from disk) enumerates those sibling runs too. without
+  # this guard, each sibling's metadata would be rewritten from the current
+  # in-memory object, clobbering its real source_file/call_stack with the
+  # latest run's.
+  current_run_ids <- tryCatch(
+    as.integer(get_block_numbers(eyeris)),
+    error = function(e) run_ids
+  )
+
   for (run_id in run_ids) {
     metadata_dir <- file.path(out, "source", "logs")
     if (!dir.exists(metadata_dir)) {
       dir.create(metadata_dir, recursive = TRUE)
     }
 
-    run_metadata <- list(
-      run = run_id,
-      source_file = eyeris$file,
-      call_stack = sanitize_call_stack(eyeris$params)
-    )
-
     meta_path <- file.path(
       metadata_dir,
       sprintf("%s_metadata.json", make_run_dir_name(run_id, task))
     )
 
-    # Always regenerate metadata to ensure it uses the latest sanitization
-    # This prevents issues with old files containing huge epoch data
-    jsonlite::write_json(
-      run_metadata,
-      meta_path,
-      pretty = TRUE,
-      auto_unbox = TRUE
-    )
+    # Regenerate metadata for the current run(s) to ensure it uses the latest
+    # sanitization (prevents old files containing huge epoch data). Sibling
+    # runs written in earlier iterations keep their already-correct metadata.
+    if (run_id %in% current_run_ids) {
+      run_metadata <- list(
+        run = run_id,
+        source_file = eyeris$file,
+        call_stack = sanitize_call_stack(eyeris$params)
+      )
+
+      jsonlite::write_json(
+        run_metadata,
+        meta_path,
+        pretty = TRUE,
+        auto_unbox = TRUE
+      )
+    }
 
     if (file.exists(meta_path)) {
       meta <- jsonlite::read_json(meta_path)
@@ -348,6 +364,7 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
     "\n\n---\n\n## Reproducible Methods Boilerplate\n\n",
     boilerplate_md,
     "\n",
+    make_gap_filter_provenance_note(eyeris),
     "\n\n---\n\n## Preprocessing Summaries\n\n",
     save_progressive_summary_plots(
       eyeris = eyeris,
@@ -386,6 +403,100 @@ make_report <- function(eyeris, out, plots, eye_suffix = NULL, ...) {
   writeLines(content, con = rmd_f)
 
   rmd_f
+}
+
+#' Build a data-provenance note when filtering ran over long interpolation gaps
+#'
+#' If `lpfilt()` and/or `downsample()` were run on data that still contained
+#' gaps left as `NA` by `interpolate(max_gap_ms)`, those steps filtered over the
+#' gaps (temporarily filling and then re-masking them), which can slightly bias
+#' the valid samples adjacent to each gap. This records that fact as a
+#' "Data Quality Notes" section in the HTML report so it is part of the
+#' preprocessing provenance.
+#'
+#' @param eyeris An `eyeris` object
+#'
+#' @return A markdown string for the report (empty string if no such filtering
+#' over gaps occurred, or if `max_gap_ms` is not a single finite numeric value)
+#'
+#' @keywords internal
+make_gap_filter_provenance_note <- function(eyeris) {
+  params <- eyeris$params
+  if (!is.list(params)) {
+    return("")
+  }
+
+  ran_lpfilt <- "lpfilt" %in% names(params)
+  ran_downsample <- "downsample" %in% names(params)
+  if (!ran_lpfilt && !ran_downsample) {
+    return("")
+  }
+
+  ts <- eyeris$timeseries
+  if (is.null(ts)) {
+    return("")
+  }
+  blocks <- if (is.data.frame(ts)) list(ts) else ts
+
+  # only emit a long-gap note when max_gap_ms is a single finite, non-NA numeric
+  # value we can name; NULL / Inf / NA / non-scalar means there is no concrete
+  # threshold to report (the length check also guards the is.na()/is.finite()
+  # calls below from length errors on malformed params)
+  max_gap <- tryCatch(
+    params$interpolate$parameters$max_gap_ms,
+    error = function(e) NULL
+  )
+  if (
+    !is.numeric(max_gap) ||
+      length(max_gap) != 1L ||
+      is.na(max_gap) ||
+      !is.finite(max_gap)
+  ) {
+    return("")
+  }
+  limit_txt <- paste0(max_gap, " ms")
+
+  # a filter step operated over gaps if its output column retains any NA
+  col_has_na <- function(suffix) {
+    for (b in blocks) {
+      if (!is.data.frame(b)) {
+        next
+      }
+      cols <- grep(paste0(suffix, "$"), colnames(b), value = TRUE)
+      for (cc in cols) {
+        if (anyNA(b[[cc]])) {
+          return(TRUE)
+        }
+      }
+    }
+    FALSE
+  }
+
+  affected <- c()
+  if (ran_lpfilt && col_has_na("_lpfilt")) {
+    affected <- c(affected, "`lpfilt()`")
+  }
+  if (ran_downsample && col_has_na("_downsample")) {
+    affected <- c(affected, "`downsample()`")
+  }
+  if (length(affected) == 0) {
+    return("")
+  }
+
+  paste0(
+    "\n\n---\n\n## Data Quality Notes\n\n",
+    "> **Filtering applied over long data gaps.** ",
+    "This recording contains gaps longer than ",
+    limit_txt,
+    " (`max_gap_ms`) that `interpolate()` left as `NA`. ",
+    paste(affected, collapse = " and "),
+    " temporarily filled these gaps in order to run and then masked them back ",
+    "to `NA`, which can slightly bias the valid pupil samples immediately ",
+    "adjacent to each gap toward the interpolated values (analogous to filter ",
+    "edge artifacts, repeated at every long gap). If this bias is a concern ",
+    "for your analysis, re-run with filtering and/or downsampling disabled ",
+    "(`lpfilt = FALSE` and/or `downsample = FALSE` in `glassbox()`).\n\n"
+  )
 }
 
 #' Create markdown table from data frame
@@ -897,92 +1008,82 @@ make_prog_summary_plot <- function(
     if (sum(valid_indices) < 100) {
       next
     }
-    layer_data[[i]] <- list(
+    layer_data[[length(layer_data) + 1]] <- list(
       time = step_time[valid_indices],
       signal = step_data[valid_indices],
       step_name = plot_steps[i]
     )
   }
-  if (length(layer_data) < 2) {
-    plot(
-      NA,
-      xlim = c(0, 1),
-      ylim = c(0, 1),
-      type = "n",
-      xlab = "",
-      ylab = "",
-      main = paste("Insufficient data for", run_id)
-    )
-    text(
-      0.5,
-      0.5,
-      "Not enough preprocessing steps\nfor progressive summary",
-      cex = 1.2,
-      col = "red"
-    )
-    return()
-  }
 
-  all_signals <- unlist(lapply(layer_data, function(x) x$signal))
-  y_range <- range(all_signals, na.rm = TRUE)
-  x_range <- range(unlist(lapply(layer_data, function(x) x$time)), na.rm = TRUE)
-  y_padding <- diff(y_range) * 0.25 + 1e-6
-  x_padding <- diff(x_range) * 0.05 + 1e-6
-  y_range <- y_range + c(-y_padding, y_padding)
-  x_range <- x_range + c(-x_padding, x_padding)
+  if (length(layer_data) < 2) {
+    suppressMessages(suppressWarnings(print(rb_blank_panel(
+      "Not enough preprocessing steps\nfor progressive summary",
+      title = paste("Insufficient data for", run_id)
+    ))))
+    return(invisible(NULL))
+  }
 
   colorpal <- eyeris_color_palette()
   colors <- c("black", colorpal)
   n_layers <- length(layer_data)
   colors <- colors[seq_len(n_layers)]
 
-  layout(matrix(1:2, nrow = 2), heights = c(7, 2))
-  par(mar = c(4, 5, 4, 2))
-  plot(
-    NA,
-    xlim = x_range,
-    ylim = y_range,
-    type = "n",
-    xlab = "Time (seconds)",
-    ylab = "Pupil Size",
-    main = paste(
-      "Progressive Preprocessing Summary -",
-      run_id,
-      if (!is.null(eye_suffix)) paste0(" (", eye_suffix, ")") else ""
-    ),
-    cex.main = cex,
-    cex.lab = cex,
-    cex.axis = cex,
-    yaxt = "n",
-    bty = "n"
+  step_names <- vapply(
+    layer_data,
+    function(x) gsub("_", " > ", gsub("pupil_", "", x$step_name)),
+    character(1)
   )
-  axis(2, labels = FALSE)
-  for (i in seq_along(layer_data)) {
-    layer <- layer_data[[i]]
-    time_offset <- layer$time + i * 0.1
-    scale_factor <- 1 - i * 0.02
-    signal_scaled <- layer$signal * scale_factor
-    lines(time_offset, signal_scaled, col = colors[i], lwd = 4)
-  }
 
-  par(mar = c(0, 0, 0, 0))
-  plot.new()
-  step_names <- sapply(layer_data, function(x) {
-    clean_name <- gsub("pupil_", "", x$step_name)
-    clean_name <- gsub("_", " > ", clean_name)
-    clean_name
-  })
-  legend(
-    "center",
-    legend = step_names,
-    col = colors,
-    lwd = 2,
-    cex = cex - 0.5,
-    title = "Processing Steps",
-    horiz = FALSE,
-    bty = "n"
+  # assemble the offset/scaled layers into one long data frame so reaborn draws
+  # them as hue-mapped lines (earliest step at the back) with a single legend
+  long <- do.call(
+    rbind,
+    lapply(seq_along(layer_data), function(i) {
+      layer <- layer_data[[i]]
+      data.frame(
+        time = layer$time + i * 0.1,
+        signal = layer$signal * (1 - i * 0.02),
+        step = step_names[i],
+        stringsAsFactors = FALSE
+      )
+    })
   )
-  layout(1)
+
+  p <- rb_quiet(reaborn::lineplot(
+    data = long,
+    x = "time",
+    y = "signal",
+    hue = "step",
+    hue_order = step_names,
+    palette = colors,
+    estimator = NULL
+  )) +
+    ggplot2::labs(
+      title = paste0(
+        "Progressive Preprocessing Summary - ",
+        run_id,
+        if (!is.null(eye_suffix)) paste0(" (", eye_suffix, ")") else ""
+      ),
+      x = "Time (seconds)",
+      y = "Pupil Size",
+      colour = "Processing Steps"
+    ) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+      axis.text.y = ggplot2::element_blank(),
+      axis.ticks.y = ggplot2::element_blank(),
+      # reaborn/seaborn places the legend inside the axes, where it overlaps the
+      # layered traces; drop it below the plot instead (a single stacked column,
+      # since the cumulative step labels are long) so the plot keeps full width,
+      # mirroring the original two-panel base-graphics layout
+      legend.position = "bottom"
+    ) +
+    ggplot2::guides(
+      colour = ggplot2::guide_legend(ncol = 1, title = "processing step")
+    )
+
+  suppressMessages(suppressWarnings(print(p)))
+  invisible(NULL)
 }
 
 #' Save progressive summary plots for each block

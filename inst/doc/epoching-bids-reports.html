@@ -369,20 +369,27 @@ needing to write any additional code)!</p>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Load the example memory task file and run default glassbox preproc workflow</span></span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>demo_data <span class="ot">&lt;-</span> <span class="fu">eyelink_asc_demo_dataset</span>()</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>eye <span class="ot">&lt;-</span> <span class="fu">glassbox</span>(demo_data)</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:54] [OKAY] Running eyeris::load_asc()</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-06-19 00:05:54] [INFO] Processing block: block_1</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:54] [OKAY] Running eyeris::deblink() for block_1</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:54] [OKAY] Running eyeris::detransient() for block_1</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:54] [OKAY] Running eyeris::interpolate() for block_1</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:54] [OKAY] Running eyeris::lpfilt() for block_1</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; ! [2026-06-19 00:05:54] [WARN] Skipping eyeris::downsample() for block_1</span></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; ! [2026-06-19 00:05:54] [WARN] Skipping eyeris::bin() for block_1</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; ! [2026-06-19 00:05:54] [WARN] Skipping eyeris::detrend() for block_1</span></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:54] [OKAY] Running eyeris::zscore() for block_1</span></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-06-19 00:05:54] [INFO] Block processing summary:</span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-06-19 00:05:54] [INFO] block_1: OK (steps: 6, latest:</span></span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; pupil_raw_deblink_detransient_interpolate_lpfilt_z)</span></span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:54] [OKAY] Running eyeris::summarize_confounds()</span></span></code></pre></div>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Running eyeris::load_asc()</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Running eyeris::resample()</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-07-31 09:36:12] [INFO] Processing block: block_1</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Running eyeris::deblink() for block_1</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Running eyeris::detransient() for block_1</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Running eyeris::interpolate() for block_1</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; ! [2026-07-31 09:36:12] [WARN] Interpolation now leaves gaps longer than 250 ms</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; as `NA` instead of interpolating across them (following Kret &amp; Sjak-Shie,</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 2018). This is a change in default behavior from eyeris &lt;= 3.2.0 and may affect</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; your results. To restore the previous behavior, set `interpolate =</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; list(max_gap_ms = Inf)` in `glassbox()` (or `max_gap_ms = Inf` in</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; `interpolate()`).</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Running eyeris::lpfilt() for block_1</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; ! [2026-07-31 09:36:12] [WARN] Skipping eyeris::downsample() for block_1</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co">#&gt; ! [2026-07-31 09:36:12] [WARN] Skipping eyeris::bin() for block_1</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt; ! [2026-07-31 09:36:12] [WARN] Skipping eyeris::detrend() for block_1</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Running eyeris::zscore() for block_1</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-07-31 09:36:12] [INFO] Block processing summary:</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-07-31 09:36:12] [INFO] block_1: OK (steps: 6, latest:</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; pupil_raw_deblink_detransient_interpolate_lpfilt_z)</span></span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Running eyeris::summarize_confounds()</span></span></code></pre></div>
 </div>
 <div id="extract-data-epochs" class="section level2">
 <h2>2 Extract Data Epochs</h2>
@@ -399,13 +406,13 @@ needing to write any additional code)!</p>
 </blockquote>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>eye_1a <span class="ot">&lt;-</span> eye <span class="sc">|&gt;</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">epoch</span>(<span class="at">events =</span> <span class="st">&quot;PROBE*&quot;</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-06-19 00:05:55] [INFO] Epoching pupil data...</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-06-19 00:05:55] [INFO] Block 1: found 10 matching events for PROBE</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:55] [OKAY] Done!</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:55] [OKAY] Block 1: pupil data from 10 unique event</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-07-31 09:36:12] [INFO] Epoching pupil data...</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-07-31 09:36:12] [INFO] Block 1: found 10 matching events for PROBE</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Done!</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Block 1: pupil data from 10 unique event</span></span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; messages extracted</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:55] [OKAY] Pupil epoching completed in 0.07 seconds</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-06-19 00:05:55] [INFO] Recalculating epoched confounds for new</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:12] [OKAY] Pupil epoching completed in 0.07 seconds</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-07-31 09:36:12] [INFO] Recalculating epoched confounds for new</span></span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; epochs...</span></span></code></pre></div>
 <p>Now, if you take a look at <code>eye</code>, you’ll notice there’s a
 new list element within this <code>eyeris</code> object:
@@ -480,14 +487,14 @@ label to the resulting epoch set.</p>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;probeAfter&quot;</span></span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  )</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-06-19 00:05:55] [INFO] Epoching pupil data...</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-06-19 00:05:55] [INFO] Block 1: found 5 matching events for</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-07-31 09:36:13] [INFO] Epoching pupil data...</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-07-31 09:36:13] [INFO] Block 1: found 5 matching events for</span></span>
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; PROBESTARTtrial</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:55] [OKAY] Done!</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:55] [OKAY] Block 1: pupil data from 5 unique event messages</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:13] [OKAY] Done!</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:13] [OKAY] Block 1: pupil data from 5 unique event messages</span></span>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; extracted</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-06-19 00:05:55] [OKAY] Pupil epoching completed in 0.02 seconds</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-06-19 00:05:55] [INFO] Recalculating epoched confounds for new</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; ✔ [2026-07-31 09:36:13] [OKAY] Pupil epoching completed in 0.02 seconds</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; ℹ [2026-07-31 09:36:13] [INFO] Recalculating epoched confounds for new</span></span>
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; epochs...</span></span>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>eye_1b <span class="sc">|&gt;</span></span>
@@ -620,8 +627,8 @@ structured, <code>BIDS</code>-inspired format.</p>
     └── sub-001
         └── ses-01
             ├── eye
-            │   ├── sub-001_ses-01_task-assocret_run-01_desc-timeseries_pupil.csv
-            │   └── sub-001_ses-01_task-assocret_run-01_epoch-prePostProbe_desc-preproc_pupil.csv
+            │   ├── sub-001_ses-01_task-assocret_run-01_desc-timeseries.csv
+            │   └── sub-001_ses-01_task-assocret_run-01_desc-preproc_pupil_epoch-prePostProbe_bline-sub-prePostProbe.csv
             ├── source
             │   └── figures
             │       └── task-assocret_run-01

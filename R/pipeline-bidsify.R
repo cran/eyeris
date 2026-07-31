@@ -420,6 +420,13 @@ run_bidsify <- function(
           current_block_names[
             current_block_names == original_block_name
           ] <- new_block_name
+          # write the renamed block key back onto the epoch list. without this
+          # the rename lived only in the local `current_block_names` copy, so
+          # the epoch element stayed keyed to the original block (e.g.
+          # "block_1"), the `eyeris[[epoch_name]][[new_block_name]]` update
+          # below silently no-op'd, and every single-run `run_num` override
+          # collapsed its epoch CSV onto run-01 (last-run-wins overwrite).
+          names(eyeris[[epoch_name]]) <- current_block_names
 
           if (!is.null(epoch_info)) {
             names(epoch_info)[
@@ -918,17 +925,21 @@ run_bidsify <- function(
             verbose = verbose
           )
 
-          evs <- get_epoch_events(eyeris, epoch_id, verbose)
+          evs <- get_epoch_events(eyeris, epoch_id, i, verbose)
           c_bline <- has_baseline(eyeris, current_label, verbose)
-          bline_evs <- get_baseline_events(eyeris, epoch_id, verbose)
-          bline_type <- get_baseline_type(eyeris, epoch_id, verbose)
+          bline_evs <- get_baseline_events(eyeris, epoch_id, i, verbose)
+          bline_type <- get_baseline_type(eyeris, epoch_id, i, verbose)
 
           f <- make_bids_fname(
             sub_id = sub,
             ses_id = ses,
             task_name = task,
-            run_num = run_num,
-            desc = paste0("preproc_pupil_", current_label),
+            run_num = sprintf("%02d", get_block_numbers(i)),
+            desc = "preproc_pupil",
+            epoch_name = current_label,
+            epoch_events = evs,
+            baseline_events = bline_evs,
+            baseline_type = bline_type,
             eye_suffix = eye_suffix
           )
 
@@ -979,7 +990,7 @@ run_bidsify <- function(
             verbose = verbose
           )
 
-          evs <- get_epoch_events(eyeris, epoch_id, verbose)
+          evs <- get_epoch_events(eyeris, epoch_id, block_name, verbose)
           c_bline <- has_baseline(eyeris, current_label, verbose)
           bline_evs <- get_baseline_events(
             eyeris,
@@ -1055,7 +1066,7 @@ run_bidsify <- function(
           sub_id = sub,
           ses_id = ses,
           task_name = task,
-          run_num = sprintf("%02d", i),
+          run_num = sprintf("%02d", run_data$block[1]),
           desc = "timeseries",
           eye_suffix = eye_suffix
         )
@@ -1069,7 +1080,7 @@ run_bidsify <- function(
           sub = sub,
           ses = ses,
           task = task,
-          run = sprintf("%02d", i),
+          run = sprintf("%02d", run_data$block[1]),
           eye_suffix = eye_suffix,
           verbose = verbose
         )
@@ -1139,7 +1150,7 @@ run_bidsify <- function(
           sub_id = sub,
           ses_id = ses,
           task_name = task,
-          run_num = sprintf("%02d", i),
+          run_num = sprintf("%02d", run_data$block[1]),
           desc = "timeseries",
           eye_suffix = eye_suffix
         )
@@ -1153,7 +1164,7 @@ run_bidsify <- function(
           sub = sub,
           ses = ses,
           task = task,
-          run = sprintf("%02d", i),
+          run = sprintf("%02d", run_data$block[1]),
           eye_suffix = eye_suffix,
           verbose = verbose
         )
@@ -1358,10 +1369,6 @@ run_bidsify <- function(
           dir.create(epoch_folder, recursive = TRUE)
         }
 
-        epoch_events_info <- get_epoch_events(eyeris, epoch_name, verbose)
-        baseline_events_info <- get_baseline_events(eyeris, epoch_name, verbose)
-        baseline_type_info <- get_baseline_type(eyeris, epoch_name, verbose)
-
         for (block_name in names(eyeris$confounds$epoched_epoch_wide[[
           epoch_name
         ]])) {
@@ -1372,6 +1379,26 @@ run_bidsify <- function(
           if (nrow(block_confounds) == 0) {
             next
           }
+
+          # derive BIDS metadata from the current block (not just the first)
+          epoch_events_info <- get_epoch_events(
+            eyeris,
+            epoch_name,
+            block_name,
+            verbose
+          )
+          baseline_events_info <- get_baseline_events(
+            eyeris,
+            epoch_name,
+            block_name,
+            verbose
+          )
+          baseline_type_info <- get_baseline_type(
+            eyeris,
+            epoch_name,
+            block_name,
+            verbose
+          )
 
           matched_events <- unique(block_confounds$matched_event)
 

@@ -364,6 +364,35 @@ discretion as they may change without notice in future versions.</p>
 </div>
 <div id="core-processing-functions" class="section level2">
 <h2>Core Processing Functions</h2>
+<div id="sampling-grid-resampling" class="section level3">
+<h3>Sampling-Grid Resampling</h3>
+<div id="resample_block" class="section level4">
+<h4><code>resample_block()</code></h4>
+<p><strong>File</strong>: <code>R/pipeline-resample.R</code>
+<strong>Description</strong>: Internal function to place a single
+recording block onto the expected uniform sampling grid. It anchors the
+grid on the first reliable regular interval, interpolates local
+sub-period timing jitter onto the grid, and inserts <code>NA</code> rows
+at longer-than-expected gaps (dropped samples), flagged in an
+<code>is_resampled</code> column for the downstream
+<code>interpolate_pupil()</code> step to fill.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">resample_block</span>(block_df, block_label, verbose)</span></code></pre></div>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>block_df</code>: A single block’s timeseries data frame (must
+contain a <code>time_orig</code> column in milliseconds)</li>
+<li><code>block_label</code>: Optional character label used in
+messages</li>
+<li><code>verbose</code>: Whether to print detailed logging
+messages</li>
+</ul>
+<p><strong>Returns</strong>: The block data frame placed on a uniform
+grid, with inserted (gap) rows marked in a logical
+<code>is_resampled</code> column; returned unchanged (with no
+<code>is_resampled</code> column) when no repair is needed</p>
+<hr />
+</div>
+</div>
 <div id="blink-removal" class="section level3">
 <h3>Blink Removal</h3>
 <div id="deblink_pupil" class="section level4">
@@ -372,7 +401,7 @@ discretion as they may change without notice in future versions.</p>
 <strong>Description</strong>: Internal function to remove blink
 artifacts from pupil data by extending NA padding around detected
 blinks.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">deblink_pupil</span>(x, prev_op, extend)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">deblink_pupil</span>(x, prev_op, extend)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: A data frame containing pupil data</li>
@@ -393,7 +422,7 @@ removed (set to NA)</p>
 <p><strong>File</strong>: <code>R/pipeline-detransient.R</code><br />
 <strong>Description</strong>: Internal function to remove transient
 artifacts from pupil data using speed-based thresholding.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">detransient_pupil</span>(x, prev_op, n, mad_thresh)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">detransient_pupil</span>(x, prev_op, n, mad_thresh)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: A data frame containing pupil data with columns
@@ -412,7 +441,7 @@ removed (set to NA)</p>
 <p><strong>File</strong>: <code>R/pipeline-detransient.R</code><br />
 <strong>Description</strong>: Calculate pupil speed using finite
 differences between consecutive time points.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">speed</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">speed</span>(x, y)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: A numeric vector of pupil data</li>
@@ -430,13 +459,16 @@ point</p>
 <p><strong>File</strong>: <code>R/pipeline-interpolate.R</code><br />
 <strong>Description</strong>: Interpolate missing pupil data using
 linear interpolation.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">interpolate_pupil</span>(x, prev_op, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">interpolate_pupil</span>(x, prev_op, verbose, <span class="at">max_gap_ms =</span> <span class="dv">250</span>)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: A data frame containing pupil data</li>
 <li><code>prev_op</code>: The name of the previous operation’s pupil
 column</li>
 <li><code>verbose</code>: Logical, whether to print verbose output</li>
+<li><code>max_gap_ms</code>: Maximum gap duration (ms) to interpolate;
+longer gaps are left as <code>NA</code> (use
+<code>Inf</code>/<code>NULL</code> to interpolate across all gaps)</li>
 </ul>
 <p><strong>Returns</strong>: A vector of interpolated pupil values</p>
 <hr />
@@ -449,7 +481,7 @@ column</li>
 <p><strong>File</strong>: <code>R/pipeline-lpfilt.R</code><br />
 <strong>Description</strong>: Internal function to apply low-pass
 filtering to pupil data using Butterworth filter design.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">lpfilt_pupil</span>(x, prev_op, wp, ws, rp, rs, fs, plot_freqz)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">lpfilt_pupil</span>(x, prev_op, wp, ws, rp, rs, fs, plot_freqz)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: A data frame containing pupil data</li>
@@ -468,7 +500,7 @@ filtering to pupil data using Butterworth filter design.</p>
 <p><strong>File</strong>: <code>R/pipeline-downsample.R</code><br />
 <strong>Description</strong>: Internal function to downsample pupil data
 with anti-aliasing filtering.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">downsample_pupil</span>(x, prev_op, target_fs, plot_freqz, current_fs, rp, rs)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">downsample_pupil</span>(x, prev_op, target_fs, plot_freqz, current_fs, rp, rs)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: Data frame containing pupil data</li>
@@ -486,7 +518,7 @@ the decimated sample rate</p>
 <p><strong>File</strong>: <code>R/pipeline-bin.R</code><br />
 <strong>Description</strong>: Bin pupil data into specified time bins
 using averaging or other methods.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">bin_pupil</span>(x, prev_op, bins_per_second, method, current_fs)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">bin_pupil</span>(x, prev_op, bins_per_second, method, current_fs)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: Data frame containing pupil data</li>
@@ -506,7 +538,7 @@ using averaging or other methods.</p>
 <p><strong>File</strong>: <code>R/pipeline-detrend.R</code><br />
 <strong>Description</strong>: Internal function to detrend pupil data
 using linear regression.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">detrend_pupil</span>(x, prev_op)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">detrend_pupil</span>(x, prev_op)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: Data frame containing pupil data</li>
@@ -520,7 +552,7 @@ coefficients, and residuals</p>
 <p><strong>File</strong>: <code>R/pipeline-zscore.R</code><br />
 <strong>Description</strong>: Internal function to z-score normalize
 pupil data.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">zscore_pupil</span>(x, prev_op)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">zscore_pupil</span>(x, prev_op)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: Data frame containing pupil data</li>
@@ -533,7 +565,7 @@ pupil data.</p>
 <p><strong>File</strong>: <code>R/pipeline-zscore.R</code><br />
 <strong>Description</strong>: Calculate z-scores for a numeric
 vector.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_zscores</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_zscores</span>(x)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: Numeric vector</li>
@@ -552,7 +584,7 @@ vector.</p>
 <p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
 <strong>Description</strong>: Main epoching and baselining logic that
 coordinates the epoching process.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_pupil</span>(x, prev_op, evs, lims, label, c_bline, a_bline, bline_type, bline_evs, bline_per, hz, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_pupil</span>(x, prev_op, evs, lims, label, c_bline, a_bline, bline_type, bline_evs, bline_per, hz, verbose)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>x</code>: Data frame containing pupil data</li>
@@ -579,7 +611,7 @@ results</p>
 <p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
 <strong>Description</strong>: Block-by-block epoch and baseline handler
 for multi-block data.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_and_baseline_block</span>(x, blk, lab, evs, lims, msg_s, msg_e, c_bline, a_bline, bline_type, bline_evs, bline_per, hz, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_and_baseline_block</span>(x, blk, lab, evs, lims, msg_s, msg_e, c_bline, a_bline, bline_type, bline_evs, bline_per, hz, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: A list containing epoch and baseline
 results for the specified block</p>
 </div>
@@ -588,7 +620,7 @@ results for the specified block</p>
 <p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
 <strong>Description</strong>: Epoch and baseline processor that handles
 the core epoching mathematics.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">process_epoch_and_baselines</span>(eyeris, timestamps, evs, lims, hz, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">process_epoch_and_baselines</span>(eyeris, timestamps, evs, lims, hz, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: A list containing epoch and baseline
 results</p>
 </div>
@@ -600,28 +632,28 @@ results</p>
 <p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
 <strong>Description</strong>: Manually epoch using provided start/end
 dataframes of timestamps.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_manually</span>(eyeris, ts_list, hz, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_manually</span>(eyeris, ts_list, hz, verbose)</span></code></pre></div>
 </div>
 <div id="epoch_only_start_msg" class="section level4">
 <h4><code>epoch_only_start_msg()</code></h4>
 <p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
 <strong>Description</strong>: Epoch based on a single event message
 without explicit limits.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_only_start_msg</span>(eyeris, start, hz, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_only_start_msg</span>(eyeris, start, hz, verbose)</span></code></pre></div>
 </div>
 <div id="epoch_start_msg_and_limits" class="section level4">
 <h4><code>epoch_start_msg_and_limits()</code></h4>
 <p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
 <strong>Description</strong>: Epoch using a start message with fixed
 limits around it.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_start_msg_and_limits</span>(eyeris, start, lims, hz, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_start_msg_and_limits</span>(eyeris, start, lims, hz, verbose)</span></code></pre></div>
 </div>
 <div id="epoch_start_end_msg" class="section level4">
 <h4><code>epoch_start_end_msg()</code></h4>
 <p><strong>File</strong>: <code>R/pipeline-epoch.R</code><br />
 <strong>Description</strong>: Epoch using both start and end messages
 with explicit timestamps.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_start_end_msg</span>(eyeris, start, end, hz, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">epoch_start_end_msg</span>(eyeris, start, end, hz, verbose)</span></code></pre></div>
 <hr />
 </div>
 </div>
@@ -635,7 +667,7 @@ with explicit timestamps.</p>
 <p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
 <strong>Description</strong>: Calculate comprehensive confounding
 variables for a single pupil data processing step.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_confounds_for_step</span>(pupil_df, pupil_vec, screen_width, screen_height, hz)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_confounds_for_step</span>(pupil_df, pupil_vec, screen_width, screen_height, hz)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>pupil_df</code>: Data frame containing pupil data</li>
@@ -652,7 +684,7 @@ for the current step</p>
 <p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
 <strong>Description</strong>: Calculate confounds specifically for
 epoched data.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">calculate_epoched_confounds</span>(eyeris, epoch_names, hz, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">calculate_epoched_confounds</span>(eyeris, epoch_names, hz, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: An updated <code>eyeris</code> object with
 epoched confounds</p>
 </div>
@@ -664,7 +696,7 @@ epoched confounds</p>
 <p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
 <strong>Description</strong>: Tag blinks in pupil data based on missing
 values and physiological constraints.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">tag_blinks</span>(pupil_df, pupil_vec)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">tag_blinks</span>(pupil_df, pupil_vec)</span></code></pre></div>
 <p><strong>Returns</strong>: A data frame with added column:
 <code>is_blink</code></p>
 </div>
@@ -673,7 +705,7 @@ values and physiological constraints.</p>
 <p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
 <strong>Description</strong>: Calculate Euclidean distance between
 consecutive gaze points.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">calc_euclidean_dist</span>(x1, y1, x2, y2)</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">calc_euclidean_dist</span>(x1, y1, x2, y2)</span></code></pre></div>
 <p><strong>Returns</strong>: A numeric vector of Euclidean distances</p>
 </div>
 <div id="normalize_gaze_coords" class="section level4">
@@ -681,7 +713,7 @@ consecutive gaze points.</p>
 <p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
 <strong>Description</strong>: Normalize gaze coordinates to
 screen-relative units (0-1 range).</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">normalize_gaze_coords</span>(pupil_df, screen_width, screen_height)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">normalize_gaze_coords</span>(pupil_df, screen_width, screen_height)</span></code></pre></div>
 <p><strong>Returns</strong>: A data frame with added normalized
 coordinate columns</p>
 </div>
@@ -690,7 +722,7 @@ coordinate columns</p>
 <p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
 <strong>Description</strong>: Tag gaze coordinates as on-screen or
 off-screen.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">tag_gaze_coords</span>(pupil_df, screen_width, screen_height, overshoot_buffer)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">tag_gaze_coords</span>(pupil_df, screen_width, screen_height, overshoot_buffer)</span></code></pre></div>
 <p><strong>Returns</strong>: A data frame with added column:
 <code>is_offscreen</code></p>
 </div>
@@ -702,7 +734,7 @@ off-screen.</p>
 <p><strong>File</strong>: <code>R/pipeline-confounds.R</code><br />
 <strong>Description</strong>: Export confounds data to CSV files and/or
 database with comprehensive error handling.</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">export_confounds_to_csv</span>(confounds_list, output_dir, filename_prefix, verbose, run_num, csv_enabled, db_con, sub, ses, task, eye_suffix, epoch_label)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">export_confounds_to_csv</span>(confounds_list, output_dir, filename_prefix, verbose, run_num, csv_enabled, db_con, sub, ses, task, eye_suffix, epoch_label)</span></code></pre></div>
 <p><strong>Returns</strong>: Invisibly returns a vector of created file
 paths</p>
 <hr />
@@ -718,7 +750,7 @@ paths</p>
 <p><strong>File</strong>: <code>R/core-logging.R</code><br />
 <strong>Description</strong>: Generate formatted timestamp for logging
 messages.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_log_timestamp</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_log_timestamp</span>()</span></code></pre></div>
 <p><strong>Returns</strong>: Character string with current timestamp in
 format <code>[YYYY-MM-DD HH:MM:SS]</code></p>
 </div>
@@ -727,7 +759,7 @@ format <code>[YYYY-MM-DD HH:MM:SS]</code></p>
 <p><strong>File</strong>: <code>R/core-logging.R</code><br />
 <strong>Description</strong>: Core logging function with timestamp and
 <code>glue</code>-style string interpolation.</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_message</span>(level, ..., verbose, wrap, .envir)</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_message</span>(level, ..., verbose, wrap, .envir)</span></code></pre></div>
 <p><strong>Parameters</strong>:</p>
 <ul>
 <li><code>level</code>: Log level (“INFO”, “SUCCESS”, “WARN”,
@@ -745,10 +777,10 @@ syntax)</li>
 <p><strong>File</strong>: <code>R/core-logging.R</code><br />
 <strong>Description</strong>: Specialized logging functions for
 different message types.</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_info</span>(..., <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span>
-<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_success</span>(..., <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span>
-<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_warn</span>(..., <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span>
-<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_error</span>(..., <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_info</span>(..., <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_success</span>(..., <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_warn</span>(..., <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">log_error</span>(..., <span class="at">wrap =</span> <span class="cn">TRUE</span>, <span class="at">.envir =</span> <span class="fu">parent.frame</span>())</span></code></pre></div>
 <hr />
 </div>
 </div>
@@ -762,28 +794,28 @@ different message types.</p>
 <p><strong>File</strong>: <code>R/utils-checks.R</code><br />
 <strong>Description</strong>: Check if input argument is provided and
 not <code>NULL</code>.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_input</span>(arg)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_input</span>(arg)</span></code></pre></div>
 </div>
 <div id="check_data" class="section level4">
 <h4><code>check_data()</code></h4>
 <p><strong>File</strong>: <code>R/utils-checks.R</code><br />
 <strong>Description</strong>: Comprehensive validation of
 <code>eyeris</code> object data structure.</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_data</span>(eyeris, fun)</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_data</span>(eyeris, fun)</span></code></pre></div>
 </div>
 <div id="check_time_monotonic" class="section level4">
 <h4><code>check_time_monotonic()</code></h4>
 <p><strong>File</strong>: <code>R/utils-checks.R</code><br />
 <strong>Description</strong>: Verify that time series data is
 monotonically increasing.</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_time_monotonic</span>(time_vector, time_col_name)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_time_monotonic</span>(time_vector, time_col_name)</span></code></pre></div>
 </div>
 <div id="is_binocular_object" class="section level4">
 <h4><code>is_binocular_object()</code></h4>
 <p><strong>File</strong>: <code>R/utils-checks.R</code><br />
 <strong>Description</strong>: Determine if an <code>eyeris</code> object
 contains binocular data.</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">is_binocular_object</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">is_binocular_object</span>(x)</span></code></pre></div>
 <p><strong>Returns</strong>: Logical indicating if object is
 binocular</p>
 </div>
@@ -795,7 +827,7 @@ binocular</p>
 <p><strong>File</strong>: <code>R/utils-checks.R</code><br />
 <strong>Description</strong>: Check for directory existence and create
 if needed with proper error handling.</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_and_create_dir</span>(basedir, dir, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">check_and_create_dir</span>(basedir, dir, verbose)</span></code></pre></div>
 <hr />
 </div>
 </div>
@@ -809,7 +841,7 @@ if needed with proper error handling.</p>
 <p><strong>File</strong>: <code>R/utils-database.R</code><br />
 <strong>Description</strong>: Connect to <code>eyeris</code>
 <code>DuckDB</code> database with comprehensive error handling.</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">connect_eyeris_database</span>(bids_dir, db_path, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">connect_eyeris_database</span>(bids_dir, db_path, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: <code>DuckDB</code> connection object or
 <code>NULL</code> on failure</p>
 </div>
@@ -818,7 +850,7 @@ if needed with proper error handling.</p>
 <p><strong>File</strong>: <code>R/utils-database.R</code><br />
 <strong>Description</strong>: Safely disconnect from <code>eyeris</code>
 <code>DuckDB</code> database.</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">disconnect_eyeris_database</span>(con, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">disconnect_eyeris_database</span>(con, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: <code>TRUE</code> if successful,
 <code>FALSE</code> otherwise</p>
 </div>
@@ -830,7 +862,7 @@ if needed with proper error handling.</p>
 <p><strong>File</strong>: <code>R/utils-database.R</code><br />
 <strong>Description</strong>: Generate standardized table names for
 <code>eyeris</code> project database storage.</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">create_table_name</span>(data_type, sub, ses, task, run, eye_suffix, epoch_label)</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">create_table_name</span>(data_type, sub, ses, task, run, eye_suffix, epoch_label)</span></code></pre></div>
 <p><strong>Returns</strong>: A standardized table name string</p>
 </div>
 <div id="write_eyeris_data_to_db" class="section level4">
@@ -838,7 +870,7 @@ if needed with proper error handling.</p>
 <p><strong>File</strong>: <code>R/utils-database.R</code><br />
 <strong>Description</strong>: Write <code>eyeris</code> data to
 <code>DuckDB</code> database with error handling and validation.</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">write_eyeris_data_to_db</span>(data, db_con, data_type, sub, ses, task, run, eye_suffix, epoch_label, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">write_eyeris_data_to_db</span>(data, db_con, data_type, sub, ses, task, run, eye_suffix, epoch_label, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: <code>TRUE</code> if successful,
 <code>FALSE</code> otherwise</p>
 </div>
@@ -847,7 +879,7 @@ if needed with proper error handling.</p>
 <p><strong>File</strong>: <code>R/utils-database.R</code><br />
 <strong>Description</strong>: Write data to both CSV file and database
 with fallback handling.</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">write_csv_and_db</span>(data, csv_path, csv_enabled, db_con, data_type, sub, ses, task, run, eye_suffix, epoch_label, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">write_csv_and_db</span>(data, csv_path, csv_enabled, db_con, data_type, sub, ses, task, run, eye_suffix, epoch_label, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: <code>TRUE</code> if at least one write
 operation succeeded</p>
 </div>
@@ -859,7 +891,7 @@ operation succeeded</p>
 <p><strong>File</strong>: <code>R/utils-database.R</code><br />
 <strong>Description</strong>: Create temporary database for parallel
 processing with unique naming.</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">create_temp_eyeris_database</span>(base_db_path, parallel_id, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">create_temp_eyeris_database</span>(base_db_path, parallel_id, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: List with temporary database path and
 connection info</p>
 </div>
@@ -868,7 +900,7 @@ connection info</p>
 <p><strong>File</strong>: <code>R/utils-database.R</code><br />
 <strong>Description</strong>: Merge temporary database into main
 database with file locking.</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">merge_temp_database</span>(temp_db_path, main_db_path, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">merge_temp_database</span>(temp_db_path, main_db_path, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: <code>TRUE</code> if merge successful,
 <code>FALSE</code> otherwise</p>
 </div>
@@ -877,7 +909,7 @@ database with file locking.</p>
 <p><strong>File</strong>: <code>R/utils-database.R</code><br />
 <strong>Description</strong>: Clean up temporary database files with
 comprehensive error handling.</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">cleanup_temp_database</span>(temp_db_info, verbose)</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">cleanup_temp_database</span>(temp_db_info, verbose)</span></code></pre></div>
 <p><strong>Returns</strong>: <code>TRUE</code> if cleanup successful</p>
 <hr />
 </div>
@@ -892,7 +924,7 @@ comprehensive error handling.</p>
 <p><strong>File</strong>: <code>R/utils-parsers.R</code><br />
 <strong>Description</strong>: Clean and sanitize strings for use in
 filenames or labels.</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">clean_string</span>(str)</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">clean_string</span>(str)</span></code></pre></div>
 <p><strong>Returns</strong>: Cleaned string with special characters
 removed/replaced</p>
 </div>
@@ -901,7 +933,7 @@ removed/replaced</p>
 <p><strong>File</strong>: <code>R/utils-epoch.R</code><br />
 <strong>Description</strong>: Sanitize event tags for safe use in
 filenames and labels.</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">sanitize_event_tag</span>(string, prefix)</span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">sanitize_event_tag</span>(string, prefix)</span></code></pre></div>
 <p><strong>Returns</strong>: Sanitized string suitable for file system
 use</p>
 </div>
@@ -913,7 +945,7 @@ use</p>
 <p><strong>File</strong>: <code>R/utils-parsers.R</code><br />
 <strong>Description</strong>: Extract block numbers from
 <code>eyeris</code> object or block names.</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_block_numbers</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">get_block_numbers</span>(x)</span></code></pre></div>
 <p><strong>Returns</strong>: Numeric vector of block numbers</p>
 </div>
 </div>
@@ -924,7 +956,7 @@ use</p>
 <p><strong>File</strong>: <code>R/pipeline-bidsify.R</code><br />
 <strong>Description</strong>: Generate BIDS-compatible filenames for
 data export.</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">make_bids_fname</span>(sub_id, task_name, run_num, desc, ses_id, epoch_name, epoch_events, baseline_events, baseline_type, eye_suffix)</span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">make_bids_fname</span>(sub_id, task_name, run_num, desc, ses_id, epoch_name, epoch_events, baseline_events, baseline_type, eye_suffix)</span></code></pre></div>
 <p><strong>Returns</strong>: A BIDS-compatible filename string</p>
 </div>
 <div id="run_bidsify" class="section level4">
@@ -932,7 +964,7 @@ data export.</p>
 <p><strong>File</strong>: <code>R/pipeline-bidsify.R</code><br />
 <strong>Description</strong>: Internal function to run bidsify operation
 on a single eye’s data.</p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">run_bidsify</span>(eyeris, save_all, epochs_list, bids_dir, participant_id, session_num, task_name, run_num, save_raw, html_report, ...)</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">run_bidsify</span>(eyeris, save_all, epochs_list, bids_dir, participant_id, session_num, task_name, run_num, save_raw, html_report, ...)</span></code></pre></div>
 <p><strong>Returns</strong>: An <code>eyeris</code> object (typically
 for chaining)</p>
 <hr />
@@ -948,7 +980,7 @@ for chaining)</p>
 <p><strong>File</strong>: <code>R/utils-progress_bar.R</code><br />
 <strong>Description</strong>: Create a customizable progress bar for
 long-running operations.</p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">progress_bar</span>(total, msg, width, show_eta, clear)</span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">progress_bar</span>(total, msg, width, show_eta, clear)</span></code></pre></div>
 <p><strong>Returns</strong>: A progress bar object from the progress
 package</p>
 </div>
@@ -957,14 +989,14 @@ package</p>
 <p><strong>File</strong>: <code>R/utils-progress_bar.R</code><br />
 <strong>Description</strong>: Create a simple counter-style progress
 bar.</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">counter_bar</span>(total, msg, width)</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">counter_bar</span>(total, msg, width)</span></code></pre></div>
 </div>
 <div id="tick" class="section level4">
 <h4><code>tick()</code></h4>
 <p><strong>File</strong>: <code>R/utils-progress_bar.R</code><br />
 <strong>Description</strong>: Advance a progress bar by specified number
 of steps.</p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">tick</span>(pb, by)</span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">tick</span>(pb, by)</span></code></pre></div>
 </div>
 </div>
 <div id="error-handling" class="section level3">
@@ -974,7 +1006,7 @@ of steps.</p>
 <p><strong>File</strong>: <code>R/utils-error_handler.R</code><br />
 <strong>Description</strong>: Generic error handler for
 <code>eyeris</code> functions with standardized error reporting.</p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">error_handler</span>(e, e_class)</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">error_handler</span>(e, e_class)</span></code></pre></div>
 <hr />
 </div>
 </div>
@@ -988,14 +1020,14 @@ of steps.</p>
 <p><strong>File</strong>: <code>R/utils-render_report.R</code><br />
 <strong>Description</strong>: Render an <code>R Markdown</code> report
 to <code>HTML</code> with proper error handling.</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">render_report</span>(rmd_f)</span></code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">render_report</span>(rmd_f)</span></code></pre></div>
 </div>
 <div id="make_report" class="section level4">
 <h4><code>make_report()</code></h4>
 <p><strong>File</strong>: <code>R/utils-render_report.R</code><br />
 <strong>Description</strong>: Generate comprehensive <code>eyeris</code>
 preprocessing report in <code>R Markdown</code> format.</p>
-<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">make_report</span>(eyeris, out, plots, eye_suffix, ...)</span></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a>eyeris<span class="sc">:::</span><span class="fu">make_report</span>(eyeris, out, plots, eye_suffix, ...)</span></code></pre></div>
 <p><strong>Returns</strong>: Path to the generated
 <code>R Markdown</code> file</p>
 <hr />
@@ -1008,19 +1040,19 @@ preprocessing report in <code>R Markdown</code> format.</p>
 <h3>Function Chaining</h3>
 <p>Many internal functions are designed to work within the pipeline
 architecture:</p>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="co"># example of internal function chaining</span></span>
-<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a>eyeris_obj <span class="sc">|&gt;</span></span>
-<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">deblink_pupil</span>(<span class="at">prev_op =</span> <span class="st">&quot;pupil_raw&quot;</span>, <span class="at">extend =</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
-<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">detransient_pupil</span>(<span class="at">prev_op =</span> <span class="st">&quot;pupil_raw_deblink&quot;</span>, <span class="at">n =</span> <span class="dv">16</span>) <span class="sc">|&gt;</span></span>
-<span id="cb52-5"><a href="#cb52-5" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">interpolate_pupil</span>(<span class="at">prev_op =</span> <span class="st">&quot;pupil_raw_deblink_detransient&quot;</span>, <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="co"># example of internal function chaining</span></span>
+<span id="cb53-2"><a href="#cb53-2" tabindex="-1"></a>eyeris_obj <span class="sc">|&gt;</span></span>
+<span id="cb53-3"><a href="#cb53-3" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">deblink_pupil</span>(<span class="at">prev_op =</span> <span class="st">&quot;pupil_raw&quot;</span>, <span class="at">extend =</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-4"><a href="#cb53-4" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">detransient_pupil</span>(<span class="at">prev_op =</span> <span class="st">&quot;pupil_raw_deblink&quot;</span>, <span class="at">n =</span> <span class="dv">16</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-5"><a href="#cb53-5" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">interpolate_pupil</span>(<span class="at">prev_op =</span> <span class="st">&quot;pupil_raw_deblink_detransient&quot;</span>, <span class="at">verbose =</span> <span class="cn">TRUE</span>, <span class="at">max_gap_ms =</span> <span class="dv">250</span>)</span></code></pre></div>
 </div>
 <div id="error-handling-1" class="section level3">
 <h3>Error Handling</h3>
 <p>All internal functions include comprehensive error handling:</p>
-<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="co"># Internal functions validate inputs and provide informative errors</span></span>
-<span id="cb53-2"><a href="#cb53-2" tabindex="-1"></a><span class="fu">try</span>({</span>
-<span id="cb53-3"><a href="#cb53-3" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">check_data</span>(invalid_object, <span class="st">&quot;function_name&quot;</span>)</span>
-<span id="cb53-4"><a href="#cb53-4" tabindex="-1"></a>}, <span class="at">silent =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a><span class="co"># Internal functions validate inputs and provide informative errors</span></span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a><span class="fu">try</span>({</span>
+<span id="cb54-3"><a href="#cb54-3" tabindex="-1"></a>  eyeris<span class="sc">:::</span><span class="fu">check_data</span>(invalid_object, <span class="st">&quot;function_name&quot;</span>)</span>
+<span id="cb54-4"><a href="#cb54-4" tabindex="-1"></a>}, <span class="at">silent =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 </div>
 <div id="performance-considerations" class="section level3">
 <h3>Performance Considerations</h3>

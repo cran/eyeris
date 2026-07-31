@@ -1,8 +1,8 @@
 Package: eyeris
 Type: Package
 Title: Flexible, Extensible, & Reproducible Pupillometry Preprocessing
-Version: 3.2.0
-Date: 2026-06-18
+Version: 3.3.0
+Date: 2026-07-30
 Language: en-US
 Authors@R: 
   c(
@@ -18,19 +18,19 @@ Description: Pupillometry offers a non-invasive window into the mind and has bee
 Encoding: UTF-8
 Depends: R (>= 4.1)
 Imports: eyelinker, dplyr, gsignal, purrr, zoo, cli, rlang, stringr,
-        utils, stats, graphics, grDevices, tidyr, progress, data.table,
-        withr, lifecycle, MASS, viridis, fields, jsonlite, rmarkdown,
-        DBI, glue, base64enc
+        utils, stats, splines, graphics, grDevices, tidyr, progress,
+        data.table, withr, lifecycle, MASS, viridis, jsonlite,
+        rmarkdown, DBI, glue, base64enc, reaborn, ggplot2, patchwork
 Suggests: arrow, duckdb, knitr, testthat (>= 3.0.0), devtools
 VignetteBuilder: knitr
 License: MIT + file LICENSE
 Config/testthat/edition: 3
-URL: https://shawnschwartz.com/eyeris/,
+URL: https://eyeris.shawnschwartz.com/,
         https://github.com/shawntz/eyeris/
 BugReports: https://github.com/shawntz/eyeris/issues
 Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2026-06-19 07:05:57 UTC; shawnschwartz
+Packaged: 2026-07-31 16:36:16 UTC; shawnschwartz
 Author: Shawn Schwartz [aut, cre] (ORCID:
     <https://orcid.org/0000-0001-6444-8451>),
   Mingjian He [ctb],
@@ -39,4 +39,4 @@ Author: Shawn Schwartz [aut, cre] (ORCID:
   Gustavo Santiago-Reyes [ctb]
 Maintainer: Shawn Schwartz <shawn.t.schwartz@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-06-19 07:30:02 UTC
+Date/Publication: 2026-07-31 22:20:02 UTC
